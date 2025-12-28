@@ -17,13 +17,27 @@
     a { text-decoration: none; color: inherit; }
 
     .promo-bar {
-      background: #ff7e8d;
-      color: #ffffff;
-      text-align: center;
-      padding: 10px;
-      font-size: 14px;
-      font-weight: 600;
-    }
+  background: #ff7e8d;
+  color: #ffffff;
+  overflow: hidden;
+  white-space: nowrap;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  font-weight: 600;
+  font-size: 14px;
+}
+
+.promo-track {
+  display: inline-block;
+  animation: promo-slide 18s linear infinite;
+}
+
+.promo-track span {
+  display: inline-block;
+  padding-left: 100%;
+}
+
 
     header {
       display: flex;
@@ -532,6 +546,14 @@ html {
     transform: translateY(0);
   }
 }
+@keyframes promo-slide {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(-100%);
+  }
+}
 
   </style>
 </head>
@@ -558,7 +580,13 @@ html {
 <body>
 
 <div class="promo-bar">
-  FREE Shipping on 3+ Sets • 30% OFF Sitewide (Limited Time) ✨
+  <div class="promo-track">
+    <span>
+      FREE Shipping on 3+ Sets • 30% OFF Sitewide (Limited Time) ✨
+      &nbsp;&nbsp;&nbsp;•&nbsp;&nbsp;&nbsp;
+      FREE Shipping on 3+ Sets • 30% OFF Sitewide (Limited Time) ✨
+    </span>
+  </div>
 </div>
 
 <header>
