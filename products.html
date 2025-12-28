@@ -1,0 +1,614 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Pink Blossom | PressPlay Nails</title>
+
+  <!-- GOOGLE FONT -->
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+  <style>
+    /* ===== GLOBAL ===== */
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: 'Poppins', sans-serif;
+      background: #E6D8C5;
+      color: #222;
+    }
+
+    a {
+      text-decoration: none;
+      color: inherit;
+    }
+    nav a[onclick] {
+      cursor: pointer;
+    }
+    /* ===== PROMO BAR ===== */
+    .promo-bar {
+      background: #ff7e8d;
+      color: #E6D8C5;
+      text-align: center;
+      padding: 10px;
+      font-size: 14px;
+      font-weight: 600;
+    }
+
+    /* ===== HEADER ===== */
+    header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 18px 40px;
+      border-bottom: 1px solid #eee;
+      position: sticky;
+      top: 0;
+      background: #E6D8C5;
+      z-index: 100;
+    }
+
+    header h1 {
+      font-size: 24px;
+      font-weight: 700;
+      letter-spacing: 1px;
+    }
+
+    nav a {
+      margin-left: 20px;
+      font-weight: 500;
+      font-size: 15px;
+    }
+
+    /* ===== PRODUCT PAGE LAYOUT ===== */
+    .product-page {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 50px;
+      padding: 60px 40px;
+      max-width: 1200px;
+      margin: auto;
+    }
+
+    /* ===== PRODUCT IMAGE ===== */
+    .product-image img {
+      width: 100%;
+      border-radius: 18px;
+      transition: transform 0.4s ease;
+    }
+
+    .product-image img:hover {
+      transform: scale(1.05);
+    }
+
+    /* ===== PRODUCT DETAILS ===== */
+    .product-details h2 {
+      font-size: 34px;
+      font-weight: 700;
+      margin-bottom: 10px;
+    }
+
+    .rating {
+      color: #ff7e8d;
+      font-size: 14px;
+      margin-bottom: 15px;
+    }
+
+    .price {
+      font-size: 22px;
+      font-weight: 600;
+      margin-bottom: 20px;
+    }
+
+    .price span {
+      font-size: 16px;
+      color: #999;
+      text-decoration: line-through;
+      margin-left: 10px;
+    }
+
+    .description {
+      font-size: 15px;
+      line-height: 1.6;
+      margin-bottom: 25px;
+      color: #444;
+    }
+
+    /* ===== OPTIONS ===== */
+    .options {
+      margin-bottom: 25px;
+    }
+
+    .options label {
+      display: block;
+      font-weight: 500;
+      margin-bottom: 8px;
+    }
+
+    select {
+      width: 100%;
+      padding: 10px;
+      border-radius: 8px;
+      border: 1px solid #ddd;
+      font-family: 'Poppins', sans-serif;
+    }
+
+    /* ===== BUTTON ===== */
+    .btn {
+      background: #ff7e8d;
+      color: #E6D8C5;
+      border: none;
+      padding: 14px 30px;
+      border-radius: 30px;
+      font-size: 15px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.3s ease;
+      width: 100%;
+    }
+
+    .btn:hover {
+      background: #ff7e8d;
+    }
+
+    /* ===== BENEFITS ===== */
+    .benefits {
+      margin-top: 30px;
+      font-size: 14px;
+      color: #555;
+    }
+
+    .benefits p {
+      margin-bottom: 8px;
+    }
+
+    /* ===== RESPONSIVE ===== */
+    @media (max-width: 900px) {
+      .product-page {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    /* ===== FOOTER ===== */
+    footer {
+      background: #ff7e8d;
+      color: #E6D8C5;
+      text-align: center;
+      padding: 25px;
+      font-size: 14px;
+      margin-top: 60px;
+    }
+     /* ================= ADDITION: CART DROPDOWN STYLES ================= */
+    .cart-dropdown {
+  position: fixed;
+  top: 0;
+  right: 0;
+  width: 360px;
+  height: 100vh;
+  background: #E6D8C5;
+  border-left: 1px solid #eee;
+  box-shadow: -8px 0 20px rgba(0,0,0,0.15);
+  display: none;
+  z-index: 999;
+  padding: 20px;
+  overflow-y: auto;
+
+  /* animation */
+  transform: translateX(100%);
+  transition: transform 0.3s ease;
+}
+
+.cart-dropdown.show {
+  display: block;
+  transform: translateX(0);
+}
+
+    .cart-dropdown h4 {
+      font-size: 16px;
+      margin-bottom: 10px;
+    }
+    .cart-item {
+      font-size: 14px;
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 6px;
+    }
+    .cart-total {
+      font-weight: 600;
+      margin-top: 10px;
+      text-align: right;
+    }
+    .checkout-btn {
+      width: 100%;
+      margin-top: 12px;
+      padding: 10px;
+      background: #ff7e8d;
+      border: none;
+      color: #E6D8C5;
+      border-radius: 6px;
+      font-weight: 600;
+      cursor: pointer;
+    }
+ .cart-icon {
+  position: relative;
+  cursor: pointer;
+  font-size: 20px;
+}
+
+.cart-icon span {
+  position: absolute;
+  top: -6px;
+  right: -10px;
+  background: #ff7e8d;
+  color: #fff;
+  font-size: 11px;
+  font-weight: 600;
+  padding: 2px 6px;
+  border-radius: 50%;
+  line-height: 1;
+}
+.cart-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.4);
+  z-index: 998;
+  display: none;
+}
+
+.cart-overlay.show {
+  display: block;
+}
+
+  /* ===== PRODUCT QUICK VIEW MODAL ===== */
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.5);
+  display: none;
+  align-items: center;
+  justify-content: center;
+  z-index: 2000;
+}
+
+.modal-overlay.show {
+  display: flex;
+}
+
+.product-modal {
+  background: #E6D8C5;
+  width: 90%;
+  max-width: 900px;
+  border-radius: 14px;
+  padding: 24px;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 24px;
+  position: relative;
+}
+
+.product-modal img {
+  width: 100%;
+  aspect-ratio: 1 / 1;
+  object-fit: cover;
+  border-radius: 12px;
+}
+
+.modal-thumbs {
+  display: flex;
+  gap: 10px;
+  margin-top: 12px;
+}
+
+.modal-thumbs img {
+  width: 70px;
+  height: 70px;
+  object-fit: cover;
+  border-radius: 8px;
+  cursor: pointer;
+  border: 2px solid transparent;
+}
+
+.modal-thumbs img:hover {
+  border-color: #ff7e8d;
+}
+
+.modal-info h3 {
+  font-size: 22px;
+  margin-bottom: 10px;
+}
+
+.modal-info p {
+  font-size: 15px;
+  margin-bottom: 16px;
+}
+
+.modal-close {
+  position: absolute;
+  top: 14px;
+  right: 18px;
+  font-size: 22px;
+  cursor: pointer;
+}
+
+  </style>
+</head>
+<!-- ===== PRODUCT MODAL ===== -->
+<div class="modal-overlay" id="productModal">
+  <div class="product-modal">
+    <span class="modal-close" onclick="closeModal()">✕</span>
+
+    <div>
+      <img id="modalMainImage" src="">
+      <div class="modal-thumbs" id="modalThumbs"></div>
+    </div>
+
+    <div class="modal-info">
+      <h3 id="modalTitle"></h3>
+      <p id="modalPrice"></p>
+      <button class="checkout-btn" id="modalAddBtn">Add to Cart</button>
+    </div>
+  </div>
+</div>
+
+<body>
+
+  <!-- PROMO BAR -->
+  <div class="promo-bar">
+    FREE Shipping on 3+ Sets • 30% OFF Sitewide ✨
+  </div>
+
+  <!-- HEADER -->
+  <header>
+    <div class="cart-overlay" id="cartOverlay" onclick="toggleCart()"></div>
+
+    <h1>PressPlayNails</h1>
+    <nav>
+      <a href="index.html">Home</a>
+      <a href="best-sellers.html">Best Sellers</a>
+      <a href="products.html">Products</a>
+    <!-- CART BUTTON (UNCHANGED) -->
+    <a onclick="toggleCart()" class="cart-icon" aria-label="Cart">
+  🛒
+  <span id="cart-count">0</span>
+</a>
+
+    <a href="checkout.html">Check Out</a>
+  </nav>
+</header>
+<!-- ================= ADDITION: CART DROPDOWN HTML ================= -->
+<div class="cart-dropdown" id="cartDropdown">
+  <h4>Your Cart</h4>
+  <div id="cartItems"></div>
+  <div class="cart-total" id="cartTotal">$0.00</div>
+<a href="checkout.html">
+  <button class="checkout-btn">Checkout</button>
+</a>
+  
+</div>
+  <!-- PRODUCT PAGE -->
+  <section class="product-page">
+
+    <!-- IMAGE -->
+    <div class="product-image">
+      <img src="rose1.jpg"
+  onclick="openProductModal(
+  'Pink Blossom',
+  24.99,
+  [
+    'rose1.jpg',
+    'rose2.jpg',
+    'rose3.jpg',
+    'size.jpg'
+  ]
+)">
+    </div>
+
+    <!-- DETAILS -->
+    <div class="product-details">
+      <h2>Pink Blossom</h2>
+
+      <!-- STAR RATING -->
+      <div class="rating">★★★★★ (4.9/5)</div>
+
+      <!-- PRICE -->
+      <div class="price">
+        $24.99 <span>$35.99</span>
+      </div>
+
+      <!-- DESCRIPTION -->
+      <p class="description">
+        Handcrafted luxury press-on nails designed for a flawless salon finish.
+        Reusable, durable, and ultra-comfortable — perfect for everyday glam
+        or special occasions.
+      </p>
+
+      <!-- OPTIONS -->
+      <div class="options">
+        <label>Choose Nail Length</label>
+        <select>
+          <option>Short</option>
+          <option>Medium</option>
+          <option>Long</option>
+        </select>
+      </div>
+
+      <div class="options">
+        <label>Choose Nail Shape</label>
+        <select>
+          <option>Almond</option>
+          <option>Coffin</option>
+          <option>Square</option>
+        </select>
+      </div>
+
+      <!-- ADD TO CART -->
+     <button class="btn" onclick="addToCart('PINK BLOSSOM', 24.99)">
+  Add to Cart
+</button>
+      <!-- BENEFITS -->
+      <div class="benefits">
+        <p>✔ Reusable up to 5+ wears</p>
+        <p>✔ Salon-quality gel finish</p>
+        <p>✔ Easy application in minutes</p>
+        <p>✔ Free returns within 14 days</p>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- FOOTER -->
+  <footer>
+    © 2025 PressPlayNails • Luxury Press-On Nails
+  </footer>
+  <script> 
+
+/* ===== REAL CART SYSTEM (GLOBAL) ===== */
+
+// Load cart from browser storage
+let cart = JSON.parse(localStorage.getItem("cart")) || [];
+
+// Add item to cart
+function addToCart(name, price) {
+  const existing = cart.find(item => item.name === name);
+  if (existing) {
+    existing.qty++;
+  } else {
+    cart.push({ name, price, qty: 1 });
+  }
+  localStorage.setItem("cart", JSON.stringify(cart));
+  alert(name + " added to cart 💖");
+  updateCartCount();
+  renderCart();
+  const dropdown = document.getElementById("cartDropdown");
+const overlay = document.getElementById("cartOverlay");
+
+dropdown.classList.add("show");
+overlay.classList.add("show");
+
+}
+
+// Update cart count
+function updateCartCount() {
+  const count = cart.reduce((sum, item) => sum + item.qty, 0);
+  const el = document.getElementById("cart-count");
+  if (el) el.textContent = count;
+}
+
+// Increase quantity
+function increaseQty(index) {
+  cart[index].qty++;
+  saveAndRender();
+}
+
+// Decrease quantity
+function decreaseQty(index) {
+  if (cart[index].qty > 1) {
+    cart[index].qty--;
+  } else {
+    cart.splice(index, 1);
+  }
+  saveAndRender();
+}
+
+// Save & re-render
+function saveAndRender() {
+  localStorage.setItem("cart", JSON.stringify(cart));
+  updateCartCount();
+  renderCart();
+}
+
+/* ================= CART DROPDOWN LOGIC ================= */
+
+function toggleCart() {
+  const dropdown = document.getElementById("cartDropdown");
+  const overlay = document.getElementById("cartOverlay");
+
+  const isOpen = dropdown.classList.contains("show");
+
+  dropdown.classList.toggle("show", !isOpen);
+  overlay.classList.toggle("show", !isOpen);
+
+  renderCart();
+}
+
+
+function renderCart() {
+  const itemsDiv = document.getElementById("cartItems");
+  const totalDiv = document.getElementById("cartTotal");
+  itemsDiv.innerHTML = "";
+
+  let total = 0;
+
+  cart.forEach((item, index) => {
+    total += item.price * item.qty;
+
+    itemsDiv.innerHTML += `
+      <div class="cart-item">
+        <span>${item.name}</span>
+        <div>
+          <button onclick="decreaseQty(${index})">−</button>
+          <span>${item.qty}</span>
+          <button onclick="increaseQty(${index})">+</button>
+        </div>
+        <span>$${(item.price * item.qty).toFixed(2)}</span>
+      </div>
+    `;
+  });
+
+  totalDiv.innerText = "$" + total.toFixed(2);
+}
+
+// Checkout function (unchanged behavior)
+function checkout() {
+  if (cart.length === 0) {
+    alert("Your cart is empty");
+    return;
+  }
+  alert("Checkout successful!");
+  cart = [];
+  localStorage.removeItem("cart");
+  updateCartCount();
+  renderCart();
+  document.getElementById("cartDropdown").style.display = "none";
+}
+
+// Run on page load
+updateCartCount();
+
+/* ===== PRODUCT MODAL LOGIC ===== */
+
+function openProductModal(name, price, images) {
+  document.getElementById("modalTitle").innerText = name;
+  document.getElementById("modalPrice").innerText = "$" + price.toFixed(2);
+
+  const mainImg = document.getElementById("modalMainImage");
+  const thumbs = document.getElementById("modalThumbs");
+
+  mainImg.src = images[0];
+  thumbs.innerHTML = "";
+
+  images.forEach(src => {
+    const img = document.createElement("img");
+    img.src = src;
+    img.onclick = () => mainImg.src = src;
+    thumbs.appendChild(img);
+  });
+
+  document.getElementById("modalAddBtn").onclick = () => {
+    addToCart(name, price);
+  };
+
+  document.getElementById("productModal").classList.add("show");
+}
+
+function closeModal() {
+  document.getElementById("productModal").classList.remove("show");
+}
+
+</script>
+
+</body>
+</html>
