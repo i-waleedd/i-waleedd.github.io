@@ -441,7 +441,8 @@ html {
     </div>
   </div>
 
-  <button class="pay-btn" onclick="checkout()">Pay now</button>
+  <button class="pay-btn" id="payButton" onclick="handlePayment()">Pay Now</button>
+
 </div>
 </div>
 
@@ -522,20 +523,70 @@ function checkout() {
   renderCart();
 }
 
-renderCart();
+/* ===== PAYMENT LOGIC ===== */
 
+const payButton = document.getElementById("payButton");
 const paymentRadios = document.querySelectorAll('input[name="payment"]');
 const cardDetails = document.getElementById("cardDetails");
 
+/* Change UI based on payment method */
 paymentRadios.forEach(radio => {
   radio.addEventListener("change", () => {
     if (radio.value === "card" && radio.checked) {
+      payButton.innerText = "Pay Now";
       cardDetails.classList.add("active");
-    } else if (radio.value === "cod" && radio.checked) {
+    }
+
+    if (radio.value === "cod" && radio.checked) {
+      payButton.innerText = "Order Now";
       cardDetails.classList.remove("active");
     }
   });
 });
+
+/* Handle payment */
+function handlePayment() {
+
+  const selectedPayment = document.querySelector('input[name="payment"]:checked').value;
+
+  if (cart.length === 0) {
+    alert("Your cart is empty");
+    return;
+  }
+
+  /* CASH ON DELIVERY */
+  if (selectedPayment === "cod") {
+    alert("✅ Your order is placed!\nPay on delivery.");
+    completeOrder();
+    return;
+  }
+
+  /* CARD PAYMENT */
+  if (selectedPayment === "card") {
+
+    const inputs = cardDetails.querySelectorAll("input");
+    let valid = true;
+
+    inputs.forEach(input => {
+      if (input.value.trim() === "") valid = false;
+    });
+
+    if (!valid) {
+      alert("❌ Payment rejected.\nPlease enter valid card details.");
+      return;
+    }
+
+    alert("✅ Payment confirmed!\nYour order is placed.");
+    completeOrder();
+  }
+}
+
+/* Complete order */
+function completeOrder() {
+  cart = [];
+  localStorage.removeItem("cart");
+  renderCart();
+}
 
 
 </script>
