@@ -712,10 +712,28 @@ document.addEventListener("DOMContentLoaded", () => {
 });
 
 function toggleMobileMenu() {
-  document.querySelector(".main-nav").classList.toggle("show");
+  document.getElementById("mobileMenu").classList.toggle("show");
 }
+/* ===============================
+   CLOSE HAMBURGER ON OUTSIDE CLICK
+   =============================== */
+document.addEventListener("click", function (e) {
+  const menu = document.getElementById("mobileMenu");
+  const toggle = document.querySelector(".menu-toggle");
+
+  if (!menu || !toggle) return;
+
+  if (
+    menu.classList.contains("show") &&
+    !menu.contains(e.target) &&
+    !toggle.contains(e.target)
+  ) {
+    menu.classList.remove("show");
+  }
+});
 
 </script>
+
 <!-- ===== PRODUCT MODAL ===== -->
 <div class="modal-overlay" id="productModal">
   <div class="product-modal">
@@ -755,13 +773,13 @@ function toggleMobileMenu() {
     <nav class="main-nav">
   <a href="index.html">Home</a>
   <a href="products.html">Products</a>
-<!-- CART BUTTON (UNCHANGED) -->
+
+</nav>
+  <!-- CART BUTTON (UNCHANGED) -->
     <a onclick="toggleCart()" class="cart-icon" aria-label="Cart">
   🛒
   <span id="cart-count">0</span>
 </a>
-</nav>
-
   </header>
 <!-- ================= ADDITION: CART DROPDOWN HTML ================= -->
 <div class="cart-dropdown" id="cartDropdown">

@@ -803,8 +803,25 @@ function closeModal() {
   document.getElementById("productModal").classList.remove("show");
 }
 function toggleMobileMenu() {
-  document.querySelector(".main-nav").classList.toggle("show");
+  document.getElementById("mobileMenu").classList.toggle("show");
 }
+/* ===============================
+   CLOSE HAMBURGER ON OUTSIDE CLICK
+   =============================== */
+document.addEventListener("click", function (e) {
+  const menu = document.getElementById("mobileMenu");
+  const toggle = document.querySelector(".menu-toggle");
+
+  if (!menu || !toggle) return;
+
+  if (
+    menu.classList.contains("show") &&
+    !menu.contains(e.target) &&
+    !toggle.contains(e.target)
+  ) {
+    menu.classList.remove("show");
+  }
+});
 
 </script>
 
