@@ -335,9 +335,80 @@
   font-size: 22px;
   cursor: pointer;
 }
+/* ================= MOBILE RESPONSIVE FIXES ================= */
+@media (max-width: 768px) {
+
+  header {
+    padding: 14px 20px;
+    flex-wrap: wrap;
+  }
+
+  header h1 {
+    font-size: 20px;
+  }
+
+  nav {
+    width: 100%;
+    margin-top: 10px;
+    display: flex;
+    justify-content: space-between;
+    flex-wrap: wrap;
+  }
+
+  nav a {
+    margin: 6px 0;
+    font-size: 14px;
+  }
+
+  .hero {
+    height: 55vh;
+    padding: 0 16px;
+  }
+
+  .hero h2 {
+    font-size: 28px;
+    line-height: 1.2;
+  }
+
+  .hero p {
+    font-size: 14px;
+  }
+
+  .products {
+    padding: 0 16px 32px;
+    gap: 16px;
+  }
+
+  .product-card img {
+    height: auto;
+  }
+
+  .cart-dropdown {
+    width: 100%;
+  }
+
+  .product-modal {
+    grid-template-columns: 1fr;
+    max-height: 90vh;
+    overflow-y: auto;
+  }
+
+  .modal-thumbs img {
+    width: 56px;
+    height: 56px;
+  }
+
+  .checkout-btn {
+    font-size: 14px;
+    padding: 10px;
+  }
+
+}
 
   </style>
 </head>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
 <!-- ===== PRODUCT MODAL ===== -->
 <div class="modal-overlay" id="productModal">
   <div class="product-modal">
