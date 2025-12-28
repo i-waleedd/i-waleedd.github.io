@@ -28,16 +28,32 @@
     nav a[onclick] {
       cursor: pointer;
     }
-    /* ===== PROMO BAR ===== */
     .promo-bar {
-      background: #ff7e8d;
-      color: #E6D8C5;
-      text-align: center;
-      padding: 10px;
-      font-size: 14px;
-      font-weight: 600;
-    }
+  background: #ff7e8d;
+  color: #ffffff;
+  overflow: hidden;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  font-size: 14px;
+  font-weight: 600;
+}
 
+.promo-track {
+  display: flex;
+  width: max-content;
+  animation: promo-slide 16s linear infinite;
+}
+
+.promo-track span {
+  padding-right: 50px;
+  white-space: nowrap;
+}
+.promo-bar {
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+}
     /* ===== HEADER ===== */
     header {
       display: flex;
@@ -50,7 +66,11 @@
       background: #E6D8C5;
       z-index: 100;
     }
-
+ header {
+  position: sticky;
+  top: 40px; /* height of promo bar */
+  z-index: 999;
+}
     header h1 {
       font-size: 24px;
       font-weight: 700;
@@ -340,6 +360,7 @@
     flex-wrap: wrap;
   }
 
+
   header h1 {
     font-size: 20px;
   }
@@ -529,7 +550,14 @@ html {
     transform: translateY(0);
   }
 }
-
+@keyframes promo-slide {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(-50%);
+  }
+}
   </style>
 </head>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -555,8 +583,11 @@ html {
 
   <!-- PROMO BAR -->
   <div class="promo-bar">
-    FREE Shipping on 3+ Sets • 30% OFF Sitewide ✨
+  <div class="promo-track">
+    <span>FREE Shipping on 3+ Sets • 30% OFF Sitewide (Limited Time) ✨</span>
+    <span>FREE Shipping on 3+ Sets • 30% OFF Sitewide (Limited Time) ✨</span>
   </div>
+</div>
 
   <!-- HEADER -->
   <header>
