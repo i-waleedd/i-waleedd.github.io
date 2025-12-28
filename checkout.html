@@ -287,6 +287,89 @@ html {
     grid-template-columns: 1fr;
   }
 }
+/* ================= CHECKOUT MOBILE OPTIMIZATION ================= */
+@media (max-width: 768px) {
+
+  /* Stack checkout columns */
+  .checkout-wrapper {
+    grid-template-columns: 1fr;
+    max-width: 100%;
+  }
+
+  /* Reduce padding */
+  .left, .right {
+    padding: 20px 16px;
+  }
+
+  /* Order summary goes below */
+  .right {
+    border-top: 1px solid #eee;
+  }
+
+  h1 {
+    font-size: 17px;
+  }
+
+  .section h3 {
+    font-size: 12.5px;
+  }
+
+  input, select {
+    font-size: 14px;
+    padding: 10px;
+  }
+
+  .row {
+    flex-direction: column;
+    gap: 6px;
+  }
+
+  .pay-box {
+    padding: 10px;
+  }
+
+  .payment-row label {
+    font-size: 13px;
+  }
+
+  .pay-btn {
+    font-size: 15px;
+    padding: 14px;
+    border-radius: 10px;
+  }
+
+  /* Cart items spacing */
+  .cart-item {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+  }
+
+  .cart-item > div:last-child {
+    width: 100%;
+    text-align: right;
+  }
+}
+
+/* ===== EXTRA SMALL PHONES (Android, old devices) ===== */
+@media (max-width: 420px) {
+
+  body {
+    font-size: 13px;
+  }
+
+  h1 {
+    font-size: 16px;
+  }
+
+  input, select {
+    font-size: 13.5px;
+  }
+
+  .pay-btn {
+    font-size: 14px;
+  }
+}
 
 </style>
 </head>
