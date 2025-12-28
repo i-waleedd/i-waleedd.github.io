@@ -16,27 +16,33 @@
     }
     a { text-decoration: none; color: inherit; }
 
-    .promo-bar {
+  .promo-bar {
   background: #ff7e8d;
   color: #ffffff;
   overflow: hidden;
-  white-space: nowrap;
   height: 40px;
   display: flex;
   align-items: center;
-  font-weight: 600;
   font-size: 14px;
+  font-weight: 600;
 }
 
 .promo-track {
-  display: inline-block;
-  animation: promo-slide 18s linear infinite;
+  display: flex;
+  width: max-content;
+  animation: promo-slide 16s linear infinite;
 }
 
 .promo-track span {
-  display: inline-block;
-  padding-left: 100%;
+  padding-right: 50px;
+  white-space: nowrap;
 }
+.promo-bar {
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+}
+
 
 
     header {
@@ -551,7 +557,7 @@ html {
     transform: translateX(0);
   }
   to {
-    transform: translateX(-100%);
+    transform: translateX(-50%);
   }
 }
 
@@ -581,13 +587,11 @@ html {
 
 <div class="promo-bar">
   <div class="promo-track">
-    <span>
-      FREE Shipping on 3+ Sets • 30% OFF Sitewide (Limited Time) ✨
-      &nbsp;&nbsp;&nbsp;•&nbsp;&nbsp;&nbsp;
-      FREE Shipping on 3+ Sets • 30% OFF Sitewide (Limited Time) ✨
-    </span>
+    <span>FREE Shipping on 3+ Sets • 30% OFF Sitewide (Limited Time) ✨</span>
+    <span>FREE Shipping on 3+ Sets • 30% OFF Sitewide (Limited Time) ✨</span>
   </div>
 </div>
+
 
 <header>
   <div class="cart-overlay" id="cartOverlay" onclick="toggleCart()"></div>
