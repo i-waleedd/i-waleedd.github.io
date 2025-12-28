@@ -507,6 +507,57 @@ html {
     grid-template-columns: 1fr;
   }
 }
+/* ===== MOBILE HEADER (SHOPIFY STYLE) ===== */
+@media (max-width: 768px) {
+
+  header {
+    padding: 14px 18px;
+  }
+
+  /* Hamburger button */
+  .menu-toggle {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    cursor: pointer;
+  }
+
+  .menu-toggle span {
+    width: 22px;
+    height: 2px;
+    background: #222;
+    border-radius: 2px;
+  }
+
+  /* Hide nav by default */
+  .main-nav {
+    position: fixed;
+    top: 64px;
+    left: 0;
+    width: 100%;
+    background: #E6D8C5;
+    display: none;
+    flex-direction: column;
+    padding: 16px;
+    z-index: 999;
+  }
+
+  .main-nav a {
+    padding: 12px 0;
+    font-size: 15px;
+    border-bottom: 1px solid rgba(0,0,0,0.08);
+  }
+
+  /* Show menu when active */
+  .main-nav.show {
+    display: flex;
+  }
+
+  /* Desktop-only elements */
+  nav a:not(.cart-icon) {
+    margin-left: 0;
+  }
+}
 
   </style>
 </head>
@@ -660,6 +711,9 @@ document.addEventListener("DOMContentLoaded", () => {
   updateCartCount();
 });
 
+function toggleMobileMenu() {
+  document.querySelector(".main-nav").classList.toggle("show");
+}
 
 </script>
 <!-- ===== PRODUCT MODAL ===== -->
@@ -689,17 +743,25 @@ document.addEventListener("DOMContentLoaded", () => {
 
   <!-- HEADER -->
   <header>
+
+    <!-- MOBILE MENU BUTTON -->
+<div class="menu-toggle" onclick="toggleMobileMenu()">
+  <span></span>
+  <span></span>
+</div>
+
     <div class="cart-overlay" id="cartOverlay" onclick="toggleCart()"></div>
     <h1>PressPlayNails</h1>
-    <nav>
-      <a href="index.html">Home</a>
-      <a href="products.html">Products</a>
-       <!-- CART BUTTON (UNCHANGED) -->
+    <nav class="main-nav">
+  <a href="index.html">Home</a>
+  <a href="products.html">Products</a>
+<!-- CART BUTTON (UNCHANGED) -->
     <a onclick="toggleCart()" class="cart-icon" aria-label="Cart">
   🛒
   <span id="cart-count">0</span>
 </a>
-    </nav>
+</nav>
+
   </header>
 <!-- ================= ADDITION: CART DROPDOWN HTML ================= -->
 <div class="cart-dropdown" id="cartDropdown">
