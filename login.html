@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Login | PressPlay Nails</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+<style>
+/* (STYLES UNCHANGED — EXACTLY AS YOU SENT) */
+* { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Poppins', sans-serif; }
+body { background: #E6D8C5; min-height: 100vh; display: flex; align-items: center; justify-content: center; }
+.login-card { width: 100%; max-width: 420px; background: #E6D8C5; padding: 40px; border-radius: 18px; box-shadow: 0 16px 45px rgba(0,0,0,0.15); }
+.brand { text-align: center; margin-bottom: 6px; font-size: 26px; font-weight: 700; letter-spacing: 1px; }
+.subtitle { text-align: center; font-size: 14px; color: #555; margin-bottom: 30px; }
+.field { margin-bottom: 18px; }
+.field label { display: block; font-size: 13px; font-weight: 500; margin-bottom: 6px; }
+.field input { width: 100%; padding: 12px 14px; border-radius: 10px; border: 1px solid rgba(0,0,0,0.2); font-size: 14px; outline: none; }
+.field input:focus { border-color: #ff7e8d; }
+.action-row { display: flex; justify-content: space-between; align-items: center; font-size: 13px; margin-bottom: 20px; }
+.action-row a { color: #ff7e8d; text-decoration: none; font-weight: 500; }
+.login-btn { width: 100%; padding: 14px; background: #ff7e8d; color: #fff; border: none; border-radius: 30px; font-size: 15px; font-weight: 600; cursor: pointer; transition: all 0.3s ease; }
+.login-btn:hover { transform: translateY(-2px); box-shadow: 0 10px 24px rgba(255,126,141,0.45); }
+.error { margin-top: 14px; color: #c0392b; font-size: 13px; display: none; text-align: center; }
+.footer-text { margin-top: 26px; text-align: center; font-size: 13px; color: #555; }
+.footer-text a { color: #ff7e8d; font-weight: 600; text-decoration: none; }
+@media (max-width: 480px) { .login-card { padding: 30px 22px; } }
+</style>
+</head>
+
+<body>
+
+<div class="login-card">
+  <div class="brand">PressPlay Nails</div>
+  <div class="subtitle">Welcome back ✨</div>
+
+  <div class="field">
+    <label>Email</label>
+    <input type="email" id="email" placeholder="you@example.com">
+  </div>
+
+  <div class="field">
+    <label>Password</label>
+    <input type="password" id="password" placeholder="••••••••">
+  </div>
+
+  <div class="action-row">
+    <span></span>
+    <a href="#" onclick="resetPassword()">Forgot password?</a>
+  </div>
+
+  <button class="login-btn" onclick="login()">Login</button>
+
+  <div class="error" id="errorMsg"></div>
+
+  <div class="footer-text">
+    New here?
+    <a href="signup.html">Create an account</a>
+  </div>
+</div>
+
+<script type="module">
+import { auth, db } from "./js/firebase.js";
+import {
+  signInWithEmailAndPassword,
+  sendPasswordResetEmail
+} from "https://www.gstatic.com/firebasejs/9.23.0/firebase-auth.js";
+
+import {
+  doc,
+  getDoc
+} from "https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js";
+
+window.login = async function () {
+  const email = document.getElementById("email").value.trim();
+  const password = document.getElementById("password").value.trim();
+  const errorMsg = document.getElementById("errorMsg");
+
+  errorMsg.style.display = "none";
+
+  if (!email || !password) {
+    errorMsg.textContent = "Please fill in all fields";
+    errorMsg.style.display = "block";
+    return;
+  }
+
+  try {
+    const userCredential = await signInWithEmailAndPassword(auth, email, password);
+    const userEmail = userCredential.user.email;
+
+    // 🔐 Check admin access
+    const adminRef = doc(db, "admins", userEmail);
+    const adminSnap = await getDoc(adminRef);
+
+    if (adminSnap.exists()) {
+      // ✅ ADMIN
+      window.location.href = "admin.html";
+    } else {
+      // 👤 NORMAL USER
+      window.location.href = "index.html";
+    }
+
+  } catch (error) {
+    errorMsg.textContent = error.message;
+    errorMsg.style.display = "block";
+  }
+};
+
+window.resetPassword = function () {
+  const email = document.getElementById("email").value.trim();
+  if (!email) {
+    alert("Enter your email first");
+    return;
+  }
+
+  sendPasswordResetEmail(auth, email)
+    .then(() => alert("Password reset email sent"))
+    .catch(err => alert(err.message));
+};
+</script>
+
+</body>
+</html>

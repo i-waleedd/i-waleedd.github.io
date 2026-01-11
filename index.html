@@ -566,6 +566,21 @@ html {
     transform: translateX(-50%);
   }
 }
+.login-btn {
+  margin-left: 14px;
+  padding: 9px 18px;
+  background: #ff7e8d;
+  color: #fff;
+  border: none;
+  border-radius: 22px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.login-btn:hover {
+  opacity: 0.9;
+}
 
   </style>
 </head>
@@ -585,11 +600,63 @@ html {
       <h3 id="modalTitle"></h3>
       <p id="modalPrice"></p>
       <button class="checkout-btn" id="modalAddBtn">Add to Cart</button>
+
     </div>
   </div>
 </div>
+<script type="module">
+import { fetchProducts } from "./js/products.js";
+
+const container = document.getElementById("featuredProducts");
+const products = await fetchProducts();
+
+products.slice(0, 3).forEach(p => {
+  container.innerHTML += `
+    <div class="product-card">
+      <img src="${p.images[0]}">
+      <h4>${p.name}</h4>
+      <p>$${p.price}</p>
+    </div>
+  `;
+});
+</script>
+<script type="module">
+import { auth } from "./js/firebase.js";
+import { onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-auth.js";
+
+document.addEventListener("DOMContentLoaded", () => {
+  const loginBtn = document.getElementById("loginBtn");
+
+  // Default behavior if Firebase hasn't loaded yet
+  loginBtn.onclick = () => {
+    window.location.href = "login.html"; // Always works
+  };
+
+  // Listen to Firebase Auth state
+  onAuthStateChanged(auth, (user) => {
+    if (user) {
+      // User logged in → show Logout
+      loginBtn.textContent = "Logout";
+      loginBtn.onclick = async () => {
+        await signOut(auth);
+        window.location.href = "index.html"; // reload after logout
+      };
+    } else {
+      // User not logged in → show Login
+      loginBtn.textContent = "Login";
+      loginBtn.onclick = () => {
+        window.location.href = "login.html"; // go to login page
+      };
+    }
+  });
+});
+</script>
+
+
+
 
 <body>
+<section class="products" id="featuredProducts"></section>
 
 <div class="promo-bar">
   <div class="promo-track">
@@ -621,7 +688,8 @@ html {
   🛒
   <span id="cart-count">0</span>
 </a>
-  
+  <button id="loginBtn" class="login-btn">Login</button>
+
 </header>
 
 <!-- ================= ADDITION: CART DROPDOWN HTML ================= -->

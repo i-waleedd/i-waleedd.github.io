@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Admin Dashboard | PressPlay Nails</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+<style>
+* {
+  box-sizing: border-box;
+  font-family: 'Poppins', sans-serif;
+}
+
+body {
+  margin: 0;
+  background: #E6D8C5;
+  display: flex;
+}
+
+/* ===== SIDEBAR ===== */
+.sidebar {
+  width: 260px;
+  background: #4A3B32;
+  color: #fff;
+  height: 100vh;
+  padding: 24px;
+}
+
+.sidebar h2 {
+  font-size: 20px;
+  margin-bottom: 30px;
+}
+
+.sidebar a {
+  display: block;
+  color: #fff;
+  text-decoration: none;
+  padding: 12px 0;
+  font-size: 15px;
+  opacity: 0.9;
+}
+
+.sidebar a:hover {
+  opacity: 1;
+}
+
+/* ===== MAIN ===== */
+.main {
+  flex: 1;
+  padding: 30px 40px;
+}
+
+/* ===== HEADER ===== */
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 30px;
+}
+
+.header h1 {
+  font-size: 26px;
+}
+
+/* ===== CARD ===== */
+.card {
+  background: #E6D8C5;
+  border-radius: 16px;
+  padding: 24px;
+  box-shadow: 0 10px 25px rgba(0,0,0,0.15);
+  max-width: 900px;
+}
+
+/* ===== FORM ===== */
+.form-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 18px;
+}
+
+.form-grid input,
+.form-grid textarea,
+.form-grid select {
+  padding: 12px;
+  border-radius: 10px;
+  border: 1px solid rgba(0,0,0,0.2);
+  font-size: 14px;
+}
+
+.form-grid textarea {
+  grid-column: span 2;
+  resize: vertical;
+}
+
+.add-btn {
+  margin-top: 20px;
+  padding: 14px;
+  background: #ff7e8d;
+  border: none;
+  color: #fff;
+  font-size: 15px;
+  font-weight: 600;
+  border-radius: 30px;
+  cursor: pointer;
+  width: 220px;
+}
+
+.add-btn:hover {
+  opacity: 0.9;
+}
+
+</style>
+<script type="module">
+import { auth } from "./js/firebase.js";
+import { onAuthStateChanged } from
+"https://www.gstatic.com/firebasejs/9.23.0/firebase-auth.js";
+import { doc, getDoc } from
+"https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js";
+import { db } from "./js/firebase.js";
+
+onAuthStateChanged(auth, async (user) => {
+  if (!user) {
+    window.location.href = "login.html";
+    return;
+  }
+
+  const adminRef = doc(db, "admins", user.email);
+  const adminSnap = await getDoc(adminRef);
+
+  if (!adminSnap.exists()) {
+    alert("Access denied");
+    window.location.href = "index.html";
+  }
+});
+</script>
+
+</head>
+
+<body>
+
+<!-- SIDEBAR -->
+<div class="sidebar">
+  <h2>PressPlay Admin</h2>
+  <a href="#">Dashboard</a>
+  <a href="#">Products</a>
+  <a href="#">Orders</a>
+  <a href="#" id="logoutBtn">Logout</a>
+</div>
+
+<!-- MAIN -->
+<div class="main">
+  <div class="header">
+    <h1>Add Product</h1>
+  </div>
+
+  <div class="card">
+    <div class="form-grid">
+      <input id="name" placeholder="Product name">
+      <input id="price" type="number" placeholder="Price">
+
+      <select id="category">
+        <option value="home">Home</option>
+        <option value="best-seller">Best Seller</option>
+        <option value="product">Product Page</option>
+      </select>
+
+      <input id="image1" placeholder="Image URL 1">
+      <input id="image2" placeholder="Image URL 2">
+      <input id="image3" placeholder="Image URL 3">
+
+      <textarea id="description" placeholder="Product description"></textarea>
+    </div>
+
+    <button class="add-btn" id="addProductBtn">Add Product</button>
+  </div>
+</div>
+
+<!-- ONE SCRIPT ONLY -->
+<script type="module" src="./js/admin.js"></script>
+
+</body>
+</html>

@@ -579,7 +579,25 @@ html {
   </div>
 </div>
 
+<script type="module">
+import { fetchProducts } from "./js/products.js";
+
+const container = document.getElementById("allProducts");
+const products = await fetchProducts();
+
+products.forEach(p => {
+  container.innerHTML += `
+    <div class="product-card">
+      <img src="${p.images[0]}">
+      <h4>${p.name}</h4>
+      <p>$${p.price}</p>
+    </div>
+  `;
+});
+</script>
+
 <body>
+<section class="products" id="allProducts"></section>
 
   <!-- PROMO BAR -->
   <div class="promo-bar">
