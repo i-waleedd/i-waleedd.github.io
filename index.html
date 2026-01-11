@@ -620,6 +620,7 @@ products.slice(0, 3).forEach(p => {
   `;
 });
 </script>
+
 <body>
 <section class="products" id="featuredProducts"></section>
 
@@ -654,42 +655,10 @@ products.slice(0, 3).forEach(p => {
   <span id="cart-count">0</span>
 </a>
   <button class="login-btn" id="loginBtn">Login</button>
+
+  
+
 </header>
-<script type="module">
-
-
-import { auth } from "./js/firebase.js";
-import { onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-auth.js";
-
-// Wait until the HTML is fully loaded
-document.addEventListener("DOMContentLoaded", () => {
-  const loginBtn = document.getElementById("loginBtn"); // get the login button
-
-  if (!loginBtn) {
-    console.error("Login button not found!");
-    return;
-  }
-
-
-  // Firebase listener
-  onAuthStateChanged(auth, (user) => {
-    if (user) {
-      // User is logged in → show Logout
-      loginBtn.textContent = "Logout";
-      loginBtn.onclick = async () => {
-        await signOut(auth);
-        window.location.href = "index.html"; // go back to homepage
-      };
-    } else {
-      // User is not logged in → show Login
-      loginBtn.textContent = "Login";
-      loginBtn.onclick = () => {
-        window.location.href = "login.html"; // go to your login page
-      };
-    }
-  });
-});
-</script>
 
 <!-- ================= ADDITION: CART DROPDOWN HTML ================= -->
 <div class="cart-dropdown" id="cartDropdown">
@@ -959,8 +928,41 @@ document.addEventListener("click", function (e) {
 
 
 
+<script type="module">
+
+
+import { auth } from "./js/firebase.js";
+import { onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-auth.js";
+
+// Wait until the HTML is fully loaded
+document.addEventListener("DOMContentLoaded", () => {
+  const loginBtn = document.getElementById("loginBtn"); // get the login button
+
+  if (!loginBtn) {
+    console.error("Login button not found!");
+    return;
+  }
+
+
+  // Firebase listener
+  onAuthStateChanged(auth, (user) => {
+    if (user) {
+      // User is logged in → show Logout
+      loginBtn.textContent = "Logout";
+      loginBtn.onclick = async () => {
+        await signOut(auth);
+        window.location.href = "index.html"; // go back to homepage
+      };
+    } else {
+      // User is not logged in → show Login
+      loginBtn.textContent = "Login";
+      loginBtn.onclick = () => {
+        window.location.href = "login.html"; // go to your login page
+      };
+    }
+  });
+});
+</script>
 
 </body>
 </html>
-
-
