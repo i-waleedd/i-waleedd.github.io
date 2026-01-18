@@ -463,9 +463,15 @@ html {
 import { db } from "./firebase.js";
 import { collection, addDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js";
 
-/* ===== CART FUNCTIONS (UNCHANGED) ===== */
-
 let cart = JSON.parse(localStorage.getItem("cart")) || [];
+
+function calculateTotal() {
+  let total = 0;
+  cart.forEach(item => {
+    total += item.price * item.qty;
+  });
+  return total;
+}
 
 function renderCart() {
   const container = document.getElementById("cartContainer");
@@ -475,13 +481,6 @@ function renderCart() {
     container.innerHTML = '<div class="empty">Your cart is empty</div>';
     return;
   }
-function calculateTotal() {
-  let total = 0;
-  cart.forEach(item => {
-    total += item.price * item.qty;
-  });
-  return total;
-}
 
   let total = 0;
 
@@ -494,23 +493,43 @@ function calculateTotal() {
         <div>
           <strong>${item.name}</strong>
           <div style="margin-top:4px;">
-            <button onclick="decreaseQty(${index})">−</button>
+            <button class="dec-btn" data-index="${index}">−</button>
             <span style="margin:0 6px;">${item.qty}</span>
-            <button onclick="increaseQty(${index})">+</button>
+            <button class="inc-btn" data-index="${index}">+</button>
           </div>
         </div>
         <div style="text-align:right;">
           $${itemTotal.toFixed(2)}<br>
-          <button onclick="removeItem(${index})">Remove</button>
+          <button class="remove-btn" data-index="${index}">Remove</button>
         </div>
       </div>
     `;
   });
 
   container.innerHTML += `<div class="total">Total: $${total.toFixed(2)}</div>`;
+
+  // Add event listeners after render
+  document.querySelectorAll(".inc-btn").forEach(btn => {
+    btn.addEventListener("click", () => {
+      increaseQty(btn.dataset.index);
+    });
+  });
+
+  document.querySelectorAll(".dec-btn").forEach(btn => {
+    btn.addEventListener("click", () => {
+      decreaseQty(btn.dataset.index);
+    });
+  });
+
+  document.querySelectorAll(".remove-btn").forEach(btn => {
+    btn.addEventListener("click", () => {
+      removeItem(btn.dataset.index);
+    });
+  });
 }
 
 function removeItem(index) {
+  index = parseInt(index);
   if (cart[index].qty > 1) cart[index].qty--;
   else cart.splice(index, 1);
   localStorage.setItem("cart", JSON.stringify(cart));
@@ -518,40 +537,30 @@ function removeItem(index) {
 }
 
 function increaseQty(index) {
+  index = parseInt(index);
   cart[index].qty++;
   localStorage.setItem("cart", JSON.stringify(cart));
   renderCart();
 }
 
 function decreaseQty(index) {
+  index = parseInt(index);
   if (cart[index].qty > 1) cart[index].qty--;
   else cart.splice(index, 1);
   localStorage.setItem("cart", JSON.stringify(cart));
   renderCart();
 }
 
-function checkout() {
-  if (cart.length === 0) return alert("Your cart is empty");
-  alert("Checkout successful!");
-  cart = [];
-  localStorage.removeItem("cart");
-  renderCart();
-}
-
-/* ===== PAYMENT LOGIC ===== */
-
 const payButton = document.getElementById("payButton");
 const paymentRadios = document.querySelectorAll('input[name="payment"]');
 const cardDetails = document.getElementById("cardDetails");
 
-/* Change UI based on payment method */
 paymentRadios.forEach(radio => {
   radio.addEventListener("change", () => {
     if (radio.value === "card" && radio.checked) {
       payButton.innerText = "Pay Now";
       cardDetails.classList.add("active");
     }
-
     if (radio.value === "cod" && radio.checked) {
       payButton.innerText = "Order Now";
       cardDetails.classList.remove("active");
@@ -559,9 +568,9 @@ paymentRadios.forEach(radio => {
   });
 });
 
-/* Handle payment */
-function handlePayment() {
+payButton.addEventListener("click", handlePayment);
 
+function handlePayment() {
   const selectedPayment = document.querySelector('input[name="payment"]:checked').value;
 
   if (cart.length === 0) {
@@ -569,16 +578,12 @@ function handlePayment() {
     return;
   }
 
-  /* CASH ON DELIVERY */
   if (selectedPayment === "cod") {
-    alert("✅ Your order is placed!\nPay on delivery.");
     completeOrder();
     return;
   }
 
-  /* CARD PAYMENT */
   if (selectedPayment === "card") {
-
     const inputs = cardDetails.querySelectorAll("input");
     let valid = true;
 
@@ -591,14 +596,11 @@ function handlePayment() {
       return;
     }
 
-    alert("✅ Payment confirmed!\nYour order is placed.");
     completeOrder();
   }
 }
 
 async function completeOrder() {
-
-  // Get address values
   const firstName = document.getElementById("firstName").value.trim();
   const lastName = document.getElementById("lastName").value.trim();
   const addressLine = document.getElementById("addressLine").value.trim();
@@ -606,19 +608,18 @@ async function completeOrder() {
   const city = document.getElementById("city").value.trim();
   const state = document.getElementById("state").value.trim();
   const zip = document.getElementById("zip").value.trim();
+  const email = document.getElementById("email").value.trim();
 
-  // Validation
-  if (!firstName || !lastName || !addressLine || !city || !state || !zip) {
+  if (!firstName || !lastName || !addressLine || !city || !state || !zip || !email) {
     return alert("Please fill all address fields");
   }
 
-  // Calculate total
   const total = calculateTotal();
 
-  // Create order object
   const order = {
     cart: cart,
     total: total,
+    email: email,
     paymentMethod: document.querySelector('input[name="payment"]:checked').value,
     address: {
       firstName,
@@ -633,20 +634,18 @@ async function completeOrder() {
     createdAt: serverTimestamp()
   };
 
-  // Save to Firestore
   await addDoc(collection(db, "orders"), order);
 
   alert("Order placed successfully!");
 
-  // Clear cart
   cart = [];
   localStorage.removeItem("cart");
   renderCart();
 }
 
-
-
+renderCart();
 </script>
+
 
 </body>
 </html>
