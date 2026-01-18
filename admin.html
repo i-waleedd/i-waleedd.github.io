@@ -113,12 +113,12 @@ body {
 
 </style>
 <script type="module">
-import { auth } from "./js/firebase.js";
+import { auth } from "./firebase.js";
 import { onAuthStateChanged } from
 "https://www.gstatic.com/firebasejs/9.23.0/firebase-auth.js";
 import { doc, getDoc } from
 "https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js";
-import { db } from "./js/firebase.js";
+import { db } from "./firebase.js";
 
 onAuthStateChanged(auth, async (user) => {
   if (!user) {
@@ -178,7 +178,7 @@ onAuthStateChanged(auth, async (user) => {
 </div>
 
 <!-- ONE SCRIPT ONLY -->
-<script type="module" src="./js/admin.js"></script>
+<script type="module" src="./admin.js"></script>
 
 </body>
 </html>
