@@ -384,26 +384,31 @@ html {
 
   <div class="section">
     <h3>Contact</h3>
-    <input type="email" placeholder="Email or mobile phone number">
+   <input id="email" type="email" placeholder="Email or mobile phone number">
+
   </div>
 
   <div class="section">
-    <h3>Delivery</h3>
-    <select>
-      <option>Pakistan</option>
-    </select>
-    <div class="row">
-      <input placeholder="First name">
-      <input placeholder="Last name">
-    </div>
-    <input placeholder="Address">
-    <input placeholder="Apartment, suite (optional)">
-    <div class="row">
-      <input placeholder="City">
-      <input placeholder="State">
-      <input placeholder="ZIP code">
-    </div>
+  <h3>Delivery</h3>
+  <select id="country">
+    <option>Pakistan</option>
+  </select>
+
+  <div class="row">
+    <input id="firstName" placeholder="First name">
+    <input id="lastName" placeholder="Last name">
   </div>
+
+  <input id="addressLine" placeholder="Address">
+  <input id="apt" placeholder="Apartment, suite (optional)">
+
+  <div class="row">
+    <input id="city" placeholder="City">
+    <input id="state" placeholder="State">
+    <input id="zip" placeholder="ZIP code">
+  </div>
+</div>
+
 <div class="section">
   <h3>Payment</h3>
 
@@ -454,7 +459,10 @@ html {
 
 </div>
 
-<script>
+  <script type="module">
+import { db } from "./firebase.js";
+import { collection, addDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js";
+
 /* ===== CART FUNCTIONS (UNCHANGED) ===== */
 
 let cart = JSON.parse(localStorage.getItem("cart")) || [];
@@ -467,6 +475,13 @@ function renderCart() {
     container.innerHTML = '<div class="empty">Your cart is empty</div>';
     return;
   }
+function calculateTotal() {
+  let total = 0;
+  cart.forEach(item => {
+    total += item.price * item.qty;
+  });
+  return total;
+}
 
   let total = 0;
 
@@ -581,12 +596,54 @@ function handlePayment() {
   }
 }
 
-/* Complete order */
-function completeOrder() {
+async function completeOrder() {
+
+  // Get address values
+  const firstName = document.getElementById("firstName").value.trim();
+  const lastName = document.getElementById("lastName").value.trim();
+  const addressLine = document.getElementById("addressLine").value.trim();
+  const apt = document.getElementById("apt").value.trim();
+  const city = document.getElementById("city").value.trim();
+  const state = document.getElementById("state").value.trim();
+  const zip = document.getElementById("zip").value.trim();
+
+  // Validation
+  if (!firstName || !lastName || !addressLine || !city || !state || !zip) {
+    return alert("Please fill all address fields");
+  }
+
+  // Calculate total
+  const total = calculateTotal();
+
+  // Create order object
+  const order = {
+    cart: cart,
+    total: total,
+    paymentMethod: document.querySelector('input[name="payment"]:checked').value,
+    address: {
+      firstName,
+      lastName,
+      addressLine,
+      apt,
+      city,
+      state,
+      zip
+    },
+    status: "pending",
+    createdAt: serverTimestamp()
+  };
+
+  // Save to Firestore
+  await addDoc(collection(db, "orders"), order);
+
+  alert("Order placed successfully!");
+
+  // Clear cart
   cart = [];
   localStorage.removeItem("cart");
   renderCart();
 }
+
 
 
 </script>
