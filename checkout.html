@@ -1,0 +1,454 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Secure Checkout | PressPlay Nails</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#ff7e8d">
+
+<link rel="icon" type="image/png" href="favicon.png">
+
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link href="https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css" rel="stylesheet">
+
+<style>
+  :root {
+    --primary: #ff7e8d;
+    --primary-dark: #e86374;
+    --text: #2b1719;
+    --gray: #6b7280;
+    --border: #e5e7eb;
+    --bg: #f9fafb;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  
+  body {
+    font-family: 'Poppins', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    font-size: 14px;
+  }
+
+  /* --- HEADER --- */
+  .checkout-header {
+    background: #fff;
+    padding: 20px 5%;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+  }
+  .brand-logo { font-size: 20px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; color: var(--text); text-decoration: none; }
+  .secure-badge { display: flex; align-items: center; gap: 6px; font-size: 12px; color: #065f46; background: #d1fae5; padding: 6px 12px; border-radius: 20px; font-weight: 500; }
+
+  /* --- LAYOUT --- */
+  .container {
+    max-width: 1200px;
+    margin: 0 auto;
+    display: grid;
+    grid-template-columns: 1.3fr 0.9fr;
+    gap: 40px;
+    padding: 40px 20px;
+  }
+
+  /* --- FORMS (LEFT) --- */
+  .form-section { margin-bottom: 32px; }
+  .section-title { font-size: 16px; font-weight: 600; margin-bottom: 16px; display: flex; justify-content: space-between; align-items: center; }
+  
+  .input-group { margin-bottom: 14px; }
+  .input-row { display: flex; gap: 14px; }
+  
+  input, select {
+    width: 100%;
+    padding: 14px;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    font-size: 14px;
+    background: #fff;
+    transition: 0.2s;
+    font-family: inherit;
+  }
+  input:focus, select:focus { border-color: var(--primary); outline: none; box-shadow: 0 0 0 3px rgba(255, 126, 141, 0.1); }
+  label { display: block; margin-bottom: 6px; font-size: 12px; font-weight: 500; color: var(--gray); }
+
+  /* --- PAYMENT BOX --- */
+  .payment-options { border: 1px solid var(--border); border-radius: 8px; overflow: hidden; background: #fff; }
+  .pay-option { 
+    padding: 16px; 
+    border-bottom: 1px solid var(--border); 
+    cursor: pointer; 
+    display: flex; 
+    align-items: center; 
+    gap: 12px; 
+    transition: 0.2s;
+  }
+  .pay-option:last-child { border-bottom: none; }
+  .pay-option:hover { background: #fdf2f3; }
+  .pay-option.active { background: #fff0f1; border-left: 4px solid var(--primary); }
+  
+  .pay-option input { width: auto; margin: 0; }
+  .pay-option label { margin: 0; font-size: 14px; font-weight: 500; flex: 1; cursor: pointer; color: var(--text); }
+  .card-icons { display: flex; gap: 5px; opacity: 0.7; }
+  .card-icons img { height: 20px; }
+
+  /* Card Details Transition */
+  .card-details-panel {
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.3s ease;
+    background: #fafafa;
+    padding: 0 16px;
+  }
+  .card-details-panel.open { padding: 16px; max-height: 300px; border-bottom: 1px solid var(--border); }
+
+  /* --- ORDER SUMMARY (RIGHT) --- */
+  .order-summary {
+    background: #fff;
+    padding: 30px;
+    border-radius: 12px;
+    border: 1px solid var(--border);
+    height: fit-content;
+    position: sticky;
+    top: 100px;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.03);
+  }
+
+  .cart-item { display: flex; align-items: center; gap: 15px; margin-bottom: 16px; }
+  .item-img { 
+    width: 64px; height: 64px; border-radius: 8px; 
+    background: #eee; object-fit: cover; border: 1px solid var(--border);
+    position: relative;
+  }
+  .item-qty-badge {
+    position: absolute; top: -8px; right: -8px;
+    background: var(--gray); color: #fff;
+    width: 20px; height: 20px; border-radius: 50%;
+    font-size: 10px; display: flex; align-items: center; justify-content: center;
+    font-weight: 600;
+  }
+  .item-info { flex: 1; }
+  .item-name { font-weight: 600; font-size: 13px; margin-bottom: 2px; }
+  .item-meta { font-size: 12px; color: var(--gray); }
+  .item-price { font-weight: 600; font-size: 14px; }
+
+  .cost-row { display: flex; justify-content: space-between; margin-bottom: 10px; font-size: 13px; color: var(--gray); }
+  .total-row { 
+    display: flex; justify-content: space-between; 
+    margin-top: 20px; padding-top: 20px; 
+    border-top: 1px solid var(--border); 
+    font-size: 18px; font-weight: 700; color: var(--text); 
+  }
+  .total-row small { font-size: 12px; font-weight: 400; color: var(--gray); }
+
+  .checkout-btn {
+    width: 100%;
+    padding: 16px;
+    background: var(--primary);
+    color: #fff;
+    border: none;
+    border-radius: 8px;
+    font-size: 15px;
+    font-weight: 600;
+    cursor: pointer;
+    margin-top: 24px;
+    transition: 0.3s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+  }
+  .checkout-btn:hover { background: var(--primary-dark); box-shadow: 0 5px 15px rgba(255, 126, 141, 0.4); }
+  .checkout-btn:disabled { background: #ccc; cursor: not-allowed; }
+
+  .back-link { display: block; text-align: center; margin-top: 16px; font-size: 13px; color: var(--primary); text-decoration: none; }
+  .back-link:hover { text-decoration: underline; }
+
+  /* RESPONSIVE */
+  @media (max-width: 900px) {
+    .container { grid-template-columns: 1fr; padding: 20px; }
+    .order-summary { order: -1; margin-bottom: 20px; position: relative; top: 0; }
+    .checkout-header { padding: 15px 20px; }
+  }
+  
+  /* TOAST */
+  .toast { visibility: hidden; min-width: 300px; background-color: #2b1719; color: #fff; text-align: center; border-radius: 50px; padding: 16px; position: fixed; z-index: 3000; left: 50%; bottom: 30px; transform: translateX(-50%); font-size: 14px; box-shadow: 0 10px 30px rgba(0,0,0,0.3); opacity: 0; transition: all 0.4s ease; }
+  .toast.show { visibility: visible; opacity: 1; bottom: 50px; }
+</style>
+</head>
+<body>
+
+<div id="toast" class="toast"></div>
+
+<header class="checkout-header">
+  <a href="index.html" class="brand-logo">PressPlay Nails</a>
+  <div class="secure-badge"><i class='bx bxs-lock-alt'></i> Secure Checkout</div>
+</header>
+
+<div class="container">
+  
+  <div class="form-column">
+    
+    <div class="form-section">
+      <div class="section-title">Contact Information</div>
+      <div class="input-group">
+        <input type="email" id="email" placeholder="Email address" required>
+      </div>
+    </div>
+
+    <div class="form-section">
+      <div class="section-title">Shipping Address</div>
+      <div class="input-group">
+        <div class="input-row">
+          <input type="text" id="fName" placeholder="First name" required>
+          <input type="text" id="lName" placeholder="Last name" required>
+        </div>
+      </div>
+      <div class="input-group">
+        <input type="text" id="address" placeholder="Address" required>
+      </div>
+      <div class="input-group">
+        <input type="text" id="apartment" placeholder="Apartment, suite, etc. (optional)">
+      </div>
+      <div class="input-group">
+        <div class="input-row">
+          <select id="city" required>
+            <option value="" disabled selected>Select City</option>
+            <option value="Karachi">Karachi</option>
+            <option value="Lahore">Lahore</option>
+            <option value="Islamabad">Islamabad</option>
+            <option value="Rawalpindi">Rawalpindi</option>
+            <option value="Faisalabad">Faisalabad</option>
+            <option value="Multan">Multan</option>
+            <option value="Peshawar">Peshawar</option>
+            <option value="Quetta">Quetta</option>
+            <option value="Gujranwala">Gujranwala</option>
+            <option value="Sialkot">Sialkot</option>
+            <option value="Hyderabad">Hyderabad</option>
+            <option value="Bahawalpur">Bahawalpur</option>
+            <option value="Sargodha">Sargodha</option>
+            <option value="Abbottabad">Abbottabad</option>
+            <option value="Other">Other</option>
+          </select>
+          <input type="text" id="zip" placeholder="Postal Code" required>
+        </div>
+      </div>
+      <div class="input-group">
+        <input type="text" value="Pakistan" readonly style="background:#f3f4f6; color:#666;">
+      </div>
+    </div>
+
+    <div class="form-section">
+      <div class="section-title">Payment Method</div>
+      <div class="payment-options">
+        
+        <div class="pay-option active" id="opt-card" onclick="selectPayment('card')">
+          <input type="radio" name="payment" value="card" checked>
+          <label>Credit / Debit Card</label>
+          <div class="card-icons">
+            <img src="https://upload.wikimedia.org/wikipedia/commons/4/41/Visa_Logo.png">
+            <img src="https://upload.wikimedia.org/wikipedia/commons/2/2a/Mastercard-logo.svg">
+          </div>
+        </div>
+        
+        <div class="card-details-panel open" id="card-panel">
+          <div class="input-group">
+            <input type="text" placeholder="Card number" maxlength="19" oninput="this.value = this.value.replace(/[^0-9]/g, '')">
+          </div>
+          <div class="input-group">
+            <div class="input-row">
+              <input type="text" placeholder="MM" maxlength="2" style="width:70px; text-align:center;" oninput="this.value = this.value.replace(/[^0-9]/g, '')">
+              <span style="align-self:center; font-weight:bold; color:#ccc;">/</span>
+              <input type="text" placeholder="YY" maxlength="2" style="width:70px; text-align:center;" oninput="this.value = this.value.replace(/[^0-9]/g, '')">
+              
+              <input type="text" placeholder="CVC" maxlength="3" style="flex:1;" oninput="this.value = this.value.replace(/[^0-9]/g, '')">
+            </div>
+          </div>
+          <div class="input-group"><input placeholder="Name on card"></div>
+        </div>
+
+        <div class="pay-option" id="opt-cod" onclick="selectPayment('cod')">
+          <input type="radio" name="payment" value="cod">
+          <label>Cash on Delivery (COD)</label>
+        </div>
+
+      </div>
+    </div>
+
+    <button class="checkout-btn" id="payButton" onclick="handlePayment()">Pay Now</button>
+    <a href="index.html" class="back-link"><i class='bx bx-left-arrow-alt'></i> Return to Store</a>
+  </div>
+
+  <div class="order-summary">
+    <div class="section-title">Order Summary</div>
+    <div id="summaryItems">
+      <p style="color:#888; text-align:center;">Loading cart...</p>
+    </div>
+
+    <div style="margin-top:20px; padding-top:20px; border-top:1px solid #eee;">
+      <div class="cost-row">
+        <span>Subtotal</span>
+        <span id="subtotalPrice">PKR 0</span>
+      </div>
+      <div class="cost-row">
+        <span>Shipping</span>
+        <span style="color:green;">Free</span>
+      </div>
+    </div>
+
+    <div class="total-row">
+      <span>Total <small>PKR</small></span>
+      <span id="totalPrice">PKR 0</span>
+    </div>
+  </div>
+
+</div>
+
+<script type="module">
+  import { db } from "./firebase.js";
+  import { collection, addDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js";
+
+  let cart = JSON.parse(localStorage.getItem("cart")) || [];
+  const payButton = document.getElementById("payButton");
+
+  // --- INITIAL RENDER ---
+  renderSummary();
+
+  // --- RENDER CART ---
+  function renderSummary() {
+    const container = document.getElementById("summaryItems");
+    const subtotalEl = document.getElementById("subtotalPrice");
+    const totalEl = document.getElementById("totalPrice");
+
+    if (cart.length === 0) {
+      container.innerHTML = '<p style="text-align:center; color:#999; padding:20px;">Your cart is empty.</p>';
+      payButton.disabled = true;
+      payButton.innerText = "Cart is Empty";
+      payButton.style.background = "#ccc";
+      return;
+    }
+
+    container.innerHTML = "";
+    let total = 0;
+
+    cart.forEach(item => {
+      const itemTotal = item.price * item.qty;
+      total += itemTotal;
+      
+      const imgUrl = item.image ? item.image : 'https://placehold.co/100x100/E6D8C5/2b1719?text=Nails';
+
+      container.innerHTML += `
+        <div class="cart-item">
+          <div style="position:relative;">
+            <img src="${imgUrl}" class="item-img">
+            <div class="item-qty-badge">${item.qty}</div>
+          </div>
+          <div class="item-info">
+            <div class="item-name">${item.name}</div>
+            <div class="item-meta">Standard Shipping</div>
+          </div>
+          <div class="item-price">PKR ${itemTotal.toLocaleString()}</div>
+        </div>
+      `;
+    });
+
+    subtotalEl.innerText = "PKR " + total.toLocaleString();
+    totalEl.innerText = "PKR " + total.toLocaleString();
+  }
+
+  // --- PAYMENT TOGGLE UI ---
+  window.selectPayment = function(type) {
+    const cardOpt = document.getElementById("opt-card");
+    const codOpt = document.getElementById("opt-cod");
+    const panel = document.getElementById("card-panel");
+    const radioCard = document.querySelector('input[value="card"]');
+    const radioCod = document.querySelector('input[value="cod"]');
+
+    if(type === 'card') {
+      cardOpt.classList.add("active");
+      codOpt.classList.remove("active");
+      panel.classList.add("open");
+      payButton.innerText = "Pay Now";
+      radioCard.checked = true;
+    } else {
+      codOpt.classList.add("active");
+      cardOpt.classList.remove("active");
+      panel.classList.remove("open");
+      payButton.innerText = "Complete Order";
+      radioCod.checked = true;
+    }
+  };
+
+  // --- SUBMIT ORDER ---
+  window.handlePayment = async function() {
+    if (cart.length === 0) return;
+
+    // 1. Validation
+    const email = document.getElementById('email').value.trim();
+    const fName = document.getElementById('fName').value.trim();
+    const lName = document.getElementById('lName').value.trim();
+    const address = document.getElementById('address').value.trim();
+    const city = document.getElementById('city').value; // Value from Dropdown
+    const zip = document.getElementById('zip').value.trim();
+
+    if(!email || !fName || !lName || !address || !city || !zip) {
+      showToast("Please fill in all shipping details.");
+      return;
+    }
+
+    // 2. Button Loading State
+    const originalText = payButton.innerText;
+    payButton.disabled = true;
+    payButton.innerHTML = "<i class='bx bx-loader-alt bx-spin'></i> Processing...";
+
+    try {
+      const selectedPayment = document.querySelector('input[name="payment"]:checked').value;
+      const totalAmount = cart.reduce((sum, item) => sum + (item.price * item.qty), 0);
+
+      const orderData = {
+        customer: {
+          name: `${fName} ${lName}`,
+          email: email,
+          address: address,
+          city: city,
+          zip: zip
+        },
+        items: cart,
+        total: totalAmount,
+        paymentMethod: selectedPayment,
+        status: "Pending",
+        createdAt: serverTimestamp()
+      };
+
+      // 3. Save to Firebase
+      await addDoc(collection(db, "orders"), orderData);
+
+      // 4. Success
+      localStorage.removeItem("cart");
+      showToast("Order Confirmed! Redirecting...");
+      
+      setTimeout(() => {
+        window.location.href = "index.html"; 
+      }, 2000);
+
+    } catch (error) {
+      console.error("Order Error:", error);
+      showToast("Payment failed. Please try again.");
+      payButton.disabled = false;
+      payButton.innerText = originalText;
+    }
+  };
+
+  function showToast(message) {
+    const toast = document.getElementById("toast");
+    toast.textContent = message;
+    toast.className = "toast show";
+    setTimeout(() => { toast.className = toast.className.replace("show", ""); }, 3000);
+  }
+</script>
+
+</body>
+</html>

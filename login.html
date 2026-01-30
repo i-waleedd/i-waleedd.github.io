@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Login | PressPlay Nails</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<link rel="icon" type="image/png" href="favicon.png">
+
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link href="https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css" rel="stylesheet">
+
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Poppins', sans-serif; }
+  body { background: #E6D8C5; min-height: 100vh; display: flex; align-items: center; justify-content: center; }
+  
+  .login-card { width: 100%; max-width: 420px; background: #E6D8C5; padding: 40px; border-radius: 18px; box-shadow: 0 16px 45px rgba(0,0,0,0.15); }
+  .brand { text-align: center; margin-bottom: 6px; font-size: 26px; font-weight: 700; letter-spacing: 1px; }
+  .subtitle { text-align: center; font-size: 14px; color: #555; margin-bottom: 30px; }
+  
+  .field { margin-bottom: 18px; }
+  .field label { display: block; font-size: 13px; font-weight: 500; margin-bottom: 6px; }
+  .field input { width: 100%; padding: 12px 14px; border-radius: 10px; border: 1px solid rgba(0,0,0,0.2); font-size: 14px; outline: none; background: #fff; }
+  .field input:focus { border-color: #ff7e8d; }
+  
+  .action-row { display: flex; justify-content: space-between; align-items: center; font-size: 13px; margin-bottom: 20px; }
+  .action-row a { color: #ff7e8d; text-decoration: none; font-weight: 500; }
+  
+  .login-btn { width: 100%; padding: 14px; background: #ff7e8d; color: #fff; border: none; border-radius: 30px; font-size: 15px; font-weight: 600; cursor: pointer; transition: all 0.3s ease; }
+  .login-btn:hover { transform: translateY(-2px); box-shadow: 0 10px 24px rgba(255,126,141,0.45); }
+  
+  /* GOOGLE BUTTON */
+  .divider { display: flex; align-items: center; margin: 24px 0; color: #666; font-size: 12px; }
+  .divider::before, .divider::after { content: ""; flex: 1; height: 1px; background: #ccc; }
+  .divider span { padding: 0 10px; }
+
+  .google-btn { 
+    width: 100%; padding: 12px; background: #fff; color: #333; 
+    border: 1px solid #ddd; border-radius: 30px; 
+    font-size: 14px; font-weight: 500; cursor: pointer; 
+    display: flex; align-items: center; justify-content: center; gap: 10px;
+    transition: 0.2s;
+  }
+  .google-btn:hover { background: #f9f9f9; border-color: #ccc; }
+  .google-btn img { width: 18px; height: 18px; }
+
+  .error { margin-top: 14px; color: #c0392b; font-size: 13px; display: none; text-align: center; padding: 10px; background: #fceceb; border-radius: 8px; }
+  .footer-text { margin-top: 26px; text-align: center; font-size: 13px; color: #555; }
+  .footer-text a { color: #ff7e8d; font-weight: 600; text-decoration: none; }
+  
+  @media (max-width: 480px) { .login-card { padding: 30px 22px; } }
+</style>
+</head>
+
+<body>
+
+<div class="login-card">
+  <div class="brand">PressPlay Nails</div>
+  <div class="subtitle">Welcome back ✨</div>
+
+  <div class="field">
+    <label>Email</label>
+    <input type="email" id="email" placeholder="you@example.com">
+  </div>
+
+  <div class="field">
+    <label>Password</label>
+    <input type="password" id="password" placeholder="••••••••">
+  </div>
+
+  <div class="action-row">
+    <span></span>
+    <a href="#" onclick="resetPassword()">Forgot password?</a>
+  </div>
+
+  <button class="login-btn" id="loginBtn" onclick="login()">Login</button>
+
+  <div class="divider"><span>OR</span></div>
+
+  <button class="google-btn" onclick="loginWithGoogle()">
+    <img src="https://upload.wikimedia.org/wikipedia/commons/c/c1/Google_%22G%22_logo.svg" alt="Google">
+    Continue with Google
+  </button>
+
+  <div class="error" id="errorMsg"></div>
+
+  <div class="footer-text">
+    New here?
+    <a href="signup.html">Create an account</a>
+  </div>
+</div>
+
+<script type="module">
+import { auth, db } from "./firebase.js";
+import { 
+  signInWithEmailAndPassword, 
+  sendPasswordResetEmail, 
+  GoogleAuthProvider, 
+  signInWithPopup 
+} from "https://www.gstatic.com/firebasejs/9.23.0/firebase-auth.js";
+import { doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js";
+
+// --- HELPER: SHOW ERROR ---
+function showError(msg) {
+  const el = document.getElementById("errorMsg");
+  el.textContent = msg;
+  el.style.display = "block";
+  setTimeout(() => el.style.display = "none", 4000);
+}
+
+// --- EMAIL LOGIN ---
+window.login = async function() {
+  const email = document.getElementById("email").value.trim();
+  const password = document.getElementById("password").value.trim();
+  const btn = document.getElementById("loginBtn");
+
+  if (!email || !password) {
+    showError("Please fill in all fields");
+    return;
+  }
+
+  btn.textContent = "Logging in...";
+  btn.disabled = true;
+
+  try {
+    const userCredential = await signInWithEmailAndPassword(auth, email, password);
+    const user = userCredential.user;
+    await checkAdminAndRedirect(user);
+  } catch (error) {
+    let msg = error.message;
+    if(msg.includes("invalid-credential")) msg = "Incorrect email or password.";
+    showError(msg);
+    btn.textContent = "Login";
+    btn.disabled = false;
+  }
+};
+
+// --- GOOGLE LOGIN ---
+window.loginWithGoogle = async function() {
+  const provider = new GoogleAuthProvider();
+  
+  try {
+    const result = await signInWithPopup(auth, provider);
+    const user = result.user;
+    
+    // Check if new user -> save to DB (Optional for future use)
+    // await setDoc(doc(db, "users", user.uid), { email: user.email, name: user.displayName }, { merge: true });
+
+    await checkAdminAndRedirect(user);
+  } catch (error) {
+    showError(error.message);
+  }
+};
+
+// --- REDIRECT LOGIC ---
+async function checkAdminAndRedirect(user) {
+  try {
+    // 1. Check strict Admin List
+    // If you want to use the database check:
+    // const adminSnap = await getDoc(doc(db, "admin", user.uid));
+    // if (adminSnap.exists()) { ... }
+
+    // 2. Simple Email Check (More robust for now)
+    if (user.email === "workwithwaleed1@gmail.com") {
+      window.location.href = "admin.html";
+    } else {
+      window.location.href = "index.html";
+    }
+  } catch (e) {
+    window.location.href = "index.html";
+  }
+}
+
+// --- RESET PASSWORD ---
+window.resetPassword = function() {
+  const email = document.getElementById("email").value.trim();
+  if (!email) {
+    showError("Please enter your email address first");
+    return;
+  }
+  sendPasswordResetEmail(auth, email)
+    .then(() => alert("Password reset link sent to your email!"))
+    .catch(err => showError(err.message));
+};
+</script>
+
+</body>
+</html>
