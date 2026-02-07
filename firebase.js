@@ -1,6 +1,6 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js";
 import { getAuth } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-auth.js";
-import { getFirestore } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js";
+import { getFirestore, enableIndexedDbPersistence } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js";
 import { getAnalytics } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-analytics.js";
 
 const firebaseConfig = {
@@ -13,7 +13,20 @@ const firebaseConfig = {
   measurementId: "G-V6V3MTGPHF"
 };
 
+// 1. Initialize App
 const app = initializeApp(firebaseConfig);
+
+// 2. Export Services
 export const auth = getAuth(app);
 export const db = getFirestore(app);
 export const analytics = getAnalytics(app);
+
+// 3. Enable Offline Persistence (Professional Speed Upgrade)
+// This makes the website load instantly for returning users even on slow internet.
+enableIndexedDbPersistence(db).catch((err) => {
+  if (err.code == 'failed-precondition') {
+      console.log("Offline persistence failed: Multiple tabs open.");
+  } else if (err.code == 'unimplemented') {
+      console.log("Offline persistence not supported by this browser.");
+  }
+});
