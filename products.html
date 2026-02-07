@@ -18,6 +18,7 @@
       --text: #2b1719;
       --white: #ffffff;
       --footer-bg: #1a1a1a;
+      --offwhite: rgba(255,255,255,0.92);
     }
 
     * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -132,7 +133,7 @@
       flex-shrink: 0;
     }
 
-    /* Shopify-like Cart Icon */
+    /* Shopify cart icon (changed from bag) */
     .cart-icon {
       position: relative;
       cursor: pointer;
@@ -144,6 +145,7 @@
       color: var(--text);
     }
     .cart-icon svg { width: 24px; height: 24px; }
+
     .cart-icon span {
       position: absolute;
       top: -6px;
@@ -157,6 +159,22 @@
       min-width: 16px;
       text-align: center;
       line-height: 1.2;
+      transform-origin: center;
+    }
+
+    /* ✅ VIBRATION effect when cart has items (every 2 sec) */
+    .cart-icon span.vibrate {
+      animation: cartVibe 2s infinite;
+    }
+    @keyframes cartVibe {
+      0%, 82% { transform: translate(0,0) rotate(0deg); }
+      84% { transform: translate(-1px, 0) rotate(-2deg); }
+      86% { transform: translate(1px, 0) rotate(2deg); }
+      88% { transform: translate(-1px, 0) rotate(-2deg); }
+      90% { transform: translate(1px, 0) rotate(2deg); }
+      92% { transform: translate(-1px, 0) rotate(-2deg); }
+      94% { transform: translate(1px, 0) rotate(2deg); }
+      96%, 100% { transform: translate(0,0) rotate(0deg); }
     }
 
     /* Login button (only shown when logged out) */
@@ -319,27 +337,39 @@
       color: rgba(43, 23, 25, 0.75);
       font-weight: 700;
     }
+    /* ✅ stars + rating in theme pink */
     .product-rating .stars {
-      color: #f4b400;
+      color: var(--primary);
       font-size: 14px;
       letter-spacing: 1px;
     }
+    .product-rating .score {
+      color: var(--primary);
+      font-weight: 800;
+    }
 
+    /* ✅ Add to cart button: pink, off-white text, hover dark + zoom */
     .add-btn {
       width: 100%;
-      padding: 8px;
-      background: transparent;
-      border: 1px solid var(--primary);
-      color: var(--primary);
-      font-weight: 700;
-      border-radius: 6px;
+      padding: 10px 10px;
+      background: var(--primary);
+      border: 1px solid transparent;
+      color: var(--offwhite);          /* ✅ off-white */
+      font-weight: 800;
+      border-radius: 10px;
       cursor: pointer;
-      transition: all 0.2s;
+      transition: transform 0.18s ease, background 0.18s ease, box-shadow 0.18s ease;
       font-size: 12px;
       text-transform: uppercase;
-      letter-spacing: 0.5px;
+      letter-spacing: 0.6px;
+      box-shadow: 0 10px 18px rgba(255,126,141,0.22);
     }
-    .add-btn:hover { background: var(--primary); color: var(--white); }
+    .add-btn:hover {
+      background: var(--primary-hover);
+      transform: scale(1.03);
+      box-shadow: 0 14px 24px rgba(255,126,141,0.28);
+    }
+    .add-btn:active { transform: scale(0.99); }
 
     /* ================= FOOTER ================= */
     footer {
@@ -485,7 +515,7 @@
       opacity: 0;
       transition: all 220ms ease;
     }
-    .preview-overlay.show .preview-popup { transform: translateY(0); opacity: 1; } /* ✅ clean animation */
+    .preview-overlay.show .preview-popup { transform: translateY(0); opacity: 1; }
 
     .preview-close {
       position: absolute;
@@ -571,10 +601,11 @@
       font-weight: 800;
     }
     .preview-rating .stars {
-      color: #f4b400;
+      color: var(--primary); /* ✅ pink */
       letter-spacing: 1px;
       font-size: 15px;
     }
+    .preview-rating .score { color: var(--primary); }
 
     .preview-price {
       font-size: 18px;
@@ -642,21 +673,19 @@
     }
 
     @media (max-width: 900px) {
-      /* ✅ Promo + header safer on small screens */
       .promo-bar { font-size: 10px; }
       header { height: 60px; padding: 0 12px; }
       header h1 { font-size: 18px; }
 
       .menu-toggle { display: flex; }
 
-      /* ✅ Mobile side menu (short height, half-ish width, skin) */
       .nav-links {
         position: fixed;
-        top: 58px;                /* below promo+header roughly */
+        top: 58px;
         left: -100%;
-        width: min(78vw, 330px);   /* ✅ not full width */
-        height: auto;             /* ✅ ends where last item ends */
-        background: var(--bg);     /* ✅ skin */
+        width: min(78vw, 330px);
+        height: auto;
+        background: var(--bg);
         flex-direction: column;
         align-items: stretch;
         padding: 14px 16px;
@@ -680,7 +709,6 @@
       }
       .nav-links a:last-child { border-bottom: none; }
 
-      /* Mobile Grid */
       .products {
         grid-template-columns: repeat(2, 1fr);
         gap: 12px;
@@ -689,15 +717,11 @@
       .product-info { padding: 10px; }
       .product-info h4 { font-size: 13px; }
       .price { font-size: 13px; }
-      .add-btn { padding: 8px; font-size: 11px; }
+      .add-btn { padding: 10px; font-size: 11px; border-radius: 10px; }
 
-      /* Popup becomes stacked on small screens */
-      .preview-popup {
-        grid-template-columns: 1fr;
-      }
+      .preview-popup { grid-template-columns: 1fr; }
       .preview-img-wrap { min-height: 240px; }
 
-      /* ✅ Footer shorter on mobile/tablet */
       footer { padding: 22px 5% 14px; }
       .footer-grid {
         grid-template-columns: 1fr;
@@ -767,11 +791,13 @@
       </svg>
     </div>
 
-    <!-- ✅ Shopify-like bag -->
+    <!-- ✅ Shopify cart icon (not bag) -->
     <div class="cart-icon" onclick="toggleCart()" aria-label="Cart">
+      <!-- Shopify-style cart -->
       <svg viewBox="0 0 24 24" fill="none">
-        <path d="M7 8V7a5 5 0 0 1 10 0v1" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
-        <path d="M6.5 8h11l1.2 13.2a1.8 1.8 0 0 1-1.79 2H7.09A1.8 1.8 0 0 1 5.3 21.2L6.5 8Z" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/>
+        <path d="M3 5h2l1.1 11.2a2 2 0 0 0 2 1.8h9.7a2 2 0 0 0 2-1.7L22 8H6.2" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+        <path d="M9 21a1 1 0 1 0 0-2 1 1 0 0 0 0 2Z" fill="currentColor"/>
+        <path d="M17 21a1 1 0 1 0 0-2 1 1 0 0 0 0 2Z" fill="currentColor"/>
       </svg>
       <span id="cart-count">0</span>
     </div>
@@ -794,7 +820,7 @@
 <div class="cart-overlay" id="cartOverlay" onclick="toggleCart()"></div>
 <div class="cart-dropdown" id="cartDropdown">
   <div class="cart-header">
-    <h4>Your Bag</h4>
+    <h4>Your Cart</h4>
     <span class="close-cart" onclick="toggleCart()"><i class='bx bx-x'></i></span>
   </div>
   <div id="cartItems"></div>
@@ -879,7 +905,7 @@
       <div class="preview-meta">
         <div class="preview-rating">
           <span class="stars" id="previewStars">☆☆☆☆☆</span>
-          <span id="previewRatingText">0.0 (0)</span>
+          <span class="score" id="previewRatingText">0.0 (0)</span>
         </div>
 
         <div id="previewPrice" class="preview-price">PKR 0</div>
@@ -904,7 +930,6 @@
   import { auth } from "./firebase.js";
   import { onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-auth.js";
 
-  // ✅ Auth UI (Login button vs Person icon + dropdown)
   document.addEventListener("DOMContentLoaded", () => {
     const loginBtn = document.getElementById("loginBtn");
     const userBtn = document.getElementById("userBtn");
@@ -939,7 +964,6 @@
         loginBtn.style.display = "none";
         userBtn.style.display = "inline-flex";
 
-        // Admin only in dropdown
         if (user.email === "workwithwaleed1@gmail.com") {
           ddAdmin.style.display = "flex";
         } else {
@@ -961,7 +985,6 @@
 
   const container = document.getElementById("productsContainer");
 
-  // popup refs
   const overlay = document.getElementById("previewOverlay");
   const closeBtn = document.getElementById("previewClose");
   const prevBtn = document.getElementById("previewPrev");
@@ -982,7 +1005,6 @@
   let PRODUCTS = [];
   let previewImages = [];
   let previewIndex = 0;
-  let previewProduct = null;
 
   function escapeHtml(str) {
     return String(str || "")
@@ -996,21 +1018,18 @@
   function renderStars(rating) {
     const r = Math.max(0, Math.min(5, Number(rating || 0)));
     const full = Math.floor(r);
-    const half = (r - full) >= 0.5 ? 1 : 0;
-    const empty = 5 - full - half;
-    return "★".repeat(full) + (half ? "✦" : "") + "☆".repeat(empty);
+    const empty = 5 - full;
+    return "★".repeat(full) + "☆".repeat(empty);
   }
 
   function openPreviewById(productId) {
     const p = PRODUCTS.find(x => x.id === productId);
     if (!p) return;
 
-    previewProduct = p;
-    previewImages = Array.isArray(p.images) && p.images.length ? p.images : [p.image || ""].filter(Boolean);
-    if (!previewImages.length) previewImages = ["https://placehold.co/600x600/E6D8C5/2b1719?text=PressPlay+Nails"];
+    const imgs = Array.isArray(p.images) && p.images.length ? p.images : [p.image || ""].filter(Boolean);
+    previewImages = imgs.length ? imgs : ["https://placehold.co/600x600/E6D8C5/2b1719?text=PressPlay+Nails"];
     previewIndex = 0;
 
-    // content
     titleEl.textContent = p.name || "Product";
     const finalPrice = p.salePrice && parseFloat(p.salePrice) < parseFloat(p.price) ? p.salePrice : p.price;
     priceEl.textContent = "PKR " + Number(finalPrice || 0).toLocaleString();
@@ -1026,22 +1045,19 @@
     sizesEl.textContent = sizes || "—";
     shapesEl.textContent = shapes || "—";
 
-    // image
     imgEl.src = previewImages[previewIndex];
 
-    // show/hide arrows if single image
     const showArrows = previewImages.length > 1;
     prevBtn.style.display = showArrows ? "flex" : "none";
     nextBtn.style.display = showArrows ? "flex" : "none";
 
-    // buttons
     addBtn.onclick = () => {
       window.addToCart(p.name, Number(finalPrice || 0), (previewImages[0] || ""));
       showToast(`${p.name} added to cart!`);
       closePreview();
+      window.toggleCart(true); // ✅ auto-open cart
     };
     viewBtn.onclick = () => {
-      // ✅ open product detail page
       window.location.href = `product.html?id=${encodeURIComponent(p.id)}`;
     };
 
@@ -1061,13 +1077,10 @@
   }
 
   closeBtn.addEventListener("click", closePreview);
-  overlay.addEventListener("click", (e) => {
-    if (e.target === overlay) closePreview();
-  });
+  overlay.addEventListener("click", (e) => { if (e.target === overlay) closePreview(); });
   prevBtn.addEventListener("click", () => changePreviewImage(-1));
   nextBtn.addEventListener("click", () => changePreviewImage(1));
 
-  // Hold/hover timers
   let hoverTimer = null;
   let pressTimer = null;
   let pressed = false;
@@ -1119,27 +1132,25 @@
             <div class="price">${priceDisplay}</div>
             <div class="product-rating">
               <span class="stars">${renderStars(ratingVal)}</span>
-              <span>${ratingVal ? ratingVal.toFixed(1) : "0.0"} (${ratingCount})</span>
+              <span class="score">${ratingVal ? ratingVal.toFixed(1) : "0.0"} (${ratingCount})</span>
             </div>
             <button class="add-btn"
               data-add="1"
               data-name="${escapeHtml(p.name || '')}"
               data-price="${Number(finalPrice || 0)}"
               data-image="${imageSrc}">
-              Add to Cart
+              ADD TO CART
             </button>
           </div>
         </div>
       `;
     });
 
-    // Events
     container.querySelectorAll(".product-card").forEach(card => {
       const pid = card.getAttribute("data-product-id");
       const img = card.querySelector("img");
       const add = card.querySelector(".add-btn");
 
-      // Add-to-cart (prevent card click)
       add.addEventListener("click", (e) => {
         e.preventDefault();
         e.stopPropagation();
@@ -1148,33 +1159,28 @@
         const image = add.getAttribute("data-image") || "";
         window.addToCart(name, price, image);
         showToast(`${name} added to cart!`);
+        window.toggleCart(true); // ✅ auto-open cart
       });
 
-      // Desktop: hover 2s opens preview
       card.addEventListener("mouseenter", () => {
         clearTimers();
         hoverTimer = setTimeout(() => openPreviewById(pid), 2000);
       });
       card.addEventListener("mouseleave", () => clearTimers());
 
-      // Mobile: long press 2s opens preview
       card.addEventListener("touchstart", () => {
         clearTimers();
         pressed = true;
-        pressTimer = setTimeout(() => {
-          if (pressed) openPreviewById(pid);
-        }, 2000);
+        pressTimer = setTimeout(() => { if (pressed) openPreviewById(pid); }, 2000);
       }, { passive: true });
 
       card.addEventListener("touchend", () => clearTimers());
       card.addEventListener("touchcancel", () => clearTimers());
 
-      // Click opens product detail page
       card.addEventListener("click", () => {
         window.location.href = `product.html?id=${encodeURIComponent(pid)}`;
       });
 
-      // Fix broken images
       img.addEventListener("error", () => {
         img.src = 'https://placehold.co/300x300/E6D8C5/2b1719?text=PressPlay+Nails';
         img.alt = 'Image unavailable';
@@ -1186,7 +1192,6 @@
 </script>
 
 <script>
-  // ✅ Toast
   function showToast(message) {
     const toast = document.getElementById("toast");
     toast.textContent = message;
@@ -1194,7 +1199,6 @@
     setTimeout(() => { toast.className = toast.className.replace("show", ""); }, 3000);
   }
 
-  // ✅ Global cart (kept same behavior)
   let cart = JSON.parse(localStorage.getItem("cart")) || [];
   updateCartCount();
 
@@ -1210,7 +1214,10 @@
   function updateCartCount() {
     const count = cart.reduce((sum, item) => sum + item.qty, 0);
     const el = document.getElementById("cart-count");
-    if (el) el.textContent = count;
+    if (el) {
+      el.textContent = count;
+      el.classList.toggle("vibrate", count > 0); // ✅ vibration effect on/off
+    }
   }
 
   function renderCart() {
@@ -1220,7 +1227,7 @@
     let total = 0;
 
     if (cart.length === 0) {
-      itemsDiv.innerHTML = "<p style='text-align:center; color:#888; margin-top:20px;'>Your bag is empty.</p>";
+      itemsDiv.innerHTML = "<p style='text-align:center; color:#888; margin-top:20px;'>Your cart is empty.</p>";
     }
 
     cart.forEach((item, index) => {
@@ -1247,15 +1254,18 @@
     renderCart();
   }
 
-  window.toggleCart = function() {
+  // ✅ if open=true passed, force open
+  window.toggleCart = function(open) {
     const dropdown = document.getElementById("cartDropdown");
     const overlay = document.getElementById("cartOverlay");
-    dropdown.classList.toggle("show");
-    overlay.classList.toggle("show");
+
+    const shouldOpen = (open === true) ? true : !dropdown.classList.contains("show");
+
+    dropdown.classList.toggle("show", shouldOpen);
+    overlay.classList.toggle("show", shouldOpen);
     renderCart();
   }
 
-  // ✅ Mobile menu toggle
   const nav = document.getElementById("navLinks");
   const menuOverlay = document.getElementById("menuOverlay");
   const menuToggle = document.getElementById("menuToggle");
@@ -1273,12 +1283,10 @@
   menuToggle.addEventListener("click", toggleMenu);
   menuOverlay.addEventListener("click", closeMenu);
 
-  // close menu when clicking a link (mobile)
   nav.querySelectorAll("a").forEach(a => {
     a.addEventListener("click", () => closeMenu());
   });
 
-  // close on ESC
   document.addEventListener("keydown", (e) => {
     if (e.key === "Escape") closeMenu();
   });
