@@ -117,12 +117,14 @@
       top: 0; left: 0;
       width: 100%; height: 100%;
       background: rgba(0,0,0,0.35);
-      z-index: 1999;
+      /* ✅ FIX: keep overlay BELOW the mobile menu so links are clickable */
+      z-index: 1000;
       opacity: 0;
       visibility: hidden;
+      pointer-events: none;
       transition: 0.25s;
     }
-    .menu-overlay.active { opacity: 1; visibility: visible; }
+    .menu-overlay.active { opacity: 1; visibility: visible; pointer-events: auto; }
 
     /* Actions */
     .header-actions {
@@ -413,6 +415,7 @@
     }
     .toast.show { visibility: visible; opacity: 1; bottom: 40px; }
 
+    /* ================= CART (Improved) ================= */
     .cart-dropdown {
       position: fixed;
       top: 0;
@@ -422,14 +425,16 @@
       background: var(--white);
       border-left: 1px solid #eee;
       box-shadow: -10px 0 30px rgba(0,0,0,0.1);
-      display: block;
       z-index: 2000;
-      padding: 25px;
+      padding: 22px;
       overflow-y: auto;
       transform: translateX(100%);
-      transition: transform 0.4s ease;
+      transition: transform 0.35s ease;
+      display: flex;
+      flex-direction: column;
     }
     .cart-dropdown.show { transform: translateX(0); }
+
     .cart-overlay {
       position: fixed;
       inset: 0;
@@ -439,11 +444,128 @@
     }
     .cart-overlay.show { display: block; }
 
-    .cart-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; border-bottom: 1px solid #eee; padding-bottom: 15px; }
-    .cart-item { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; font-size: 13px; }
-    .cart-controls button { width: 22px; height: 22px; border: 1px solid #ddd; background: #fff; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; }
-    .cart-total { font-weight: 700; margin-top: 30px; text-align: right; font-size: 18px; border-top: 1px solid #eee; padding-top: 20px; }
-    .checkout-btn { width: 100%; margin-top: 20px; padding: 15px; background: var(--primary); border: none; color: var(--white); border-radius: 8px; font-weight: 600; cursor: pointer; font-size: 15px; }
+    .cart-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 14px;
+      border-bottom: 1px solid #eee;
+      padding-bottom: 12px;
+    }
+    .cart-header h4 { font-size: 16px; font-weight: 800; }
+    .close-cart { cursor: pointer; display: inline-flex; align-items: center; justify-content: center; }
+    .close-cart i { font-size: 24px; }
+
+    #cartItems { flex: 1; padding-top: 8px; }
+
+    .cart-empty {
+      text-align: center;
+      color: #888;
+      margin-top: 20px;
+      font-size: 13px;
+      font-weight: 600;
+    }
+
+    .cart-item {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+      padding: 10px 0;
+      border-bottom: 1px solid rgba(0,0,0,0.06);
+    }
+    .cart-item:last-child { border-bottom: none; }
+
+    .cart-thumb {
+      width: 46px;
+      height: 46px;
+      border-radius: 10px;
+      object-fit: cover;
+      border: 1px solid rgba(0,0,0,0.10);
+      flex-shrink: 0;
+      background: #fafafa;
+    }
+
+    .cart-meta {
+      flex: 1;
+      min-width: 0;
+    }
+    .cart-name {
+      font-weight: 800;
+      font-size: 13px;
+      color: #2b1719;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .cart-sub {
+      margin-top: 3px;
+      font-size: 11px;
+      color: rgba(43,23,25,0.65);
+      font-weight: 700;
+    }
+
+    .cart-right {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-end;
+      gap: 8px;
+      flex-shrink: 0;
+    }
+    .cart-price {
+      font-weight: 900;
+      font-size: 13px;
+      white-space: nowrap;
+    }
+
+    .cart-controls {
+      display: inline-flex;
+      gap: 8px;
+      align-items: center;
+    }
+    .cart-controls button {
+      width: 32px;
+      height: 32px;
+      border: 1px solid rgba(0,0,0,0.12);
+      background: #fff;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 10px;
+      font-size: 16px;
+      font-weight: 900;
+      transition: 0.2s;
+    }
+    .cart-controls button:hover { background: rgba(0,0,0,0.03); }
+    .cart-controls button:active { transform: scale(0.98); }
+
+    .cart-total {
+      font-weight: 900;
+      margin-top: 16px;
+      text-align: right;
+      font-size: 18px;
+      border-top: 1px solid #eee;
+      padding-top: 14px;
+    }
+
+    .checkout-btn {
+      width: 100%;
+      margin-top: 14px;
+      padding: 14px;
+      background: var(--primary);
+      border: none;
+      color: var(--white);
+      border-radius: 12px;
+      font-weight: 800;
+      cursor: pointer;
+      font-size: 14px;
+      letter-spacing: 0.3px;
+      box-shadow: 0 12px 22px rgba(255,126,141,0.22);
+    }
+    .checkout-btn:hover { background: var(--primary-hover); }
+
+    /* Prevent background scrolling when overlays open */
+    body.no-scroll { overflow: hidden; }
 
     /* ================= SPINNER ================= */
     .spinner-container {
@@ -683,6 +805,7 @@
         font-weight: 700;
         text-transform: none;
         letter-spacing: 0.2px;
+        display: block; /* ✅ helps ensure taps/clicks always register */
       }
       .nav-links a:last-child { border-bottom: none; }
 
@@ -725,7 +848,8 @@
     }
 
     @media (max-width: 480px) {
-      .cart-dropdown { width: 100%; }
+      .cart-dropdown { width: 100%; padding: 18px; }
+      .cart-controls button { width: 36px; height: 36px; }
     }
   </style>
 </head>
@@ -1179,20 +1303,17 @@
     setTimeout(() => { toast.className = toast.className.replace("show", ""); }, 3000);
   }
 
+  // ========= CART (Fixed + Better UI) =========
   let cart = JSON.parse(localStorage.getItem("cart")) || [];
-  updateCartCount();
 
-  window.addToCart = function(name, price, image = "") {
-    const existing = cart.find(item => item.name === name);
-    if (existing) { existing.qty++; }
-    else { cart.push({ name, price, image, qty: 1 }); }
-    localStorage.setItem("cart", JSON.stringify(cart));
-    updateCartCount();
-    renderCart();
+  function safeImg(url) {
+    return (url && String(url).trim().length)
+      ? url
+      : "https://placehold.co/100x100/f3f4f6/9ca3af?text=No+Img";
   }
 
   function updateCartCount() {
-    const count = cart.reduce((sum, item) => sum + item.qty, 0);
+    const count = cart.reduce((sum, item) => sum + (item.qty || 0), 0);
     const el = document.getElementById("cart-count");
     if (el) {
       el.textContent = count;
@@ -1203,35 +1324,70 @@
   function renderCart() {
     const itemsDiv = document.getElementById("cartItems");
     const totalDiv = document.getElementById("cartTotal");
+    if (!itemsDiv || !totalDiv) return;
+
     itemsDiv.innerHTML = "";
     let total = 0;
 
-    if (cart.length === 0) {
-      itemsDiv.innerHTML = "<p style='text-align:center; color:#888; margin-top:20px;'>Your cart is empty.</p>";
+    if (!cart.length) {
+      itemsDiv.innerHTML = `<div class="cart-empty">Your cart is empty.</div>`;
+      totalDiv.innerText = "PKR 0";
+      return;
     }
 
     cart.forEach((item, index) => {
-      total += item.price * item.qty;
+      const qty = Number(item.qty || 0);
+      const price = Number(item.price || 0);
+      const line = price * qty;
+      total += line;
+
       itemsDiv.innerHTML += `
         <div class="cart-item">
-          <span>${item.name} <small>x${item.qty}</small></span>
-          <div class="cart-controls">
-            <button onclick="changeQty(${index}, -1)">−</button>
-            <button onclick="changeQty(${index}, 1)">+</button>
+          <img class="cart-thumb" src="${safeImg(item.image)}" alt="Item" onerror="this.src='https://placehold.co/100x100/f3f4f6/9ca3af?text=No+Img'">
+          <div class="cart-meta">
+            <div class="cart-name">${item.name || "Item"}</div>
+            <div class="cart-sub">Qty: ${qty}</div>
           </div>
-          <strong>PKR ${(item.price * item.qty).toLocaleString()}</strong>
+          <div class="cart-right">
+            <div class="cart-price">PKR ${line.toLocaleString()}</div>
+            <div class="cart-controls">
+              <button type="button" aria-label="Decrease quantity" onclick="changeQty(${index}, -1)">−</button>
+              <button type="button" aria-label="Increase quantity" onclick="changeQty(${index}, 1)">+</button>
+            </div>
+          </div>
         </div>
       `;
     });
+
     totalDiv.innerText = "PKR " + total.toLocaleString();
   }
 
-  window.changeQty = function(index, change) {
-    cart[index].qty += change;
-    if (cart[index].qty <= 0) cart.splice(index, 1);
+  window.addToCart = function(name, price, image = "") {
+    const existing = cart.find(item => item.name === name);
+    if (existing) existing.qty = (existing.qty || 0) + 1;
+    else cart.push({ name, price: Number(price || 0), image, qty: 1 });
+
     localStorage.setItem("cart", JSON.stringify(cart));
     updateCartCount();
     renderCart();
+  };
+
+  window.changeQty = function(index, change) {
+    if (!cart[index]) return;
+    cart[index].qty = Number(cart[index].qty || 0) + Number(change || 0);
+    if (cart[index].qty <= 0) cart.splice(index, 1);
+
+    localStorage.setItem("cart", JSON.stringify(cart));
+    updateCartCount();
+    renderCart();
+  };
+
+  function closeCart() {
+    const dropdown = document.getElementById("cartDropdown");
+    const overlay = document.getElementById("cartOverlay");
+    dropdown.classList.remove("show");
+    overlay.classList.remove("show");
+    document.body.classList.remove("no-scroll");
   }
 
   // if open=true passed, force open
@@ -1239,37 +1395,80 @@
     const dropdown = document.getElementById("cartDropdown");
     const overlay = document.getElementById("cartOverlay");
 
-    const shouldOpen = (open === true) ? true : !dropdown.classList.contains("show");
+    // ✅ if menu is open, close it first
+    closeMenu();
+
+    const isOpen = dropdown.classList.contains("show");
+    const shouldOpen = (open === true) ? true : !isOpen;
 
     dropdown.classList.toggle("show", shouldOpen);
     overlay.classList.toggle("show", shouldOpen);
-    renderCart();
-  }
+    document.body.classList.toggle("no-scroll", shouldOpen);
 
+    renderCart();
+  };
+
+  // Sync cart across tabs/windows
+  window.addEventListener("storage", (e) => {
+    if (e.key === "cart") {
+      cart = JSON.parse(localStorage.getItem("cart")) || [];
+      updateCartCount();
+      renderCart();
+    }
+  });
+
+  // Close cart with ESC
+  document.addEventListener("keydown", (e) => {
+    if (e.key === "Escape") closeCart();
+  });
+
+  // ========= MOBILE MENU (Workable) =========
   const nav = document.getElementById("navLinks");
   const menuOverlay = document.getElementById("menuOverlay");
   const menuToggle = document.getElementById("menuToggle");
 
   function closeMenu() {
+    if (!nav || !menuOverlay) return;
     nav.classList.remove("active");
     menuOverlay.classList.remove("active");
+
+    // Only unlock scroll if cart is not open
+    const cartOpen = document.getElementById("cartDropdown")?.classList.contains("show");
+    if (!cartOpen) document.body.classList.remove("no-scroll");
+  }
+
+  function openMenu() {
+    // ✅ if cart is open, close it
+    closeCart();
+
+    nav.classList.add("active");
+    menuOverlay.classList.add("active");
+    document.body.classList.add("no-scroll");
   }
 
   function toggleMenu() {
-    nav.classList.toggle("active");
-    menuOverlay.classList.toggle("active");
+    const isOpen = nav.classList.contains("active");
+    if (isOpen) closeMenu();
+    else openMenu();
   }
 
-  menuToggle.addEventListener("click", toggleMenu);
-  menuOverlay.addEventListener("click", closeMenu);
+  if (menuToggle) menuToggle.addEventListener("click", toggleMenu);
+  if (menuOverlay) menuOverlay.addEventListener("click", closeMenu);
 
-  nav.querySelectorAll("a").forEach(a => {
-    a.addEventListener("click", () => closeMenu());
-  });
+  if (nav) {
+    nav.querySelectorAll("a").forEach(a => {
+      a.addEventListener("click", () => closeMenu());
+    });
+  }
 
+  // Close menu with ESC
   document.addEventListener("keydown", (e) => {
     if (e.key === "Escape") closeMenu();
   });
+
+  // ========= INIT =========
+  updateCartCount();
+  renderCart();
 </script>
 
 </body>
