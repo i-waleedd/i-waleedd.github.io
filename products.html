@@ -14,7 +14,7 @@
     :root {
       --primary: #ff7e8d;
       --primary-hover: #ff6b7d;
-      --bg: #E6D8C5;            /* ✅ Skin theme color */
+      --bg: #ffffff;            /* ✅ White theme background */
       --text: #2b1719;
       --white: #ffffff;
       --footer-bg: #1a1a1a;
@@ -208,7 +208,7 @@
       position: absolute;
       right: 5%;
       top: calc(36px + 70px - 6px);
-      background: var(--bg); /* ✅ skin */
+      background: var(--bg); /* ✅ white */
       border: 1px solid rgba(0,0,0,0.12);
       border-radius: 14px;
       box-shadow: 0 10px 30px rgba(0,0,0,0.12);
@@ -256,11 +256,12 @@
       flex: 1;
     }
 
-    /* ✅ card is skin + image zoom on hover */
+    /* ✅ card is white + pink outline + image zoom on hover */
     .product-card {
       border-radius: 12px;
       overflow: hidden;
-      background: var(--bg); /* ✅ skin */
+      background: var(--bg); /* ✅ white */
+      border: 1.5px solid rgba(255,126,141,0.75); /* ✅ pink outline */
       box-shadow: 0 4px 15px rgba(0,0,0,0.05);
       position: relative;
       transition: transform 0.3s ease, box-shadow 0.3s ease;
@@ -304,6 +305,7 @@
       display: flex;
       flex-direction: column;
       gap: 6px;
+      background: var(--bg); /* ✅ white box part */
     }
 
     .product-info h4 {
@@ -503,8 +505,8 @@
 
     .preview-popup {
       width: min(920px, 96vw);
-      background: var(--bg); /* ✅ skin */
-      border: 1px solid rgba(0,0,0,0.12);
+      background: var(--bg); /* ✅ white */
+      border: 1px solid rgba(255,126,141,0.55); /* ✅ pink outline */
       border-radius: 18px;
       box-shadow: 0 18px 60px rgba(0,0,0,0.25);
       overflow: hidden;
