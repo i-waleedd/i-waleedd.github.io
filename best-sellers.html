@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+<!DOCTYPE html> 
 <html lang="en">
 <head>
   <meta charset="UTF-8">
@@ -19,6 +19,9 @@
       --white: #ffffff;
       --footer-bg: #1a1a1a;
       --offwhite: rgba(255,255,255,0.92);
+
+      /* ✅ slight difference between page bg and product box bg */
+      --card-bg: #fbfbfc;
     }
 
     * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -255,20 +258,28 @@
       flex: 1;
     }
 
-    /* match products.html card style */
+    /* ✅ wrapper so button sits OUTSIDE the product box but stays under it */
+    .product-wrap{
+      display:flex;
+      flex-direction:column;
+      gap: 10px;
+    }
+
+    /* ✅ match index/products behavior */
     .product-card {
       border-radius: 12px;
       overflow: hidden;
-      background: var(--bg);
-      border: 1.5px solid rgba(255,126,141,0.75);
+      background: var(--card-bg);
+      border: 1.5px solid transparent; /* ✅ no border by default */
       box-shadow: 0 4px 15px rgba(0,0,0,0.05);
       position: relative;
-      transition: transform 0.3s ease, box-shadow 0.3s ease;
+      transition: transform 0.3s ease, box-shadow 0.3s ease, border-color 0.25s ease;
       cursor: pointer;
     }
     .product-card:hover {
       transform: translateY(-5px);
       box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+      border-color: rgba(255,126,141,0.75); /* ✅ show border on hover only */
     }
 
     .product-card img {
@@ -298,12 +309,12 @@
     .badge.sale { background: #d32f2f; }
 
     .product-info {
-      padding: 15px;
+      padding: 10px 12px; /* ✅ less white part */
       text-align: center;
       display: flex;
       flex-direction: column;
       gap: 6px;
-      background: var(--bg);
+      background: var(--card-bg);
     }
 
     .product-info h4 {
@@ -814,7 +825,7 @@
         gap: 12px;
         padding: 0 12px 60px;
       }
-      .product-info { padding: 10px; }
+      .product-info { padding: 8px 10px; } /* ✅ less white part on mobile too */
       .product-info h4 { font-size: 13px; }
       .price { font-size: 13px; }
       .add-btn { padding: 10px; font-size: 11px; border-radius: 10px; }
@@ -1005,7 +1016,7 @@
       <div class="preview-meta">
         <div class="preview-rating">
           <span class="stars" id="previewStars">☆☆☆☆☆</span>
-          <span class="score" id="previewRatingText">0.0 (0)</span>
+          <span class="score" id="previewRatingText">0.0</span>
         </div>
 
         <div id="previewPrice" class="preview-price">PKR 0</div>
@@ -1136,9 +1147,8 @@
     priceEl.textContent = "PKR " + Number(finalPrice || 0).toLocaleString();
 
     const ratingVal = Number(p.rating || 0);
-    const ratingCount = Number(p.ratingCount || 0);
     starsEl.textContent = renderStars(ratingVal);
-    ratingTextEl.textContent = `${ratingVal ? ratingVal.toFixed(1) : "0.0"} (${ratingCount})`;
+    ratingTextEl.textContent = `${ratingVal ? ratingVal.toFixed(1) : "0.0"}`;
 
     descEl.textContent = p.description || "No description available.";
     const sizes = Array.isArray(p.sizes) ? p.sizes.join(", ") : (p.sizes || "—");
@@ -1227,29 +1237,33 @@
       const imageSrc = (p.images && p.images[0]) ? p.images[0] : "";
 
       container.innerHTML += `
-        <div class="product-card" data-product-id="${p.id}">
-          ${badgeHtml}
-          <img src="${imageSrc}" alt="${escapeHtml(p.name || '')}">
-          <div class="product-info">
-            <h4>${escapeHtml(p.name || "Untitled")}</h4>
-            <div class="price">${priceDisplay}</div>
-            <button class="add-btn"
-              data-add="1"
-              data-name="${escapeHtml(p.name || '')}"
-              data-price="${Number(finalPrice || 0)}"
-              data-image="${imageSrc}">
-              ADD TO CART
-            </button>
+        <div class="product-wrap" data-product-id="${p.id}">
+          <div class="product-card" data-product-id="${p.id}">
+            ${badgeHtml}
+            <img src="${imageSrc}" alt="${escapeHtml(p.name || '')}">
+            <div class="product-info">
+              <h4>${escapeHtml(p.name || "Untitled")}</h4>
+              <div class="price">${priceDisplay}</div>
+            </div>
           </div>
+
+          <button class="add-btn"
+            data-add="1"
+            data-name="${escapeHtml(p.name || '')}"
+            data-price="${Number(finalPrice || 0)}"
+            data-image="${imageSrc}">
+            ADD TO CART
+          </button>
         </div>
       `;
     });
 
     // attach events + quick view timers
-    container.querySelectorAll(".product-card").forEach(card => {
-      const pid = card.getAttribute("data-product-id");
-      const img = card.querySelector("img");
-      const add = card.querySelector(".add-btn");
+    container.querySelectorAll(".product-wrap").forEach(wrap => {
+      const pid = wrap.getAttribute("data-product-id");
+      const card = wrap.querySelector(".product-card");
+      const img = wrap.querySelector("img");
+      const add = wrap.querySelector(".add-btn");
 
       // Add to cart (don’t open product page)
       add.addEventListener("click", (e) => {

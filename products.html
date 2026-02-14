@@ -19,6 +19,9 @@
       --white: #ffffff;
       --footer-bg: #1a1a1a;
       --offwhite: rgba(255,255,255,0.92);
+
+      /* ✅ slight difference between page bg and product box bg */
+      --card-bg: #fbfbfc;
     }
 
     * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -258,20 +261,28 @@
       flex: 1;
     }
 
-    /* ✅ card is white + pink outline + image zoom on hover */
+    /* ✅ wrapper so button sits OUTSIDE the product box but stays under it */
+    .product-wrap{
+      display:flex;
+      flex-direction:column;
+      gap: 10px;
+    }
+
+    /* ✅ product box: no outline normally, outline on hover */
     .product-card {
       border-radius: 12px;
       overflow: hidden;
-      background: var(--bg); /* ✅ white */
-      border: 1.5px solid rgba(255,126,141,0.75); /* ✅ pink outline */
+      background: var(--card-bg);
+      border: 1.5px solid transparent; /* ✅ no outline default */
       box-shadow: 0 4px 15px rgba(0,0,0,0.05);
       position: relative;
-      transition: transform 0.3s ease, box-shadow 0.3s ease;
+      transition: transform 0.3s ease, box-shadow 0.3s ease, border-color 0.25s ease;
       cursor: pointer;
     }
     .product-card:hover {
       transform: translateY(-5px);
       box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+      border-color: rgba(255,126,141,0.75); /* ✅ outline on hover */
     }
 
     .product-card img {
@@ -302,12 +313,12 @@
 
     /* ✅ Product info alignment */
     .product-info {
-      padding: 15px;
+      padding: 10px 12px; /* ✅ less white part */
       text-align: center;
       display: flex;
       flex-direction: column;
       gap: 6px;
-      background: var(--bg); /* ✅ white box part */
+      background: var(--card-bg);
     }
 
     .product-info h4 {
@@ -466,8 +477,114 @@
     .cart-overlay.show { display: block; }
 
     .cart-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; border-bottom: 1px solid #eee; padding-bottom: 15px; }
-    .cart-item { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; font-size: 13px; }
-    .cart-controls button { width: 22px; height: 22px; border: 1px solid #ddd; background: #fff; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; }
+
+    /* ✅ UPDATED CART UI */
+    .cart-item {
+      display: grid;
+      grid-template-columns: 54px 1fr auto;
+      gap: 12px;
+      align-items: center;
+      margin-bottom: 14px;
+      font-size: 13px;
+      padding: 10px;
+      border: 1px solid rgba(0,0,0,0.08);
+      border-radius: 12px;
+      background: #fff;
+    }
+    .cart-thumb {
+      width: 54px;
+      height: 54px;
+      border-radius: 10px;
+      overflow: hidden;
+      border: 1px solid rgba(0,0,0,0.08);
+      background: rgba(0,0,0,0.03);
+      flex-shrink: 0;
+    }
+    .cart-thumb img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+    }
+    .cart-mid {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      min-width: 0;
+    }
+    .cart-name-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      min-width: 0;
+    }
+    .cart-name {
+      font-weight: 800;
+      color: #2b1719;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      min-width: 0;
+    }
+    .remove-btn {
+      width: 28px;
+      height: 28px;
+      border-radius: 10px;
+      border: 1px solid rgba(0,0,0,0.10);
+      background: rgba(0,0,0,0.02);
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: 0.2s;
+      flex-shrink: 0;
+    }
+    .remove-btn:hover { background: rgba(255,126,141,0.12); border-color: rgba(255,126,141,0.35); }
+    .remove-btn i { font-size: 18px; color: #2b1719; }
+
+    .cart-controls {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .cart-controls button {
+      width: 26px;
+      height: 26px;
+      border: 1px solid #ddd;
+      background: #fff;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 8px;
+      font-weight: 800;
+      transition: 0.2s;
+    }
+    .cart-controls button:hover { border-color: rgba(255,126,141,0.55); color: var(--primary); }
+    .cart-qty {
+      font-weight: 900;
+      min-width: 18px;
+      text-align: center;
+    }
+    .cart-right {
+      text-align: right;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      align-items: flex-end;
+      white-space: nowrap;
+    }
+    .cart-lineprice {
+      font-weight: 900;
+      color: #2b1719;
+    }
+    .cart-unit {
+      font-size: 11px;
+      color: #888;
+      font-weight: 700;
+    }
+
     .cart-total { font-weight: 700; margin-top: 30px; text-align: right; font-size: 18px; border-top: 1px solid #eee; padding-top: 20px; }
     .checkout-btn { width: 100%; margin-top: 20px; padding: 15px; background: var(--primary); border: none; color: var(--white); border-radius: 8px; font-weight: 600; cursor: pointer; font-size: 15px; }
 
@@ -719,7 +836,7 @@
         gap: 12px;
         padding: 0 12px 60px;
       }
-      .product-info { padding: 10px; }
+      .product-info { padding: 8px 10px; } /* ✅ less white part on mobile too */
       .product-info h4 { font-size: 13px; }
       .price { font-size: 13px; }
       .add-btn { padding: 10px; font-size: 11px; border-radius: 10px; }
@@ -1129,32 +1246,36 @@
       const ratingCount = Number(p.ratingCount || 0);
 
       container.innerHTML += `
-        <div class="product-card" data-product-id="${p.id}">
-          ${badgeHtml}
-          <img src="${imageSrc}" alt="${escapeHtml(p.name || '')}">
-          <div class="product-info">
-            <h4>${escapeHtml(p.name || 'Untitled')}</h4>
-            <div class="price">${priceDisplay}</div>
-            <div class="product-rating">
-              <span class="stars">${renderStars(ratingVal)}</span>
-              <span class="score">${ratingVal ? ratingVal.toFixed(1) : "0.0"} (${ratingCount})</span>
+        <div class="product-wrap" data-product-id="${p.id}">
+          <div class="product-card" data-product-id="${p.id}">
+            ${badgeHtml}
+            <img src="${imageSrc}" alt="${escapeHtml(p.name || '')}">
+            <div class="product-info">
+              <h4>${escapeHtml(p.name || 'Untitled')}</h4>
+              <div class="price">${priceDisplay}</div>
+              <div class="product-rating">
+                <span class="stars">${renderStars(ratingVal)}</span>
+                <span class="score">${ratingVal ? ratingVal.toFixed(1) : "0.0"} (${ratingCount})</span>
+              </div>
             </div>
-            <button class="add-btn"
-              data-add="1"
-              data-name="${escapeHtml(p.name || '')}"
-              data-price="${Number(finalPrice || 0)}"
-              data-image="${imageSrc}">
-              ADD TO CART
-            </button>
           </div>
+
+          <button class="add-btn"
+            data-add="1"
+            data-name="${escapeHtml(p.name || '')}"
+            data-price="${Number(finalPrice || 0)}"
+            data-image="${imageSrc}">
+            ADD TO CART
+          </button>
         </div>
       `;
     });
 
-    container.querySelectorAll(".product-card").forEach(card => {
-      const pid = card.getAttribute("data-product-id");
-      const img = card.querySelector("img");
-      const add = card.querySelector(".add-btn");
+    container.querySelectorAll(".product-wrap").forEach(wrap => {
+      const pid = wrap.getAttribute("data-product-id");
+      const card = wrap.querySelector(".product-card");
+      const img = wrap.querySelector("img");
+      const add = wrap.querySelector(".add-btn");
 
       add.addEventListener("click", (e) => {
         e.preventDefault();
@@ -1237,17 +1358,40 @@
 
     cart.forEach((item, index) => {
       total += item.price * item.qty;
+
+      const safeImg = item.image && String(item.image).trim().length
+        ? item.image
+        : "https://placehold.co/120x120/E6D8C5/2b1719?text=PressPlay";
+
       itemsDiv.innerHTML += `
         <div class="cart-item">
-          <span>${item.name} <small>x${item.qty}</small></span>
-          <div class="cart-controls">
-            <button onclick="changeQty(${index}, -1)">−</button>
-            <button onclick="changeQty(${index}, 1)">+</button>
+          <div class="cart-thumb">
+            <img src="${safeImg}" alt="Cart item" onerror="this.src='https://placehold.co/120x120/E6D8C5/2b1719?text=PressPlay'">
           </div>
-          <strong>PKR ${(item.price * item.qty).toLocaleString()}</strong>
+
+          <div class="cart-mid">
+            <div class="cart-name-row">
+              <div class="cart-name">${item.name}</div>
+              <button class="remove-btn" onclick="removeItem(${index})" aria-label="Remove item">
+                <i class='bx bx-trash'></i>
+              </button>
+            </div>
+
+            <div class="cart-controls">
+              <button onclick="changeQty(${index}, -1)" aria-label="Decrease quantity">−</button>
+              <div class="cart-qty">${item.qty}</div>
+              <button onclick="changeQty(${index}, 1)" aria-label="Increase quantity">+</button>
+            </div>
+          </div>
+
+          <div class="cart-right">
+            <div class="cart-lineprice">PKR ${(item.price * item.qty).toLocaleString()}</div>
+            <div class="cart-unit">PKR ${Number(item.price || 0).toLocaleString()} each</div>
+          </div>
         </div>
       `;
     });
+
     totalDiv.innerText = "PKR " + total.toLocaleString();
   }
 
@@ -1259,12 +1403,22 @@
     renderCart();
   }
 
+  window.removeItem = function(index) {
+    cart.splice(index, 1);
+    localStorage.setItem("cart", JSON.stringify(cart));
+    updateCartCount();
+    renderCart();
+  }
+
   // ✅ if open=true passed, force open
   window.toggleCart = function(open) {
     const dropdown = document.getElementById("cartDropdown");
     const overlay = document.getElementById("cartOverlay");
 
     const shouldOpen = (open === true) ? true : !dropdown.classList.contains("show");
+
+    // ✅ if menu is open, close it first (prevents overlay conflicts)
+    closeMenu();
 
     dropdown.classList.toggle("show", shouldOpen);
     overlay.classList.toggle("show", shouldOpen);
@@ -1281,6 +1435,12 @@
   }
 
   function toggleMenu() {
+    // ✅ if cart is open, close it
+    const dropdown = document.getElementById("cartDropdown");
+    const overlay = document.getElementById("cartOverlay");
+    dropdown.classList.remove("show");
+    overlay.classList.remove("show");
+
     nav.classList.toggle("active");
     menuOverlay.classList.toggle("active");
   }
