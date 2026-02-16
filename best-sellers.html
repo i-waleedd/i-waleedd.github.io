@@ -22,6 +22,12 @@
 
       /* ✅ slight difference between page bg and product box bg */
       --card-bg: #fbfbfc;
+
+      /* ✅ Dior-like neutrals (from index.html) */
+      --dior-ink: #111;
+      --dior-muted: rgba(17,17,17,0.62);
+      --dior-border: rgba(17,17,17,0.12);
+      --dior-soft: rgba(17,17,17,0.06);
     }
 
     * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -137,48 +143,6 @@
       flex-shrink: 0;
     }
 
-    /* Shopify cart icon */
-    .cart-icon {
-      position: relative;
-      cursor: pointer;
-      width: 26px;
-      height: 26px;
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      color: var(--text);
-    }
-    .cart-icon svg { width: 24px; height: 24px; }
-
-    .cart-icon span {
-      position: absolute;
-      top: -6px;
-      right: -8px;
-      background: var(--primary);
-      color: var(--white);
-      font-size: 10px;
-      font-weight: 700;
-      padding: 2px 5px;
-      border-radius: 999px;
-      min-width: 16px;
-      text-align: center;
-      line-height: 1.2;
-      transform-origin: center;
-    }
-
-    /* vibration when cart has items */
-    .cart-icon span.vibrate { animation: cartVibe 2s infinite; }
-    @keyframes cartVibe {
-      0%, 82% { transform: translate(0,0) rotate(0deg); }
-      84% { transform: translate(-1px, 0) rotate(-2deg); }
-      86% { transform: translate(1px, 0) rotate(2deg); }
-      88% { transform: translate(-1px, 0) rotate(-2deg); }
-      90% { transform: translate(1px, 0) rotate(2deg); }
-      92% { transform: translate(-1px, 0) rotate(-2deg); }
-      94% { transform: translate(1px, 0) rotate(2deg); }
-      96%, 100% { transform: translate(0,0) rotate(0deg); }
-    }
-
     /* Login button (only shown when logged out) */
     .login-btn {
       padding: 8px 18px;
@@ -239,6 +203,48 @@
     }
     .user-dd-item i { font-size: 18px; }
 
+    /* Shopify cart icon */
+    .cart-icon {
+      position: relative;
+      cursor: pointer;
+      width: 26px;
+      height: 26px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--text);
+    }
+    .cart-icon svg { width: 24px; height: 24px; }
+
+    .cart-icon span {
+      position: absolute;
+      top: -6px;
+      right: -8px;
+      background: var(--primary);
+      color: var(--white);
+      font-size: 10px;
+      font-weight: 700;
+      padding: 2px 5px;
+      border-radius: 999px;
+      min-width: 16px;
+      text-align: center;
+      line-height: 1.2;
+      transform-origin: center;
+    }
+
+    /* vibration when cart has items */
+    .cart-icon span.vibrate { animation: cartVibe 2s infinite; }
+    @keyframes cartVibe {
+      0%, 82% { transform: translate(0,0) rotate(0deg); }
+      84% { transform: translate(-1px, 0) rotate(-2deg); }
+      86% { transform: translate(1px, 0) rotate(2deg); }
+      88% { transform: translate(-1px, 0) rotate(-2deg); }
+      90% { transform: translate(1px, 0) rotate(2deg); }
+      92% { transform: translate(-1px, 0) rotate(-2deg); }
+      94% { transform: translate(1px, 0) rotate(2deg); }
+      96%, 100% { transform: translate(0,0) rotate(0deg); }
+    }
+
     /* ================= PAGE TITLE ================= */
     .page-header {
       text-align: center;
@@ -262,105 +268,232 @@
     .product-wrap{
       display:flex;
       flex-direction:column;
-      gap: 10px;
+      gap: 12px; /* match index spacing */
     }
 
-    /* ✅ match index/products behavior */
+    /* ✅ Dior-like product card style (from index.html) */
     .product-card {
-      border-radius: 12px;
+      border-radius: 6px;
       overflow: hidden;
-      background: var(--card-bg);
-      border: 1.5px solid transparent; /* ✅ no border by default */
-      box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+      background: var(--white);
+      border: 1px solid transparent;
+      box-shadow: none;
       position: relative;
-      transition: transform 0.3s ease, box-shadow 0.3s ease, border-color 0.25s ease;
+      transition: border-color 0.2s ease, transform 0.2s ease;
       cursor: pointer;
     }
-    .product-card:hover {
-      transform: translateY(-5px);
-      box-shadow: 0 10px 25px rgba(0,0,0,0.1);
-      border-color: rgba(255,126,141,0.75); /* ✅ show border on hover only */
+    .product-card:hover{
+      transform: translateY(-2px);
+      border-color: var(--primary);
     }
 
+    /* media area for wishlist + nav + progress (like index.html) */
+    .product-media{
+      position: relative;
+      width: 100%;
+      overflow: hidden;
+      background: #fff;
+      touch-action: pan-y;
+    }
+
+    /* ✅ Image full (no side whitespace) */
     .product-card img {
       width: 100%;
-      aspect-ratio: 1 / 1;
-      object-fit: cover;
+      margin: 0;
       display: block;
+      aspect-ratio: 4 / 5;
+      object-fit: cover;
+      border-radius: 0;
       transition: transform 0.35s ease;
+      user-select: none;
+      -webkit-user-drag: none;
+      pointer-events: none;
     }
-    .product-card:hover img { transform: scale(1.05); }
+    .product-card:hover img { transform: scale(1.03); }
 
+    /* ✅ Sale & Best Seller tag: old style (red bg, white text) */
     .badge {
       position: absolute;
-      top: 10px;
-      left: 10px;
-      background: var(--primary);
-      color: var(--white);
-      padding: 4px 10px;
-      font-size: 10px;
-      font-weight: 700;
-      border-radius: 20px;
-      z-index: 2;
+      top: 14px;
+      left: 14px;
+      background: #d32f2f;
+      color: #fff;
+      padding: 6px 10px;
+      font-size: 11px;
+      font-weight: 800;
+      border-radius: 999px;
+      z-index: 5;
       text-transform: uppercase;
-      letter-spacing: 1px;
-      box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+      letter-spacing: 0.4px;
+      box-shadow: 0 10px 18px rgba(0,0,0,0.10);
+      pointer-events: none;
     }
-    .badge.sale { background: #d32f2f; }
+    .badge.sale{
+      background: #d32f2f;
+      color: #fff;
+    }
 
+    /* ✅ Wishlist button (top-right) */
+    .wish-btn{
+      position: absolute;
+      top: 12px;
+      right: 12px;
+      width: 34px;
+      height: 34px;
+      border-radius: 8px;
+      border: 1px solid rgba(0,0,0,0.18);
+      background: rgba(0,0,0,0.18);
+      color: rgba(255,255,255,0.95);
+      display: grid;
+      place-items: center;
+      cursor: pointer;
+      z-index: 6;
+      transition: background .15s ease, transform .15s ease, border-color .15s ease;
+    }
+    .wish-btn i{ font-size: 18px; line-height: 1; }
+    .wish-btn:hover{
+      background: rgba(0,0,0,0.28);
+      border-color: rgba(0,0,0,0.28);
+      transform: translateY(-1px);
+    }
+    .wish-btn.active{
+      background: rgba(211,47,47,0.95);
+      border-color: rgba(211,47,47,0.95);
+      color: #fff;
+    }
+
+    /* ✅ Desktop arrows only when multiple images */
+    .img-nav{
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      z-index: 4;
+      display: none;
+    }
+    .img-nav.show{ display:block; }
+
+    .img-nav-btn{
+      pointer-events: auto;
+      position: absolute;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 38px;
+      height: 38px;
+      border-radius: 999px;
+      border: 1px solid rgba(0,0,0,0.14);
+      background: rgba(255,255,255,0.55);
+      backdrop-filter: blur(2px);
+      cursor: pointer;
+      display: grid;
+      place-items: center;
+      transition: 0.18s;
+      opacity: 0;
+    }
+    .img-nav-btn i{ font-size: 22px; color: #2b1719; }
+    .img-nav-btn:hover{ background: rgba(255,255,255,0.75); transform: translateY(-50%) scale(1.03); }
+    .img-nav-btn.prev{ left: 10px; }
+    .img-nav-btn.next{ right: 10px; }
+
+    @media (hover:hover){
+      .product-card:hover .img-nav-btn{ opacity: 1; }
+    }
+
+    /* ✅ Dior-style segmented progress line */
+    .img-progress{
+      position: absolute;
+      left: 12px;
+      right: 12px;
+      bottom: 8px;
+      height: 3px;
+      display: none;
+      z-index: 4;
+      pointer-events: none;
+      gap: 6px;
+      align-items: center;
+    }
+    .img-progress.show{
+      display: flex;
+    }
+    .img-segment{
+      flex: 1;
+      height: 3px;
+      background: rgba(0,0,0,0.15);
+      border-radius: 999px;
+      transition: background 0.25s ease;
+    }
+    .img-segment.active{
+      background: var(--primary);
+    }
+
+    /* ✅ Dior-like text block */
     .product-info {
-      padding: 10px 12px; /* ✅ less white part */
+      padding: 16px 18px 22px;
       text-align: center;
       display: flex;
       flex-direction: column;
       gap: 6px;
-      background: var(--card-bg);
+      background: var(--white);
+      border-top: 1px solid rgba(0,0,0,0.06);
     }
 
     .product-info h4 {
-      font-size: 14px;
-      font-weight: 700;
-      color: #333;
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--dior-ink);
       overflow: hidden;
       text-overflow: ellipsis;
       white-space: nowrap;
+      letter-spacing: 0.01em;
     }
 
     .price {
-      font-size: 14px;
-      font-weight: 800;
-      color: #2b1719;
+      font-size: 12.5px;
+      font-weight: 500;
+      color: var(--dior-muted);
     }
     .price span {
-      color: #999;
+      color: rgba(17,17,17,0.35);
       font-weight: 500;
       text-decoration: line-through;
       font-size: 12px;
-      margin-left: 5px;
+      margin-left: 6px;
     }
 
-    /* same button style as products.html */
-    .add-btn {
-      width: 100%;
-      padding: 10px 10px;
-      background: var(--primary);
-      border: 1px solid transparent;
-      color: var(--offwhite);
-      font-weight: 800;
-      border-radius: 10px;
-      cursor: pointer;
-      transition: transform 0.18s ease, background 0.18s ease, box-shadow 0.18s ease;
+    /* ✅ review shown on hover (also on mobile via JS class) */
+    .product-rating {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 8px;
+      font-size: 11.5px;
+      color: var(--primary);
+      font-weight: 700;
+      margin-top: 2px;
+      opacity: 0;
+      transform: translateY(4px);
+      max-height: 0;
+      overflow: hidden;
+      transition: opacity 0.2s ease, transform 0.2s ease, max-height 0.2s ease;
+    }
+    .product-card:hover .product-rating{
+      opacity: 1;
+      transform: translateY(0);
+      max-height: 24px;
+    }
+    .product-card.show-rating .product-rating{
+      opacity: 1;
+      transform: translateY(0);
+      max-height: 24px;
+    }
+    .product-rating .stars {
+      color: var(--primary);
       font-size: 12px;
-      text-transform: uppercase;
-      letter-spacing: 0.6px;
-      box-shadow: 0 10px 18px rgba(255,126,141,0.22);
+      letter-spacing: 1px;
     }
-    .add-btn:hover {
-      background: var(--primary-hover);
-      transform: scale(1.03);
-      box-shadow: 0 14px 24px rgba(255,126,141,0.28);
+    .product-rating .score {
+      color: var(--primary);
+      font-weight: 800;
     }
-    .add-btn:active { transform: scale(0.99); }
 
     /* ================= FOOTER ================= */
     footer {
@@ -598,188 +731,11 @@
     @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
     @keyframes promo-slide { from { transform: translateX(0); } to { transform: translateX(-50%); } }
 
-    /* ================= PRODUCT PREVIEW POPUP (Quick View) ================= */
-    .preview-overlay {
-      position: fixed;
-      inset: 0;
-      background: rgba(0,0,0,0.5);
-      z-index: 3500;
-      display: none;
-      align-items: center;
-      justify-content: center;
-      padding: 18px;
-    }
-    .preview-overlay.show { display: flex; }
-
-    .preview-popup {
-      width: min(920px, 96vw);
-      background: var(--bg);
-      border: 1px solid rgba(255,126,141,0.55);
-      border-radius: 18px;
-      box-shadow: 0 18px 60px rgba(0,0,0,0.25);
-      overflow: hidden;
-      display: grid;
-      grid-template-columns: 1.05fr 1fr;
-      position: relative;
-      transform: translateY(8px);
-      opacity: 0;
-      transition: all 220ms ease;
-    }
-    .preview-overlay.show .preview-popup { transform: translateY(0); opacity: 1; }
-
-    .preview-close {
-      position: absolute;
-      top: 12px;
-      right: 12px;
-      width: 38px;
-      height: 38px;
-      border-radius: 999px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      cursor: pointer;
-      background: rgba(255,255,255,0.35);
-      border: 1px solid rgba(0,0,0,0.10);
-      z-index: 3;
-    }
-    .preview-close i { font-size: 22px; color: #2b1719; }
-
-    .preview-img-wrap {
-      position: relative;
-      background: rgba(255,255,255,0.18);
-      min-height: 320px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    }
-    .preview-img {
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
-      display: block;
-    }
-
-    .preview-nav-btn {
-      position: absolute;
-      top: 50%;
-      transform: translateY(-50%);
-      width: 42px;
-      height: 42px;
-      border-radius: 999px;
-      border: 1px solid rgba(0,0,0,0.12);
-      background: rgba(255,255,255,0.55);
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      z-index: 2;
-      transition: 0.2s;
-    }
-    .preview-nav-btn:hover { background: rgba(255,255,255,0.75); }
-    .preview-nav-btn i { font-size: 22px; color: #2b1719; }
-    .preview-nav-btn.prev { left: 12px; }
-    .preview-nav-btn.next { right: 12px; }
-
-    .preview-body {
-      padding: 26px 24px;
-      display: flex;
-      flex-direction: column;
-      gap: 10px;
-      justify-content: center;
-    }
-
-    .preview-title {
-      font-size: 22px;
-      font-weight: 800;
-      color: #1b0f10;
-      line-height: 1.2;
-    }
-
-    .preview-meta {
-      display: flex;
-      flex-direction: column;
-      gap: 10px;
-      margin-top: 4px;
-    }
-
-    .preview-rating {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      font-size: 13px;
-      color: rgba(43, 23, 25, 0.85);
-      font-weight: 800;
-    }
-    .preview-rating .stars {
-      color: var(--primary);
-      letter-spacing: 1px;
-      font-size: 15px;
-    }
-    .preview-rating .score { color: var(--primary); }
-
-    .preview-price {
-      font-size: 18px;
-      font-weight: 900;
-      color: var(--primary);
-    }
-
-    .preview-desc {
-      font-size: 13px;
-      color: rgba(43, 23, 25, 0.78);
-      line-height: 1.55;
-      max-height: 4.8em;
-      overflow: hidden;
-    }
-
-    .preview-tags {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 8px;
-      margin-top: 2px;
-    }
-    .preview-tag {
-      padding: 8px 10px;
-      border-radius: 12px;
-      background: rgba(255,255,255,0.35);
-      border: 1px solid rgba(0,0,0,0.12);
-      font-size: 12px;
-      font-weight: 800;
-      color: #1b0f10;
-    }
-    .preview-tag span.label {
-      font-weight: 900;
-      color: rgba(43, 23, 25, 0.7);
-      margin-right: 6px;
-    }
-
-    .preview-actions {
-      display: flex;
-      gap: 10px;
-      margin-top: 6px;
-    }
-    .preview-btn {
-      flex: 1;
-      padding: 12px 12px;
-      border-radius: 12px;
-      border: 1px solid rgba(0,0,0,0.12);
-      background: rgba(255,255,255,0.40);
-      color: #2b1719;
-      font-weight: 800;
-      cursor: pointer;
-      transition: 0.2s;
-    }
-    .preview-btn:hover { transform: translateY(-1px); background: rgba(255,255,255,0.60); }
-    .preview-btn.primary {
-      background: var(--primary);
-      color: #fff;
-      border-color: transparent;
-    }
-    .preview-btn.primary:hover { background: var(--primary-hover); }
-
     /* ================= RESPONSIVE FIXES ================= */
     @media (max-width: 1024px) {
       .nav-links { gap: 22px; }
       header { padding: 0 4%; }
+      .footer-grid { grid-template-columns: 1fr 1fr; } /* match index.html */
     }
 
     @media (max-width: 900px) {
@@ -816,7 +772,7 @@
         font-weight: 700;
         text-transform: none;
         letter-spacing: 0.2px;
-        display: block; /* ✅ helps ensure taps/clicks always register */
+        display: block;
       }
       .nav-links a:last-child { border-bottom: none; }
 
@@ -825,13 +781,28 @@
         gap: 12px;
         padding: 0 12px 60px;
       }
-      .product-info { padding: 8px 10px; } /* ✅ less white part on mobile too */
-      .product-info h4 { font-size: 13px; }
-      .price { font-size: 13px; }
-      .add-btn { padding: 10px; font-size: 11px; border-radius: 10px; }
 
-      .preview-popup { grid-template-columns: 1fr; }
-      .preview-img-wrap { min-height: 240px; }
+      /* ✅ keep image full on mobile */
+      .product-card img{
+        width: 100%;
+        margin: 0;
+        aspect-ratio: 4 / 5;
+      }
+      .badge{ top: 10px; left: 10px; padding: 6px 10px; font-size: 10px; }
+      .wish-btn{ top: 10px; right: 10px; width: 32px; height: 32px; border-radius: 8px; }
+      .img-nav{ display: none !important; }
+      .img-nav-btn{ display:none !important; }
+
+      .product-info { padding: 14px 12px 18px; }
+      .product-info h4 { font-size: 12.5px; }
+      .price { font-size: 12px; }
+
+      /* ✅ IMPORTANT: don't force rating visible on mobile */
+      .product-rating{
+        opacity: 0;
+        transform: translateY(4px);
+        max-height: 0;
+      }
 
       footer { padding: 22px 5% 14px; }
       .footer-grid {
@@ -919,6 +890,12 @@
     <div class="user-dd-item" id="ddAdmin" style="display:none;">
       <i class='bx bx-shield-quarter'></i> Admin Dashboard
     </div>
+
+    <!-- ✅ Wishlist button added (match index.html) -->
+    <div class="user-dd-item" id="ddWishlist">
+      <i class='bx bx-heart'></i> Wishlist
+    </div>
+
     <div class="user-dd-item" id="ddOrders">
       <i class='bx bx-receipt'></i> Orders
     </div>
@@ -995,48 +972,6 @@
   </div>
 </footer>
 
-<!-- ✅ Quick View popup (same as products.html) -->
-<div class="preview-overlay" id="previewOverlay" aria-hidden="true">
-  <div class="preview-popup" role="dialog" aria-modal="true" aria-label="Product preview">
-    <div class="preview-close" id="previewClose"><i class='bx bx-x'></i></div>
-
-    <div class="preview-img-wrap">
-      <button class="preview-nav-btn prev" id="previewPrev" type="button" aria-label="Previous image">
-        <i class='bx bx-chevron-left'></i>
-      </button>
-      <img id="previewImg" class="preview-img" src="" alt="Product image">
-      <button class="preview-nav-btn next" id="previewNext" type="button" aria-label="Next image">
-        <i class='bx bx-chevron-right'></i>
-      </button>
-    </div>
-
-    <div class="preview-body">
-      <div id="previewTitle" class="preview-title">Product</div>
-
-      <div class="preview-meta">
-        <div class="preview-rating">
-          <span class="stars" id="previewStars">☆☆☆☆☆</span>
-          <span class="score" id="previewRatingText">0.0</span>
-        </div>
-
-        <div id="previewPrice" class="preview-price">PKR 0</div>
-
-        <div id="previewDesc" class="preview-desc"></div>
-
-        <div class="preview-tags">
-          <div class="preview-tag"><span class="label">Sizes:</span> <span id="previewSizes">—</span></div>
-          <div class="preview-tag"><span class="label">Shapes:</span> <span id="previewShapes">—</span></div>
-        </div>
-      </div>
-
-      <div class="preview-actions">
-        <button class="preview-btn" id="previewAddBtn" type="button">Add to Cart</button>
-        <button class="preview-btn primary" id="previewViewBtn" type="button">View Details</button>
-      </div>
-    </div>
-  </div>
-</div>
-
 <script type="module">
   import { auth } from "./firebase.js";
   import { onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-auth.js";
@@ -1047,6 +982,7 @@
     const userDropdown = document.getElementById("userDropdown");
 
     const ddAdmin = document.getElementById("ddAdmin");
+    const ddWishlist = document.getElementById("ddWishlist");
     const ddOrders = document.getElementById("ddOrders");
     const ddLogout = document.getElementById("ddLogout");
 
@@ -1062,6 +998,7 @@
     document.addEventListener("click", () => closeUserDropdown());
 
     ddAdmin.addEventListener("click", () => { window.location.href = "admin.html"; });
+    ddWishlist.addEventListener("click", () => { window.location.href = "wishlist.html"; });
     ddOrders.addEventListener("click", () => { window.location.href = "orders.html"; });
     ddLogout.addEventListener("click", async () => {
       await signOut(auth);
@@ -1096,27 +1033,7 @@
 
   const container = document.getElementById("bestSellersContainer");
 
-  // Quick View elements
-  const overlay = document.getElementById("previewOverlay");
-  const closeBtn = document.getElementById("previewClose");
-  const prevBtn = document.getElementById("previewPrev");
-  const nextBtn = document.getElementById("previewNext");
-
-  const imgEl = document.getElementById("previewImg");
-  const titleEl = document.getElementById("previewTitle");
-  const starsEl = document.getElementById("previewStars");
-  const ratingTextEl = document.getElementById("previewRatingText");
-  const priceEl = document.getElementById("previewPrice");
-  const descEl = document.getElementById("previewDesc");
-  const sizesEl = document.getElementById("previewSizes");
-  const shapesEl = document.getElementById("previewShapes");
-
-  const addBtn = document.getElementById("previewAddBtn");
-  const viewBtn = document.getElementById("previewViewBtn");
-
   let PRODUCTS = [];
-  let previewImages = [];
-  let previewIndex = 0;
 
   function escapeHtml(str) {
     return String(str || "")
@@ -1134,87 +1051,72 @@
     return "★".repeat(full) + "☆".repeat(empty);
   }
 
-  function openPreviewById(productId) {
-    const p = PRODUCTS.find(x => x.id === productId);
-    if (!p) return;
-
-    const imgs = Array.isArray(p.images) && p.images.length ? p.images : [p.image || ""].filter(Boolean);
-    previewImages = imgs.length ? imgs : ["https://placehold.co/600x600/E6D8C5/2b1719?text=PressPlay+Nails"];
-    previewIndex = 0;
-
-    titleEl.textContent = p.name || "Product";
-    const finalPrice = p.salePrice && parseFloat(p.salePrice) < parseFloat(p.price) ? p.salePrice : p.price;
-    priceEl.textContent = "PKR " + Number(finalPrice || 0).toLocaleString();
-
-    const ratingVal = Number(p.rating || 0);
-    starsEl.textContent = renderStars(ratingVal);
-    ratingTextEl.textContent = `${ratingVal ? ratingVal.toFixed(1) : "0.0"}`;
-
-    descEl.textContent = p.description || "No description available.";
-    const sizes = Array.isArray(p.sizes) ? p.sizes.join(", ") : (p.sizes || "—");
-    const shapes = Array.isArray(p.shapes) ? p.shapes.join(", ") : (p.shapes || "—");
-    sizesEl.textContent = sizes || "—";
-    shapesEl.textContent = shapes || "—";
-
-    imgEl.src = previewImages[previewIndex];
-
-    const showArrows = previewImages.length > 1;
-    prevBtn.style.display = showArrows ? "flex" : "none";
-    nextBtn.style.display = showArrows ? "flex" : "none";
-
-    addBtn.onclick = () => {
-      window.addToCart(p.name, Number(finalPrice || 0), (previewImages[0] || ""));
-      showToast(`${p.name} added to cart!`);
-      closePreview();
-      window.toggleCart(true); // ✅ auto-open cart
-    };
-
-    viewBtn.onclick = () => {
-      window.location.href = `product.html?id=${encodeURIComponent(p.id)}`;
-    };
-
-    overlay.classList.add("show");
-    overlay.setAttribute("aria-hidden", "false");
+  function getWishlist() {
+    try { return JSON.parse(localStorage.getItem("wishlist") || "[]"); }
+    catch { return []; }
   }
 
-  function closePreview() {
-    overlay.classList.remove("show");
-    overlay.setAttribute("aria-hidden", "true");
+  function setWishlist(arr) {
+    localStorage.setItem("wishlist", JSON.stringify(arr || []));
+    window.dispatchEvent(new Event("wishlist:updated"));
   }
 
-  function changePreviewImage(dir) {
-    if (!previewImages.length) return;
-    previewIndex = (previewIndex + dir + previewImages.length) % previewImages.length;
-    imgEl.src = previewImages[previewIndex];
+  function isWished(productId) {
+    const wl = getWishlist();
+    return wl.includes(productId);
   }
 
-  closeBtn.addEventListener("click", closePreview);
-  overlay.addEventListener("click", (e) => { if (e.target === overlay) closePreview(); });
-  prevBtn.addEventListener("click", () => changePreviewImage(-1));
-  nextBtn.addEventListener("click", () => changePreviewImage(1));
+  function toggleWish(productId) {
+    const wl = getWishlist();
+    const idx = wl.indexOf(productId);
+    if (idx >= 0) wl.splice(idx, 1);
+    else wl.push(productId);
+    setWishlist(wl);
+    return wl.includes(productId);
+  }
 
-  document.addEventListener("keydown", (e) => {
-    if (e.key === "Escape") closePreview();
-  });
+  function buildProgressSegments(progressEl, total) {
+    if (!progressEl) return;
+    const t = Math.max(1, Number(total || 1));
+    const existing = progressEl.querySelectorAll(".img-segment").length;
+    if (existing === t) return;
 
-  let hoverTimer = null;
-  let pressTimer = null;
-  let pressed = false;
+    progressEl.innerHTML = "";
+    for (let i = 0; i < t; i++) {
+      const seg = document.createElement("div");
+      seg.className = "img-segment";
+      progressEl.appendChild(seg);
+    }
+  }
 
-  function clearTimers() {
-    if (hoverTimer) { clearTimeout(hoverTimer); hoverTimer = null; }
-    if (pressTimer) { clearTimeout(pressTimer); pressTimer = null; }
-    pressed = false;
+  function updateProgress(progressEl, total, index) {
+    if (!progressEl) return;
+    const t = Math.max(1, Number(total || 1));
+    const i = Math.max(0, Math.min(t - 1, Number(index || 0)));
+
+    const segments = progressEl.querySelectorAll(".img-segment");
+    segments.forEach((seg, idx) => {
+      seg.classList.toggle("active", idx === i);
+    });
+  }
+
+  function isMobileOrTab() {
+    return window.matchMedia("(max-width: 900px)").matches;
+  }
+
+  function setCardRatingVisible(card, visible) {
+    if (!card) return;
+    card.classList.toggle("show-rating", !!visible);
   }
 
   async function loadBestSellers() {
     container.innerHTML = '<div class="spinner-container"><div class="spinner"></div></div>';
 
     const products = await fetchProducts();
-    PRODUCTS = products || [];
+    PRODUCTS = (products || []).filter(p => !p.isHidden);
 
     const bestSellers = PRODUCTS.filter(p =>
-      !p.isHidden && (p.isBestSeller === true || p.category === "best-seller")
+      (p.isBestSeller === true || p.category === "best-seller")
     );
 
     container.innerHTML = "";
@@ -1233,66 +1135,197 @@
         badgeHtml = `<div class="badge sale">SALE</div>`;
       }
 
-      const finalPrice = (p.salePrice && parseFloat(p.salePrice) < parseFloat(p.price)) ? p.salePrice : p.price;
-      const imageSrc = (p.images && p.images[0]) ? p.images[0] : "";
+      const imgs = Array.isArray(p.images) && p.images.length ? p.images : [(p.image || "")].filter(Boolean);
+      const imageSrc = (imgs && imgs[0]) ? imgs[0] : "";
+      const imagesJson = escapeHtml(JSON.stringify(imgs || []));
+
+      const ratingVal = Number(p.rating || 0);
+      const wished = isWished(p.id);
 
       container.innerHTML += `
         <div class="product-wrap" data-product-id="${p.id}">
           <div class="product-card" data-product-id="${p.id}">
             ${badgeHtml}
-            <img src="${imageSrc}" alt="${escapeHtml(p.name || '')}">
+
+            <div class="product-media" data-images="${imagesJson}">
+              <button class="wish-btn ${wished ? "active" : ""}" type="button" aria-label="Add to wishlist" data-wish="1" data-id="${escapeHtml(p.id)}">
+                <i class='bx ${wished ? "bxs-heart" : "bx-heart"}'></i>
+              </button>
+
+              <img src="${imageSrc}" alt="${escapeHtml(p.name || '')}" data-img="1">
+
+              <div class="img-nav" data-nav="1">
+                <button class="img-nav-btn prev" type="button" aria-label="Previous image" data-prev="1"><i class='bx bx-chevron-left'></i></button>
+                <button class="img-nav-btn next" type="button" aria-label="Next image" data-next="1"><i class='bx bx-chevron-right'></i></button>
+              </div>
+
+              <div class="img-progress" data-progress="1">
+                <div class="img-progress-bar" data-bar="1"></div>
+              </div>
+            </div>
+
             <div class="product-info">
               <h4>${escapeHtml(p.name || "Untitled")}</h4>
               <div class="price">${priceDisplay}</div>
+              <div class="product-rating">
+                <span class="stars">${renderStars(ratingVal)}</span>
+                <span class="score">${ratingVal ? ratingVal.toFixed(1) : "0.0"}</span>
+              </div>
             </div>
           </div>
-
-          <button class="add-btn"
-            data-add="1"
-            data-name="${escapeHtml(p.name || '')}"
-            data-price="${Number(finalPrice || 0)}"
-            data-image="${imageSrc}">
-            ADD TO CART
-          </button>
         </div>
       `;
     });
 
-    // attach events + quick view timers
+    // attach events + image slider + wishlist
     container.querySelectorAll(".product-wrap").forEach(wrap => {
       const pid = wrap.getAttribute("data-product-id");
       const card = wrap.querySelector(".product-card");
-      const img = wrap.querySelector("img");
-      const add = wrap.querySelector(".add-btn");
+      const media = wrap.querySelector(".product-media");
+      const img = wrap.querySelector('[data-img="1"]');
 
-      // Add to cart (don’t open product page)
-      add.addEventListener("click", (e) => {
-        e.preventDefault();
-        e.stopPropagation();
-        const name = add.getAttribute("data-name");
-        const price = Number(add.getAttribute("data-price") || 0);
-        const image = add.getAttribute("data-image") || "";
-        window.addToCart(name, price, image);
-        showToast(`${name} added to cart!`);
-        window.toggleCart(true);
-      });
+      const nav = wrap.querySelector('[data-nav="1"]');
+      const prev = wrap.querySelector('[data-prev="1"]');
+      const next = wrap.querySelector('[data-next="1"]');
+      const progress = wrap.querySelector('[data-progress="1"]');
 
-      // ✅ Desktop: 2 sec hover opens quick view
-      card.addEventListener("mouseenter", () => {
-        clearTimers();
-        hoverTimer = setTimeout(() => openPreviewById(pid), 2000);
-      });
-      card.addEventListener("mouseleave", () => clearTimers());
+      const wishBtn = wrap.querySelector('[data-wish="1"]');
 
-      // ✅ Mobile: 2 sec press opens quick view
-      card.addEventListener("touchstart", () => {
-        clearTimers();
-        pressed = true;
-        pressTimer = setTimeout(() => { if (pressed) openPreviewById(pid); }, 2000);
-      }, { passive: true });
+      // Wishlist button (heart) - separate from card click
+      if (wishBtn) {
+        wishBtn.addEventListener("click", (e) => {
+          e.preventDefault();
+          e.stopPropagation();
+          const nowWished = toggleWish(pid);
+          wishBtn.classList.toggle("active", nowWished);
+          const icon = wishBtn.querySelector("i");
+          if (icon) icon.className = `bx ${nowWished ? "bxs-heart" : "bx-heart"}`;
+          showToast(nowWished ? "Added to wishlist!" : "Removed from wishlist!");
+        });
+      }
 
-      card.addEventListener("touchend", () => clearTimers());
-      card.addEventListener("touchcancel", () => clearTimers());
+      // Images / carousel
+      let images = [];
+      try {
+        const raw = media?.getAttribute("data-images") || "[]";
+        images = JSON.parse(raw);
+      } catch {
+        images = [];
+      }
+      images = (Array.isArray(images) ? images : []).filter(Boolean);
+      if (!images.length && img?.src) images = [img.src];
+
+      let idx = 0;
+
+      function applyImage(newIdx) {
+        if (!images.length) return;
+        idx = (newIdx + images.length) % images.length;
+        if (img) img.src = images[idx];
+        buildProgressSegments(progress, images.length);
+        updateProgress(progress, images.length, idx);
+      }
+
+      function refreshControls() {
+        const multi = images.length > 1;
+
+        // progress line shows if multi
+        if (progress) {
+          progress.classList.toggle("show", multi);
+          if (multi) buildProgressSegments(progress, images.length);
+          updateProgress(progress, images.length, idx);
+        }
+
+        // arrows: PC only + multi
+        const showArrows = multi && !isMobileOrTab();
+        if (nav) nav.classList.toggle("show", showArrows);
+      }
+
+      refreshControls();
+      window.addEventListener("resize", refreshControls);
+
+      if (prev) {
+        prev.addEventListener("click", (e) => {
+          e.preventDefault();
+          e.stopPropagation();
+          if (images.length > 1) applyImage(idx - 1);
+        });
+      }
+      if (next) {
+        next.addEventListener("click", (e) => {
+          e.preventDefault();
+          e.stopPropagation();
+          if (images.length > 1) applyImage(idx + 1);
+        });
+      }
+
+      // Rating visibility behavior (match index.html)
+      if (card) {
+        card.addEventListener("touchstart", () => {
+          if (!isMobileOrTab()) return;
+          setCardRatingVisible(card, true);
+        }, { passive: true });
+
+        card.addEventListener("touchend", () => {
+          if (!isMobileOrTab()) return;
+          setTimeout(() => setCardRatingVisible(card, false), 800);
+        }, { passive: true });
+
+        document.addEventListener("touchstart", (e) => {
+          if (!isMobileOrTab()) return;
+          if (!card.contains(e.target)) setCardRatingVisible(card, false);
+        }, { passive: true });
+      }
+
+      // Swipe on mobile/tab
+      let startX = 0;
+      let startY = 0;
+      let dragging = false;
+
+      function onTouchStart(e) {
+        if (!isMobileOrTab()) return;
+        if (images.length <= 1) return;
+        const t = e.touches && e.touches[0];
+        if (!t) return;
+        startX = t.clientX;
+        startY = t.clientY;
+        dragging = true;
+      }
+
+      function onTouchMove(e) {
+        if (!dragging) return;
+        const t = e.touches && e.touches[0];
+        if (!t) return;
+
+        const dx = t.clientX - startX;
+        const dy = t.clientY - startY;
+
+        if (Math.abs(dx) > Math.abs(dy) && Math.abs(dx) > 10) {
+          e.preventDefault();
+        }
+      }
+
+      function onTouchEnd(e) {
+        if (!dragging) return;
+        dragging = false;
+
+        const changed = e.changedTouches && e.changedTouches[0];
+        if (!changed) return;
+
+        const dx = changed.clientX - startX;
+        const dy = changed.clientY - startY;
+
+        if (Math.abs(dx) > Math.abs(dy) && Math.abs(dx) > 45) {
+          if (dx < 0) applyImage(idx + 1);
+          else applyImage(idx - 1);
+        }
+      }
+
+      if (media) {
+        media.addEventListener("touchstart", onTouchStart, { passive: true });
+        media.addEventListener("touchmove", onTouchMove, { passive: false });
+        media.addEventListener("touchend", onTouchEnd, { passive: true });
+        media.addEventListener("touchcancel", () => { dragging = false; }, { passive: true });
+      }
 
       // Card click -> product page
       card.addEventListener("click", () => {
@@ -1300,13 +1333,26 @@
       });
 
       img.addEventListener("error", () => {
-        img.src = 'https://placehold.co/300x300/E6D8C5/2b1719?text=PressPlay+Nails';
+        img.src = 'https://placehold.co/300x300/ffffff/2b1719?text=PressPlay+Nails';
         img.alt = 'Image unavailable';
       });
     });
   }
 
   loadBestSellers();
+
+  // keep UI synced if wishlist updated elsewhere/tab
+  window.addEventListener("storage", (e) => {
+    if (e.key === "wishlist") {
+      container.querySelectorAll('[data-wish="1"]').forEach(btn => {
+        const id = btn.getAttribute("data-id");
+        const nowWished = isWished(id);
+        btn.classList.toggle("active", nowWished);
+        const icon = btn.querySelector("i");
+        if (icon) icon.className = `bx ${nowWished ? "bxs-heart" : "bx-heart"}`;
+      });
+    }
+  });
 </script>
 
 <script>
@@ -1436,13 +1482,12 @@
     if (e.key === "Escape") closeCart();
   });
 
-  // ========= MOBILE MENU (Workable) =========
+  // ✅ menu toggle (consistent with index.html)
   const nav = document.getElementById("navLinks");
   const menuOverlay = document.getElementById("menuOverlay");
   const menuToggle = document.getElementById("menuToggle");
 
   function closeMenu() {
-    if (!nav || !menuOverlay) return;
     nav.classList.remove("active");
     menuOverlay.classList.remove("active");
 
@@ -1451,31 +1496,18 @@
     if (!cartOpen) document.body.classList.remove("no-scroll");
   }
 
-  function openMenu() {
-    // ✅ if cart is open, close it
-    closeCart();
-
-    nav.classList.add("active");
-    menuOverlay.classList.add("active");
-    document.body.classList.add("no-scroll");
-  }
-
   function toggleMenu() {
-    const isOpen = nav.classList.contains("active");
-    if (isOpen) closeMenu();
-    else openMenu();
+    nav.classList.toggle("active");
+    menuOverlay.classList.toggle("active");
   }
 
-  if (menuToggle) menuToggle.addEventListener("click", toggleMenu);
-  if (menuOverlay) menuOverlay.addEventListener("click", closeMenu);
+  menuToggle.addEventListener("click", toggleMenu);
+  menuOverlay.addEventListener("click", closeMenu);
 
-  if (nav) {
-    nav.querySelectorAll("a").forEach(a => {
-      a.addEventListener("click", () => closeMenu());
-    });
-  }
+  nav.querySelectorAll("a").forEach(a => {
+    a.addEventListener("click", () => closeMenu());
+  });
 
-  // Close menu with ESC
   document.addEventListener("keydown", (e) => {
     if (e.key === "Escape") closeMenu();
   });
