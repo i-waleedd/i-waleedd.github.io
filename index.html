@@ -446,26 +446,31 @@
       .product-card:hover .img-nav-btn{ opacity: 1; }
     }
 
-    /* ✅ Pink progress line (at bottom edge of image) */
+    /* ✅ Dior-style segmented progress line */
     .img-progress{
       position: absolute;
-      left: 0;
-      right: 0;
-      bottom: 0;             /* ✅ exactly bottom of image */
+      left: 12px;
+      right: 12px;
+      bottom: 8px;
       height: 3px;
-      background: rgba(0,0,0,0.12);
-      overflow: hidden;
+      display: none;
       z-index: 4;
-      display: none; /* shown only when enabled by JS */
       pointer-events: none;
+      gap: 6px;
+      align-items: center;
     }
-    .img-progress.show{ display:block; }
-    .img-progress-bar{
-      height: 100%;
-      width: 0%;
+    .img-progress.show{
+      display: flex;
+    }
+    .img-segment{
+      flex: 1;
+      height: 3px;
+      background: rgba(0,0,0,0.15);
+      border-radius: 999px;
+      transition: background 0.25s ease;
+    }
+    .img-segment.active{
       background: var(--primary);
-      transform: translateX(0);
-      transition: transform 220ms ease, width 220ms ease;
     }
 
     /* ✅ Dior-like text block: centered, lots of breathing room */
@@ -1163,13 +1168,30 @@
     return wl.includes(productId);
   }
 
-  function updateProgress(progressBarEl, total, index) {
-    if (!progressBarEl) return;
+  function buildProgressSegments(progressEl, total) {
+    if (!progressEl) return;
+    const t = Math.max(1, Number(total || 1));
+    const existing = progressEl.querySelectorAll(".img-segment").length;
+
+    if (existing === t) return;
+
+    progressEl.innerHTML = "";
+    for (let i = 0; i < t; i++) {
+      const seg = document.createElement("div");
+      seg.className = "img-segment";
+      progressEl.appendChild(seg);
+    }
+  }
+
+  function updateProgress(progressEl, total, index) {
+    if (!progressEl) return;
     const t = Math.max(1, Number(total || 1));
     const i = Math.max(0, Math.min(t - 1, Number(index || 0)));
-    const pct = ((i + 1) / t) * 100;     // ✅ fill from left (last image = 100%)
-    progressBarEl.style.width = `${pct}%`;
-    progressBarEl.style.transform = `translateX(0)`;
+
+    const segments = progressEl.querySelectorAll(".img-segment");
+    segments.forEach((seg, idx) => {
+      seg.classList.toggle("active", idx === i);
+    });
   }
 
   async function loadHomeProducts() {
@@ -1292,15 +1314,19 @@
         if (!images.length) return;
         idx = (newIdx + images.length) % images.length;
         if (img) img.src = images[idx];
-        updateProgress(bar, images.length, idx);
+        buildProgressSegments(progress, images.length);
+        updateProgress(progress, images.length, idx);
       }
 
       function refreshControls() {
         const multi = images.length > 1;
 
         // progress line shows if multi
-        if (progress) progress.classList.toggle("show", multi);
-        updateProgress(bar, images.length, idx);
+        if (progress) {
+          progress.classList.toggle("show", multi);
+          if (multi) buildProgressSegments(progress, images.length);
+          updateProgress(progress, images.length, idx);
+        }
 
         // arrows: PC only + multi
         const showArrows = multi && !isMobileOrTab();
