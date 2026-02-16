@@ -1167,9 +1167,9 @@
     if (!progressBarEl) return;
     const t = Math.max(1, Number(total || 1));
     const i = Math.max(0, Math.min(t - 1, Number(index || 0)));
-    const w = 100 / t;
-    progressBarEl.style.width = `${w}%`;
-    progressBarEl.style.transform = `translateX(${i * w}%)`;
+    const pct = ((i + 1) / t) * 100;     // ✅ fill from left (last image = 100%)
+    progressBarEl.style.width = `${pct}%`;
+    progressBarEl.style.transform = `translateX(0)`;
   }
 
   async function loadHomeProducts() {
