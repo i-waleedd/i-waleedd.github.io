@@ -750,19 +750,22 @@
     </header>
     <div class="content-area">
       <div class="table-card">
-        <table>
-          <thead>
-            <tr>
-              <th class="text-left">Order ID</th>
-              <th class="text-left">Customer</th>
-              <th class="text-left">Total</th>
-              <th class="text-left">Date</th>
-              <th class="text-center">Status</th>
-              <th class="text-right">Action</th>
-            </tr>
-          </thead>
-          <tbody id="ordersTableBody"></tbody>
-        </table>
+        <!-- ✅ Mobile/tablet fix: allow horizontal scroll without breaking layout -->
+        <div style="overflow-x:auto;">
+          <table>
+            <thead>
+              <tr>
+                <th class="text-left">Order ID</th>
+                <th class="text-left">Customer</th>
+                <th class="text-left">Total</th>
+                <th class="text-left">Date</th>
+                <th class="text-center">Status</th>
+                <th class="text-right">Action</th>
+              </tr>
+            </thead>
+            <tbody id="ordersTableBody"></tbody>
+          </table>
+        </div>
       </div>
     </div>
   </div>
@@ -964,13 +967,56 @@
     document.getElementById('statProducts').textContent = products.length;
     document.getElementById('statOrders').textContent = orders.length;
 
-    const totalRev = orders.reduce((sum, order) => sum + (order.total || 0), 0);
+    // ✅ Orders total can be stored as total/grandTotal/amount (safe fallback)
+    const totalRev = orders.reduce((sum, order) => sum + getOrderTotal(order), 0);
     document.getElementById('statRevenue').textContent = "PKR " + totalRev.toLocaleString();
   }
 
   // ✅ safe image (no external placeholder dependency)
   function safeImg(url){
     return url && url.trim().length ? url : "https://placehold.co/100x100/f3f4f6/9ca3af?text=No+Img";
+  }
+
+  // ✅ orders helpers (admin)
+  function getOrderTotal(o){
+    const v = (o?.total ?? o?.grandTotal ?? o?.amount ?? 0);
+    const n = Number(v || 0);
+    return Number.isFinite(n) ? n : 0;
+  }
+
+  function getOrderDateValue(o){
+    const raw = o?.createdAt ?? o?.created_at ?? o?.timestamp ?? null;
+    try {
+      if (raw?.toDate) return raw.toDate();
+      const d = raw ? new Date(raw) : null;
+      return (d && !isNaN(d.getTime())) ? d : null;
+    } catch {
+      return null;
+    }
+  }
+
+  function formatOrderDate(o){
+    const d = getOrderDateValue(o);
+    return d ? d.toLocaleDateString(undefined, { year:'numeric', month:'short', day:'2-digit' }) : '—';
+  }
+
+  function normalizeStatus(s){
+    const v = String(s || "Pending").trim();
+    // keep it limited to your known statuses
+    if (v === "Pending" || v === "Shipped" || v === "Delivered" || v === "Cancelled") return v;
+    // basic mapping (in case you have "paid", "completed", etc.)
+    const low = v.toLowerCase();
+    if (low.includes("deliver")) return "Delivered";
+    if (low.includes("ship")) return "Shipped";
+    if (low.includes("cancel") || low.includes("reject") || low.includes("fail")) return "Cancelled";
+    return "Pending";
+  }
+
+  function getCustomerName(o){
+    return (o?.customer?.name || o?.customerName || o?.shipping?.name || o?.name || 'Guest');
+  }
+  function getCustomerEmail(o){
+    return (o?.customer?.email || o?.customerEmail || o?.email || o?.shipping?.email || '');
   }
 
   // --- RENDERING ---
@@ -1051,35 +1097,43 @@
   function renderOrders() {
     const tbody = document.getElementById('ordersTableBody');
 
-    // ✅ newest first (if createdAt exists)
+    // ✅ newest first (supports createdAt/created_at/timestamp/string)
     const sorted = [...orders].sort((a,b) => {
-      const ad = a.createdAt?.toDate ? a.createdAt.toDate().getTime() : 0;
-      const bd = b.createdAt?.toDate ? b.createdAt.toDate().getTime() : 0;
+      const ad = getOrderDateValue(a)?.getTime?.() || 0;
+      const bd = getOrderDateValue(b)?.getTime?.() || 0;
       return bd - ad;
     });
 
-    tbody.innerHTML = sorted.map(o => `
-      <tr>
-        <td style="font-family:monospace; color:rgba(0,0,0,0.65);">#${o.id.slice(0,6)}</td>
-        <td>
-          <div style="font-weight:800;">${o.customer?.name || o.customerName || 'Guest'}</div>
-          <div style="font-size:11px; color:rgba(0,0,0,0.65); font-weight:600;">${o.customer?.email || o.customerEmail || ''}</div>
-        </td>
-        <td>PKR ${(o.total || 0).toLocaleString()}</td>
-        <td>${o.createdAt?.toDate ? o.createdAt.toDate().toLocaleDateString() : '—'}</td>
-        <td class="text-center">
-          <select class="status-select ${o.status || 'Pending'}" onchange="updateOrderStatus('${o.id}', this)">
-            <option value="Pending" ${o.status === 'Pending' ? 'selected' : ''}>Pending</option>
-            <option value="Shipped" ${o.status === 'Shipped' ? 'selected' : ''}>Shipped</option>
-            <option value="Delivered" ${o.status === 'Delivered' ? 'selected' : ''}>Delivered</option>
-            <option value="Cancelled" ${o.status === 'Cancelled' ? 'selected' : ''}>Cancelled</option>
-          </select>
-        </td>
-        <td class="text-right">
-          <button class="action-btn btn-delete" onclick="deleteOrder('${o.id}')"><i class='bx bx-trash'></i></button>
-        </td>
-      </tr>
-    `).join('');
+    tbody.innerHTML = sorted.map(o => {
+      const status = normalizeStatus(o.status);
+      const name = getCustomerName(o);
+      const email = getCustomerEmail(o);
+      const total = getOrderTotal(o);
+      const dateStr = formatOrderDate(o);
+
+      return `
+        <tr>
+          <td style="font-family:monospace; color:rgba(0,0,0,0.65);">#${o.id.slice(0,6)}</td>
+          <td>
+            <div style="font-weight:800;">${name}</div>
+            <div style="font-size:11px; color:rgba(0,0,0,0.65); font-weight:600;">${email}</div>
+          </td>
+          <td>PKR ${total.toLocaleString()}</td>
+          <td>${dateStr}</td>
+          <td class="text-center">
+            <select class="status-select ${status}" onchange="updateOrderStatus('${o.id}', this)">
+              <option value="Pending" ${status === 'Pending' ? 'selected' : ''}>Pending</option>
+              <option value="Shipped" ${status === 'Shipped' ? 'selected' : ''}>Shipped</option>
+              <option value="Delivered" ${status === 'Delivered' ? 'selected' : ''}>Delivered</option>
+              <option value="Cancelled" ${status === 'Cancelled' ? 'selected' : ''}>Cancelled</option>
+            </select>
+          </td>
+          <td class="text-right">
+            <button class="action-btn btn-delete" onclick="deleteOrder('${o.id}')"><i class='bx bx-trash'></i></button>
+          </td>
+        </tr>
+      `;
+    }).join('');
 
     if (sorted.length === 0) {
       tbody.innerHTML = `<tr><td colspan="6" style="text-align:center; color:rgba(0,0,0,0.65); padding:28px; font-weight:700;">No orders yet.</td></tr>`;
@@ -1135,6 +1189,7 @@
 
   window.updateOrderStatus = async (id, selectEl) => {
     const newStatus = selectEl.value;
+    // ✅ ensure class always matches theme selectors
     selectEl.className = `status-select ${newStatus}`;
     await updateDoc(doc(db, "orders", id), { status: newStatus });
     showToast(`Order marked as ${newStatus}`);
