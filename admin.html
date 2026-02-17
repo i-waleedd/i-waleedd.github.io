@@ -318,6 +318,199 @@
   }
   .status-select:focus { border-color: var(--primary); box-shadow: 0 0 0 3px rgba(255,126,141,0.18); }
 
+  /* ===== ORDERS (PRO) ===== */
+  .orders-toolbar {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+  }
+  .filter-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 12px;
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    background: #fff;
+    font-weight: 800;
+    font-size: 12px;
+    color: var(--text-main);
+    white-space: nowrap;
+  }
+  .filter-chip select,
+  .filter-chip input {
+    border: none;
+    background: transparent;
+    font-weight: 800;
+    font-size: 12px;
+    color: var(--text-main);
+    outline: none;
+  }
+  .filter-chip select { cursor: pointer; }
+  .orders-subtitle {
+    margin: 0;
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--text-muted);
+  }
+  .order-row {
+    cursor: pointer;
+    transition: background 0.2s ease, transform 0.2s ease;
+  }
+  .order-row:hover { background: rgba(255,126,141,0.06); }
+  .order-id-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 10px;
+    border-radius: 999px;
+    border: 1px solid rgba(0,0,0,0.14);
+    background: #fff;
+    font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+    font-size: 12px;
+    font-weight: 800;
+    color: rgba(0,0,0,0.75);
+  }
+  .mini-muted { font-size: 11px; font-weight: 700; color: rgba(0,0,0,0.60); }
+  .btn-linkish {
+    border: 1px solid rgba(0,0,0,0.14);
+    background: #fff;
+    color: #000;
+    padding: 8px 12px;
+    border-radius: 12px;
+    font-weight: 900;
+    font-size: 12px;
+    cursor: pointer;
+    transition: 0.2s;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    white-space: nowrap;
+  }
+  .btn-linkish:hover { background: rgba(0,0,0,0.03); border-color: rgba(0,0,0,0.22); }
+
+  /* ORDER DETAILS MODAL */
+  .modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.38);
+    z-index: 6000;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    padding: 18px;
+  }
+  .modal-overlay.show { display: flex; }
+  .modal-card {
+    width: min(980px, 100%);
+    max-height: min(84vh, 760px);
+    background: #fff;
+    border-radius: 18px;
+    border: 1px solid rgba(0,0,0,0.14);
+    box-shadow: 0 20px 60px rgba(0,0,0,0.30);
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+  }
+  .modal-head {
+    padding: 16px 18px;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+  }
+  .modal-title {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+  .modal-title h3 {
+    margin: 0;
+    font-size: 16px;
+    font-weight: 900;
+    font-family: 'Poppins', sans-serif;
+    color: #000;
+    line-height: 1.1;
+  }
+  .modal-body {
+    padding: 18px;
+    overflow: auto;
+  }
+  .modal-grid {
+    display: grid;
+    grid-template-columns: 1.4fr 1fr;
+    gap: 16px;
+  }
+  .detail-card {
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    background: #fff;
+    overflow: hidden;
+  }
+  .detail-card .dc-head {
+    padding: 12px 14px;
+    border-bottom: 1px solid var(--border);
+    font-size: 12px;
+    font-weight: 900;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: rgba(0,0,0,0.70);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+  }
+  .detail-card .dc-body { padding: 14px; }
+  .kv {
+    display: grid;
+    grid-template-columns: 140px 1fr;
+    gap: 10px;
+    padding: 8px 0;
+    border-bottom: 1px solid rgba(0,0,0,0.06);
+  }
+  .kv:last-child { border-bottom: none; }
+  .kv b { font-size: 12px; color: rgba(0,0,0,0.65); }
+  .kv span { font-size: 13px; font-weight: 800; color: #000; word-break: break-word; }
+
+  .items-list { display: flex; flex-direction: column; gap: 10px; }
+  .item-row {
+    display: flex;
+    gap: 12px;
+    align-items: center;
+    border: 1px solid rgba(0,0,0,0.10);
+    border-radius: 14px;
+    padding: 10px;
+    background: #fff;
+  }
+  .item-thumb {
+    width: 46px;
+    height: 46px;
+    border-radius: 12px;
+    object-fit: cover;
+    border: 1px solid rgba(0,0,0,0.12);
+    background: #fff;
+    flex-shrink: 0;
+  }
+  .item-main { flex: 1; min-width: 0; }
+  .item-name {
+    font-weight: 900;
+    font-size: 13px;
+    color: #000;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .item-meta { margin-top: 3px; font-size: 11px; font-weight: 700; color: rgba(0,0,0,0.62); }
+  .item-price { font-weight: 900; font-size: 13px; white-space: nowrap; }
+
+  @media (max-width: 900px) {
+    .modal-grid { grid-template-columns: 1fr; }
+    .kv { grid-template-columns: 120px 1fr; }
+  }
+
   /* EDITOR FORM */
   .editor-grid { display: grid; grid-template-columns: 2fr 1fr; gap: 32px; max-width: 1200px; margin: 0 auto; }
   .card-section {
@@ -748,14 +941,80 @@
         Customer Orders
       </div>
     </header>
+
     <div class="content-area">
+
+      <!-- ✅ Orders Summary + Filters (Professional) -->
+      <div class="stats-grid" style="margin-bottom:18px;">
+        <div class="stat-card">
+          <div class="stat-icon" style="background:rgba(255,126,141,0.14); color:#000;"><i class='bx bxs-receipt'></i></div>
+          <div class="stat-info">
+            <h4 id="orderStatTotal">0</h4>
+            <p>Total Orders</p>
+          </div>
+        </div>
+
+        <div class="stat-card">
+          <div class="stat-icon" style="background:rgba(255,126,141,0.14); color:#000;"><i class='bx bxs-wallet'></i></div>
+          <div class="stat-info">
+            <h4 id="orderStatRevenue">PKR 0</h4>
+            <p>Revenue Earned</p>
+          </div>
+        </div>
+
+        <div class="stat-card">
+          <div class="stat-icon" style="background:rgba(255,126,141,0.14); color:#000;"><i class='bx bxs-hourglass'></i></div>
+          <div class="stat-info">
+            <h4 id="orderStatPending">0</h4>
+            <p>Pending Orders</p>
+          </div>
+        </div>
+
+        <div class="stat-card">
+          <div class="stat-icon" style="background:rgba(255,126,141,0.14); color:#000;"><i class='bx bxs-truck'></i></div>
+          <div class="stat-info">
+            <h4 id="orderStatDelivered">0</h4>
+            <p>Delivered</p>
+          </div>
+        </div>
+      </div>
+
       <div class="table-card">
+        <div class="table-header" style="align-items:flex-start;">
+          <div style="display:flex; flex-direction:column; gap:6px;">
+            <h3 style="margin:0; font-size:16px; font-weight:900;">Orders</h3>
+            <p class="orders-subtitle" id="ordersSubtitle">Showing 0 orders</p>
+          </div>
+
+          <div class="orders-toolbar">
+            <div class="search-box" style="display:flex; width:280px;">
+              <i class='bx bx-search'></i>
+              <input type="text" id="ordersSearchInput" placeholder="Search name, email, order id...">
+            </div>
+
+            <div class="filter-chip">
+              <i class='bx bx-filter'></i>
+              <select id="ordersStatusFilter">
+                <option value="All">All</option>
+                <option value="Pending">Pending</option>
+                <option value="Shipped">Shipped</option>
+                <option value="Delivered">Delivered</option>
+                <option value="Cancelled">Cancelled</option>
+              </select>
+            </div>
+
+            <button class="btn-linkish" id="ordersClearFiltersBtn" type="button">
+              <i class='bx bx-refresh'></i> Reset
+            </button>
+          </div>
+        </div>
+
         <!-- ✅ Mobile/tablet fix: allow horizontal scroll without breaking layout -->
         <div style="overflow-x:auto;">
           <table>
             <thead>
               <tr>
-                <th class="text-left">Order ID</th>
+                <th class="text-left">Order</th>
                 <th class="text-left">Customer</th>
                 <th class="text-left">Total</th>
                 <th class="text-left">Date</th>
@@ -767,6 +1026,7 @@
           </table>
         </div>
       </div>
+
     </div>
   </div>
 
@@ -860,6 +1120,25 @@
 
 </main>
 
+<!-- ✅ Order Details Modal -->
+<div id="orderModalOverlay" class="modal-overlay" aria-hidden="true">
+  <div class="modal-card" role="dialog" aria-modal="true">
+    <div class="modal-head">
+      <div class="modal-title">
+        <h3 id="orderModalTitle">Order Details</h3>
+        <div class="mini-muted" id="orderModalSubtitle">—</div>
+      </div>
+      <div style="display:flex; align-items:center; gap:10px;">
+        <button class="btn-linkish" id="copyOrderIdBtn" type="button"><i class='bx bx-copy'></i> Copy ID</button>
+        <button class="btn-secondary" id="closeOrderModalBtn" type="button" style="padding:10px 12px; border-radius:12px;"><i class='bx bx-x'></i> Close</button>
+      </div>
+    </div>
+    <div class="modal-body" id="orderModalBody">
+      <!-- injected -->
+    </div>
+  </div>
+</div>
+
 <script type="module">
   import { auth, db } from "./firebase.js";
   import { onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-auth.js";
@@ -871,6 +1150,11 @@
   let products = [];
   let orders = [];
   let currentEditId = null;
+
+  // ✅ orders ui state
+  let ordersQuery = "";
+  let ordersStatus = "All";
+  let selectedOrderId = null;
 
   // --- DOM ELEMENTS ---
   const views = {
@@ -1002,9 +1286,7 @@
 
   function normalizeStatus(s){
     const v = String(s || "Pending").trim();
-    // keep it limited to your known statuses
     if (v === "Pending" || v === "Shipped" || v === "Delivered" || v === "Cancelled") return v;
-    // basic mapping (in case you have "paid", "completed", etc.)
     const low = v.toLowerCase();
     if (low.includes("deliver")) return "Delivered";
     if (low.includes("ship")) return "Shipped";
@@ -1017,6 +1299,36 @@
   }
   function getCustomerEmail(o){
     return (o?.customer?.email || o?.customerEmail || o?.email || o?.shipping?.email || '');
+  }
+
+  function getOrderItems(o){
+    const items = o?.items || o?.cartItems || o?.lineItems || o?.products || [];
+    return Array.isArray(items) ? items : [];
+  }
+
+  function safeText(v){
+    const s = (v === null || v === undefined) ? '' : String(v);
+    return s.replace(/[&<>"']/g, (m) => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[m]));
+  }
+
+  function currency(n){
+    const val = Number(n || 0);
+    return "PKR " + (Number.isFinite(val) ? val.toLocaleString() : "0");
+  }
+
+  function buildAddressText(addr){
+    if (!addr) return "—";
+    if (typeof addr === "string") return addr;
+    const parts = [
+      addr.line1 || addr.address1 || addr.street,
+      addr.line2 || addr.address2,
+      addr.area,
+      addr.city,
+      addr.state,
+      addr.postalCode || addr.zip,
+      addr.country
+    ].filter(Boolean);
+    return parts.length ? parts.join(", ") : "—";
   }
 
   // --- RENDERING ---
@@ -1094,33 +1406,86 @@
     `).join('');
   }
 
+  function updateOrdersSummaryCards(list){
+    const all = orders;
+    const totalOrders = all.length;
+    const revenue = all.reduce((sum, o) => sum + getOrderTotal(o), 0);
+    const pending = all.filter(o => normalizeStatus(o.status) === "Pending").length;
+    const delivered = all.filter(o => normalizeStatus(o.status) === "Delivered").length;
+
+    const elTotal = document.getElementById('orderStatTotal');
+    const elRev = document.getElementById('orderStatRevenue');
+    const elPending = document.getElementById('orderStatPending');
+    const elDelivered = document.getElementById('orderStatDelivered');
+
+    if (elTotal) elTotal.textContent = totalOrders;
+    if (elRev) elRev.textContent = currency(revenue);
+    if (elPending) elPending.textContent = pending;
+    if (elDelivered) elDelivered.textContent = delivered;
+
+    const subtitle = document.getElementById('ordersSubtitle');
+    if (subtitle) subtitle.textContent = `Showing ${list.length} order${list.length === 1 ? '' : 's'}`;
+  }
+
+  function getFilteredOrders(){
+    const q = (ordersQuery || "").trim().toLowerCase();
+    const status = ordersStatus || "All";
+
+    return [...orders]
+      .filter(o => {
+        const s = normalizeStatus(o.status);
+        if (status !== "All" && s !== status) return false;
+        if (!q) return true;
+
+        const idShort = (o.id || "").slice(0, 8).toLowerCase();
+        const name = (getCustomerName(o) || "").toLowerCase();
+        const email = (getCustomerEmail(o) || "").toLowerCase();
+        const fullId = (o.id || "").toLowerCase();
+
+        return (
+          name.includes(q) ||
+          email.includes(q) ||
+          idShort.includes(q) ||
+          fullId.includes(q)
+        );
+      })
+      .sort((a,b) => {
+        const ad = getOrderDateValue(a)?.getTime?.() || 0;
+        const bd = getOrderDateValue(b)?.getTime?.() || 0;
+        return bd - ad;
+      });
+  }
+
   function renderOrders() {
     const tbody = document.getElementById('ordersTableBody');
+    const filtered = getFilteredOrders();
 
-    // ✅ newest first (supports createdAt/created_at/timestamp/string)
-    const sorted = [...orders].sort((a,b) => {
-      const ad = getOrderDateValue(a)?.getTime?.() || 0;
-      const bd = getOrderDateValue(b)?.getTime?.() || 0;
-      return bd - ad;
-    });
+    updateOrdersSummaryCards(filtered);
 
-    tbody.innerHTML = sorted.map(o => {
+    tbody.innerHTML = filtered.map(o => {
       const status = normalizeStatus(o.status);
       const name = getCustomerName(o);
       const email = getCustomerEmail(o);
       const total = getOrderTotal(o);
       const dateStr = formatOrderDate(o);
+      const short = o.id.slice(0,6);
 
       return `
-        <tr>
-          <td style="font-family:monospace; color:rgba(0,0,0,0.65);">#${o.id.slice(0,6)}</td>
+        <tr class="order-row" onclick="openOrderDetails('${o.id}')">
           <td>
-            <div style="font-weight:800;">${name}</div>
-            <div style="font-size:11px; color:rgba(0,0,0,0.65); font-weight:600;">${email}</div>
+            <span class="order-id-pill"><i class='bx bx-hash'></i> ${short}</span>
+            <div class="mini-muted" style="margin-top:6px;">Tap to view full details</div>
           </td>
-          <td>PKR ${total.toLocaleString()}</td>
-          <td>${dateStr}</td>
-          <td class="text-center">
+
+          <td>
+            <div style="font-weight:900;">${safeText(name)}</div>
+            <div class="mini-muted">${safeText(email)}</div>
+          </td>
+
+          <td style="font-weight:900;">${currency(total)}</td>
+          <td>${safeText(dateStr)}</td>
+
+          <td class="text-center" onclick="event.stopPropagation()">
             <select class="status-select ${status}" onchange="updateOrderStatus('${o.id}', this)">
               <option value="Pending" ${status === 'Pending' ? 'selected' : ''}>Pending</option>
               <option value="Shipped" ${status === 'Shipped' ? 'selected' : ''}>Shipped</option>
@@ -1128,17 +1493,148 @@
               <option value="Cancelled" ${status === 'Cancelled' ? 'selected' : ''}>Cancelled</option>
             </select>
           </td>
-          <td class="text-right">
+
+          <td class="text-right" onclick="event.stopPropagation()">
             <button class="action-btn btn-delete" onclick="deleteOrder('${o.id}')"><i class='bx bx-trash'></i></button>
           </td>
         </tr>
       `;
     }).join('');
 
-    if (sorted.length === 0) {
-      tbody.innerHTML = `<tr><td colspan="6" style="text-align:center; color:rgba(0,0,0,0.65); padding:28px; font-weight:700;">No orders yet.</td></tr>`;
+    if (filtered.length === 0) {
+      tbody.innerHTML = `<tr><td colspan="6" style="text-align:center; color:rgba(0,0,0,0.65); padding:28px; font-weight:900;">No orders match your filters.</td></tr>`;
     }
   }
+
+  // ✅ Modal logic
+  const orderModalOverlay = document.getElementById('orderModalOverlay');
+  const orderModalTitle = document.getElementById('orderModalTitle');
+  const orderModalSubtitle = document.getElementById('orderModalSubtitle');
+  const orderModalBody = document.getElementById('orderModalBody');
+  const closeOrderModalBtn = document.getElementById('closeOrderModalBtn');
+  const copyOrderIdBtn = document.getElementById('copyOrderIdBtn');
+
+  function openModal(){
+    orderModalOverlay.classList.add('show');
+    orderModalOverlay.setAttribute('aria-hidden', 'false');
+    document.addEventListener('keydown', escCloseOrderModal);
+  }
+  function closeModal(){
+    orderModalOverlay.classList.remove('show');
+    orderModalOverlay.setAttribute('aria-hidden', 'true');
+    document.removeEventListener('keydown', escCloseOrderModal);
+    selectedOrderId = null;
+  }
+  function escCloseOrderModal(e){
+    if(e.key === 'Escape') closeModal();
+  }
+
+  window.openOrderDetails = (id) => {
+    const o = orders.find(x => x.id === id);
+    if(!o) return;
+
+    selectedOrderId = id;
+
+    const status = normalizeStatus(o.status);
+    const name = getCustomerName(o);
+    const email = getCustomerEmail(o);
+    const total = getOrderTotal(o);
+    const dateStr = formatOrderDate(o);
+
+    orderModalTitle.textContent = `Order #${id.slice(0,6)}`;
+    orderModalSubtitle.textContent = `${name}${email ? " • " + email : ""} • ${dateStr}`;
+
+    const shipping = o.shipping || o.address || o.delivery || {};
+    const phone = o.customer?.phone || o.customerPhone || o.phone || shipping.phone || "—";
+    const addrText = buildAddressText(shipping);
+
+    const payment = o.paymentMethod || o.payment || o.method || o.gateway || "—";
+    const notes = o.notes || o.note || o.message || "—";
+
+    const items = getOrderItems(o);
+    const itemsHtml = items.length ? items.map((it) => {
+      const img = safeImg(it.image || it.img || it.thumbnail || it.photo || it.images?.[0] || "");
+      const n = it.name || it.title || it.productName || "Item";
+      const qty = Number(it.qty ?? it.quantity ?? 1) || 1;
+      const price = Number(it.price ?? it.unitPrice ?? it.amount ?? 0) || 0;
+
+      const shape = it.shape || it.selectedShape || it.variant?.shape || "";
+      const size = it.size || it.selectedSize || it.variant?.size || "";
+      const variantText = [shape ? `Shape: ${shape}` : "", size ? `Size: ${size}` : ""].filter(Boolean).join(" • ");
+
+      return `
+        <div class="item-row">
+          <img class="item-thumb" src="${img}" onerror="this.src='https://placehold.co/100x100/f3f4f6/9ca3af?text=No+Img'">
+          <div class="item-main">
+            <div class="item-name">${safeText(n)}</div>
+            <div class="item-meta">${variantText ? safeText(variantText) + " • " : ""}Qty: ${qty}</div>
+          </div>
+          <div class="item-price">${currency(price * qty)}</div>
+        </div>
+      `;
+    }).join('') : `<div style="font-weight:900; color:rgba(0,0,0,0.65);">No items found in this order.</div>`;
+
+    orderModalBody.innerHTML = `
+      <div class="modal-grid">
+        <div class="detail-card">
+          <div class="dc-head">
+            <span><i class='bx bxs-cart-alt'></i> Items</span>
+            <span class="mini-muted">${items.length} item${items.length === 1 ? '' : 's'}</span>
+          </div>
+          <div class="dc-body">
+            <div class="items-list">${itemsHtml}</div>
+          </div>
+        </div>
+
+        <div style="display:flex; flex-direction:column; gap:16px;">
+          <div class="detail-card">
+            <div class="dc-head"><span><i class='bx bxs-receipt'></i> Order Info</span></div>
+            <div class="dc-body">
+              <div class="kv"><b>Status</b>
+                <span>
+                  <select class="status-select ${status}" style="width: 160px;" onchange="updateOrderStatusFromModal('${id}', this)">
+                    <option value="Pending" ${status === 'Pending' ? 'selected' : ''}>Pending</option>
+                    <option value="Shipped" ${status === 'Shipped' ? 'selected' : ''}>Shipped</option>
+                    <option value="Delivered" ${status === 'Delivered' ? 'selected' : ''}>Delivered</option>
+                    <option value="Cancelled" ${status === 'Cancelled' ? 'selected' : ''}>Cancelled</option>
+                  </select>
+                </span>
+              </div>
+              <div class="kv"><b>Total</b><span>${currency(total)}</span></div>
+              <div class="kv"><b>Payment</b><span>${safeText(payment)}</span></div>
+              <div class="kv"><b>Phone</b><span>${safeText(phone)}</span></div>
+            </div>
+          </div>
+
+          <div class="detail-card">
+            <div class="dc-head"><span><i class='bx bxs-map'></i> Shipping</span></div>
+            <div class="dc-body">
+              <div class="kv"><b>Name</b><span>${safeText(name)}</span></div>
+              <div class="kv"><b>Email</b><span>${safeText(email || "—")}</span></div>
+              <div class="kv"><b>Address</b><span>${safeText(addrText)}</span></div>
+            </div>
+          </div>
+
+          <div class="detail-card">
+            <div class="dc-head"><span><i class='bx bxs-note'></i> Notes</span></div>
+            <div class="dc-body">
+              <div style="font-size:13px; font-weight:800; color:#000; line-height:1.5; white-space:pre-wrap;">${safeText(notes)}</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    `;
+
+    openModal();
+  };
+
+  window.updateOrderStatusFromModal = async (id, selectEl) => {
+    await updateOrderStatus(id, selectEl);
+    // keep modal UI in sync
+    if (selectedOrderId === id) {
+      openOrderDetails(id);
+    }
+  };
 
   // --- ACTIONS ---
   window.editProduct = (id) => {
@@ -1189,17 +1685,33 @@
 
   window.updateOrderStatus = async (id, selectEl) => {
     const newStatus = selectEl.value;
-    // ✅ ensure class always matches theme selectors
     selectEl.className = `status-select ${newStatus}`;
+
+    // ✅ This updates the same Firestore order doc, so customer side stays updated automatically
     await updateDoc(doc(db, "orders", id), { status: newStatus });
+
+    // keep local state synced (no re-fetch required)
+    const idx = orders.findIndex(x => x.id === id);
+    if (idx !== -1) orders[idx].status = newStatus;
+
     showToast(`Order marked as ${newStatus}`);
+
+    // update summary + table without losing filters
+    renderOrders();
   };
 
   window.deleteOrder = async (id) => {
     if (!confirm("Delete this order?")) return;
     await deleteDoc(doc(db, "orders", id));
-    await fetchOrders();
+
+    // keep local state synced
+    orders = orders.filter(o => o.id !== id);
+
     renderOrders();
+    updateStats();
+
+    if (selectedOrderId === id) closeModal();
+
     showToast("Order deleted");
   };
 
@@ -1301,6 +1813,52 @@
     const search = document.getElementById('searchInput');
     if (search) {
       search.addEventListener('input', (e) => renderDashboard(e.target.value));
+    }
+
+    // ✅ Orders filters
+    const oSearch = document.getElementById('ordersSearchInput');
+    const oStatus = document.getElementById('ordersStatusFilter');
+    const oReset = document.getElementById('ordersClearFiltersBtn');
+
+    if (oSearch) {
+      oSearch.addEventListener('input', (e) => {
+        ordersQuery = e.target.value || "";
+        renderOrders();
+      });
+    }
+    if (oStatus) {
+      oStatus.addEventListener('change', (e) => {
+        ordersStatus = e.target.value || "All";
+        renderOrders();
+      });
+    }
+    if (oReset) {
+      oReset.addEventListener('click', () => {
+        ordersQuery = "";
+        ordersStatus = "All";
+        if (oSearch) oSearch.value = "";
+        if (oStatus) oStatus.value = "All";
+        renderOrders();
+      });
+    }
+
+    // ✅ Modal events
+    if (closeOrderModalBtn) closeOrderModalBtn.onclick = closeModal;
+    if (orderModalOverlay) {
+      orderModalOverlay.addEventListener('click', (e) => {
+        if (e.target === orderModalOverlay) closeModal();
+      });
+    }
+    if (copyOrderIdBtn) {
+      copyOrderIdBtn.onclick = async () => {
+        if (!selectedOrderId) return;
+        try {
+          await navigator.clipboard.writeText(selectedOrderId);
+          showToast("Order ID copied");
+        } catch {
+          showToast("Copy not supported");
+        }
+      };
     }
 
     // Editor Buttons
