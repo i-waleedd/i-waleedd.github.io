@@ -31,8 +31,6 @@
     --success-text: #000000;
     --draft-bg: rgba(0,0,0,0.06);
     --draft-text: #000000;
-    --danger-bg: rgba(0,0,0,0.06);
-    --danger-text: #000000;
 
     --sidebar-bg: #000000;
     --sidebar-active: rgba(255,255,255,0.08);
@@ -261,18 +259,6 @@
   .prod-thumb { width: 44px; height: 44px; border-radius: 10px; object-fit: cover; background: #fff; border: 1px solid var(--border); }
   .prod-name { font-weight: 700; color: var(--text-main); font-size: 14px; }
 
-  .badge {
-    padding: 4px 10px;
-    border-radius: 20px;
-    font-size: 11px;
-    font-weight: 700;
-    display: inline-block;
-    text-transform: capitalize;
-    letter-spacing: 0.3px;
-  }
-  .badge-active { background: var(--success-bg); color: var(--success-text); border: 1px solid rgba(255,126,141,0.35); }
-  .badge-draft { background: var(--draft-bg); color: var(--draft-text); border: 1px solid var(--border); }
-
   .actions-cell { display: flex; justify-content: flex-end; gap: 8px; }
 
   .action-btn {
@@ -293,7 +279,11 @@
   .btn-delete { background: #fff; border-color: rgba(0,0,0,0.18); color: var(--primary); }
   .btn-delete:hover { background: rgba(0,0,0,0.04); }
 
-  /* ORDER STATUS SELECT (theme-only) */
+  /* ✅ hide/unhide quick action */
+  .btn-hide { background: #fff; border-color: rgba(0,0,0,0.18); color: #000; }
+  .btn-hide:hover { background: rgba(0,0,0,0.04); }
+
+  /* ✅ ONE control in Product Status column: dropdown */
   .status-select {
     padding: 6px 12px;
     border-radius: 999px;
@@ -304,17 +294,9 @@
     outline: none;
     appearance: none;
     text-align: center;
-    width: 120px;
+    width: 140px;
     background: #fff;
     color: #000;
-  }
-  .status-select.Pending,
-  .status-select.Shipped,
-  .status-select.Delivered,
-  .status-select.Cancelled {
-    background: #fff;
-    color: #000;
-    border-color: rgba(0,0,0,0.18);
   }
   .status-select:focus { border-color: var(--primary); box-shadow: 0 0 0 3px rgba(255,126,141,0.18); }
 
@@ -597,7 +579,7 @@
   }
   .btn-remove-img:hover { background: rgba(0,0,0,0.04); border-color: rgba(0,0,0,0.22); }
 
-  /* SWITCHES (FIX: make toggles visible + theme-only) */
+  /* SWITCHES */
   .switch-group {
     display: flex;
     justify-content: space-between;
@@ -676,12 +658,11 @@
   }
   .sidebar-overlay.show{ display:block; }
 
-  /* ✅ MOBILE MENU STYLE (match products.html: floating rounded drawer + proper overlay) */
+  /* ✅ MOBILE MENU STYLE */
   @media (max-width: 900px) {
     body { height: 100dvh; }
     .editor-grid { grid-template-columns: 1fr; }
 
-    /* Sidebar becomes a floating drawer like products.html */
     .sidebar{
       position: fixed;
       left: 12px;
@@ -725,11 +706,9 @@
       font-size: 14px;
     }
 
-    /* Overlay same feeling as products.html */
     .sidebar-overlay{ z-index: 1999; background: rgba(0,0,0,0.35); }
     .sidebar-overlay.show{ display:block; }
 
-    /* Topbar + content spacing */
     .toggle-menu-btn { display: block; }
     .topbar{
       padding: 0 12px;
@@ -744,7 +723,6 @@
       white-space: nowrap;
     }
 
-    /* Add Product button too big -> compact like mobile buttons */
     .btn-primary{
       padding: 8px 12px;
       font-size: 11px;
@@ -755,7 +733,6 @@
     }
     .btn-primary i{ font-size: 18px; }
 
-    /* Editor top buttons compact */
     #editorView .btn-secondary,
     #editorView .btn-primary{
       padding: 8px 10px !important;
@@ -766,20 +743,17 @@
     .content-area{ padding: 14px 12px 18px; }
     .table-card{ overflow-x: auto; }
 
-    /* Stats grid tighter */
     .stats-grid{ gap: 12px; margin-bottom: 16px; }
     .stat-card{ padding: 14px; border-radius: 14px; gap: 12px; }
     .stat-icon{ width: 46px; height: 46px; border-radius: 14px; font-size: 22px; }
     .stat-info h4{ font-size: 22px; }
     .stat-info p{ font-size: 12px; }
 
-    /* Table padding tighter on mobile */
     th{ padding: 12px 14px; }
     td{ padding: 14px 14px; font-size: 13px; }
     .prod-thumb{ width: 38px; height: 38px; border-radius: 10px; }
     .prod-name{ font-size: 13px; }
 
-    /* Search hidden already, keep */
     .search-box { width: 100%; display: none; }
   }
 
@@ -944,7 +918,6 @@
 
     <div class="content-area">
 
-      <!-- ✅ Orders Summary + Filters (Professional) -->
       <div class="stats-grid" style="margin-bottom:18px;">
         <div class="stat-card">
           <div class="stat-icon" style="background:rgba(255,126,141,0.14); color:#000;"><i class='bx bxs-receipt'></i></div>
@@ -1009,7 +982,6 @@
           </div>
         </div>
 
-        <!-- ✅ Mobile/tablet fix: allow horizontal scroll without breaking layout -->
         <div style="overflow-x:auto;">
           <table>
             <thead>
@@ -1133,9 +1105,7 @@
         <button class="btn-secondary" id="closeOrderModalBtn" type="button" style="padding:10px 12px; border-radius:12px;"><i class='bx bx-x'></i> Close</button>
       </div>
     </div>
-    <div class="modal-body" id="orderModalBody">
-      <!-- injected -->
-    </div>
+    <div class="modal-body" id="orderModalBody"></div>
   </div>
 </div>
 
@@ -1205,7 +1175,7 @@
       if (user && user.email === "workwithwaleed1@gmail.com") {
         initAdmin();
       } else {
-        window.location.href = "login.html"; // Protect route
+        window.location.href = "login.html";
       }
     });
   });
@@ -1225,10 +1195,9 @@
     views[viewName].classList.add('active');
     if (navItems[viewName]) navItems[viewName].classList.add('active');
 
-    // close mobile sidebar
     closeSidebar();
 
-    if (viewName === 'dashboard') renderDashboard();
+    if (viewName === 'dashboard') renderDashboard(document.getElementById('searchInput')?.value || "");
     if (viewName === 'home') renderHomeManager();
     if (viewName === 'bestSellers') renderBestSellersManager();
     if (viewName === 'orders') renderOrders();
@@ -1247,25 +1216,84 @@
     updateStats();
   }
 
-  function updateStats() {
-    document.getElementById('statProducts').textContent = products.length;
-    document.getElementById('statOrders').textContent = orders.length;
-
-    // ✅ Orders total can be stored as total/grandTotal/amount (safe fallback)
-    const totalRev = orders.reduce((sum, order) => sum + getOrderTotal(order), 0);
-    document.getElementById('statRevenue').textContent = "PKR " + totalRev.toLocaleString();
+  // ✅ Revenue rules:
+  // - COD: revenue counts ONLY when status is Delivered
+  // - Online: revenue counts as soon as payment is received
+  function getPaymentMethodText(o){
+    const m = (o?.paymentMethod ?? o?.payment ?? o?.method ?? o?.gateway ?? o?.paymentGateway ?? o?.payment_provider ?? "");
+    return String(m || "").trim();
   }
 
-  // ✅ safe image (no external placeholder dependency)
-  function safeImg(url){
-    return url && url.trim().length ? url : "https://placehold.co/100x100/f3f4f6/9ca3af?text=No+Img";
+  function isCashOnDelivery(o){
+    const m = getPaymentMethodText(o).toLowerCase();
+    return (m.includes("cod") || m.includes("cash") || m.includes("cash on delivery") || m.includes("pay on delivery"));
   }
 
-  // ✅ orders helpers (admin)
+  function isPaymentReceived(o){
+    const flags = [o?.isPaid, o?.paid, o?.paymentReceived, o?.payment_done, o?.payment_done === true];
+    if (flags.some(v => v === true)) return true;
+
+    const maybeId = o?.paymentId || o?.transactionId || o?.txnId || o?.referenceId || o?.reference || o?.receiptId;
+    const paidAt = o?.paidAt || o?.paid_at || o?.paymentDate || o?.payment_date;
+    if (paidAt) return true;
+
+    const ps =
+      o?.paymentStatus ??
+      o?.payment_status ??
+      o?.payment?.status ??
+      o?.gatewayStatus ??
+      o?.gateway_status ??
+      o?.statusPayment ??
+      "";
+
+    const s = String(ps || "").toLowerCase().trim();
+    if (
+      s === "paid" || s === "success" || s === "succeeded" || s === "completed" ||
+      s === "received" || s === "captured" ||
+      s.includes("paid") || s.includes("success") || s.includes("succeed") ||
+      s.includes("complete") || s.includes("receive") || s.includes("capture")
+    ) return true;
+
+    if (maybeId && !s.includes("fail") && !s.includes("cancel") && !s.includes("decline")) return true;
+
+    return false;
+  }
+
+  function normalizeStatus(s){
+    const v = String(s || "Pending").trim();
+    if (v === "Pending" || v === "Shipped" || v === "Delivered" || v === "Cancelled") return v;
+    const low = v.toLowerCase();
+    if (low.includes("deliver")) return "Delivered";
+    if (low.includes("ship")) return "Shipped";
+    if (low.includes("cancel") || low.includes("reject") || low.includes("fail")) return "Cancelled";
+    return "Pending";
+  }
+
   function getOrderTotal(o){
     const v = (o?.total ?? o?.grandTotal ?? o?.amount ?? 0);
     const n = Number(v || 0);
     return Number.isFinite(n) ? n : 0;
+  }
+
+  function isRevenueEarned(o){
+    if (isCashOnDelivery(o)) return normalizeStatus(o.status) === "Delivered";
+    return isPaymentReceived(o);
+  }
+
+  function getEarnedRevenueTotal(list){
+    return (list || []).reduce((sum, order) => sum + (isRevenueEarned(order) ? getOrderTotal(order) : 0), 0);
+  }
+
+  function updateStats() {
+    document.getElementById('statProducts').textContent = products.length;
+    document.getElementById('statOrders').textContent = orders.length;
+
+    const earned = getEarnedRevenueTotal(orders);
+    document.getElementById('statRevenue').textContent = "PKR " + earned.toLocaleString();
+  }
+
+  function safeImg(url){
+    return url && url.trim().length ? url : "https://placehold.co/100x100/f3f4f6/9ca3af?text=No+Img";
   }
 
   function getOrderDateValue(o){
@@ -1282,16 +1310,6 @@
   function formatOrderDate(o){
     const d = getOrderDateValue(o);
     return d ? d.toLocaleDateString(undefined, { year:'numeric', month:'short', day:'2-digit' }) : '—';
-  }
-
-  function normalizeStatus(s){
-    const v = String(s || "Pending").trim();
-    if (v === "Pending" || v === "Shipped" || v === "Delivered" || v === "Cancelled") return v;
-    const low = v.toLowerCase();
-    if (low.includes("deliver")) return "Delivered";
-    if (low.includes("ship")) return "Shipped";
-    if (low.includes("cancel") || low.includes("reject") || low.includes("fail")) return "Cancelled";
-    return "Pending";
   }
 
   function getCustomerName(o){
@@ -1340,24 +1358,47 @@
       ? products.filter(p => (p.name || "").toLowerCase().includes(q))
       : products;
 
-    tbody.innerHTML = filtered.map(p => `
-      <tr>
-        <td>
-          <div class="prod-cell">
-            <img src="${safeImg(p.images?.[0])}" class="prod-thumb" onerror="this.src='https://placehold.co/100x100/f3f4f6/9ca3af?text=No+Img'">
-            <span class="prod-name">${p.name || '-'}</span>
-          </div>
-        </td>
-        <td>PKR ${(p.price || 0).toLocaleString()}</td>
-        <td class="text-center"><span class="badge ${p.stock ? 'badge-active' : 'badge-draft'}">${p.stock ? 'In Stock' : 'Out'}</span></td>
-        <td>
-          <div class="actions-cell">
-            <button class="action-btn btn-edit" onclick="editProduct('${p.id}')"><i class='bx bx-edit'></i></button>
-            <button class="action-btn btn-delete" onclick="deleteProduct('${p.id}')"><i class='bx bx-trash'></i></button>
-          </div>
-        </td>
-      </tr>
-    `).join('');
+    tbody.innerHTML = filtered.map(p => {
+      const inStock = !!p.stock;
+      const hidden = !!p.isHidden;
+
+      return `
+        <tr>
+          <td>
+            <div class="prod-cell">
+              <img src="${safeImg(p.images?.[0])}" class="prod-thumb" onerror="this.src='https://placehold.co/100x100/f3f4f6/9ca3af?text=No+Img'">
+              <div style="display:flex; flex-direction:column; gap:6px;">
+                <span class="prod-name">${p.name || '-'}</span>
+                ${hidden ? `<span class="mini-muted" style="font-weight:900;"><i class='bx bx-hide'></i> Hidden on Website</span>` : ``}
+              </div>
+            </div>
+          </td>
+          <td>PKR ${(p.price || 0).toLocaleString()}</td>
+
+          <!-- ✅ STATUS COLUMN: ONLY ONE CONTROL -->
+          <td class="text-center">
+            <select
+              class="status-select"
+              onchange="quickSetStockFromSelect('${p.id}', this)"
+              title="Set stock status"
+            >
+              <option value="in" ${inStock ? 'selected' : ''}>In Stock</option>
+              <option value="out" ${!inStock ? 'selected' : ''}>Out of Stock</option>
+            </select>
+          </td>
+
+          <td>
+            <div class="actions-cell">
+              <button class="action-btn btn-hide" title="${hidden ? 'Unhide from website' : 'Hide from website'}" onclick="toggleHiddenFromAction('${p.id}')">
+                <i class='bx ${hidden ? 'bx-show' : 'bx-hide'}'></i>
+              </button>
+              <button class="action-btn btn-edit" onclick="editProduct('${p.id}')"><i class='bx bx-edit'></i></button>
+              <button class="action-btn btn-delete" onclick="deleteProduct('${p.id}')"><i class='bx bx-trash'></i></button>
+            </div>
+          </td>
+        </tr>
+      `;
+    }).join('');
 
     if (filtered.length === 0) {
       tbody.innerHTML = `<tr><td colspan="4" style="text-align:center; color:rgba(0,0,0,0.65); padding:28px; font-weight:700;">No products found.</td></tr>`;
@@ -1374,7 +1415,9 @@
             <span class="prod-name">${p.name || '-'}</span>
           </div>
         </td>
-        <td class="text-center"><span class="badge ${p.stock ? 'badge-active' : 'badge-draft'}">${p.stock ? 'Active' : 'Inactive'}</span></td>
+        <td class="text-center">
+          <span style="font-weight:900; color:rgba(0,0,0,0.75);">${p.stock ? 'Active' : 'Inactive'}</span>
+        </td>
         <td class="text-center">
           <label class="toggle-switch toggle-sm">
             <input type="checkbox" ${!p.isHidden ? 'checked' : ''} onchange="toggleHome('${p.id}', this.checked)">
@@ -1395,7 +1438,9 @@
             <span class="prod-name">${p.name || '-'}</span>
           </div>
         </td>
-        <td class="text-center"><span class="badge ${p.stock ? 'badge-active' : 'badge-draft'}">${p.stock ? 'Active' : 'Inactive'}</span></td>
+        <td class="text-center">
+          <span style="font-weight:900; color:rgba(0,0,0,0.75);">${p.stock ? 'Active' : 'Inactive'}</span>
+        </td>
         <td class="text-center">
           <label class="toggle-switch toggle-sm">
             <input type="checkbox" ${p.isBestSeller ? 'checked' : ''} onchange="toggleBestSeller('${p.id}', this.checked)">
@@ -1409,7 +1454,7 @@
   function updateOrdersSummaryCards(list){
     const all = orders;
     const totalOrders = all.length;
-    const revenue = all.reduce((sum, o) => sum + getOrderTotal(o), 0);
+    const revenueEarned = getEarnedRevenueTotal(all);
     const pending = all.filter(o => normalizeStatus(o.status) === "Pending").length;
     const delivered = all.filter(o => normalizeStatus(o.status) === "Delivered").length;
 
@@ -1419,7 +1464,7 @@
     const elDelivered = document.getElementById('orderStatDelivered');
 
     if (elTotal) elTotal.textContent = totalOrders;
-    if (elRev) elRev.textContent = currency(revenue);
+    if (elRev) elRev.textContent = currency(revenueEarned);
     if (elPending) elPending.textContent = pending;
     if (elDelivered) elDelivered.textContent = delivered;
 
@@ -1442,12 +1487,7 @@
         const email = (getCustomerEmail(o) || "").toLowerCase();
         const fullId = (o.id || "").toLowerCase();
 
-        return (
-          name.includes(q) ||
-          email.includes(q) ||
-          idShort.includes(q) ||
-          fullId.includes(q)
-        );
+        return (name.includes(q) || email.includes(q) || idShort.includes(q) || fullId.includes(q));
       })
       .sort((a,b) => {
         const ad = getOrderDateValue(a)?.getTime?.() || 0;
@@ -1486,7 +1526,7 @@
           <td>${safeText(dateStr)}</td>
 
           <td class="text-center" onclick="event.stopPropagation()">
-            <select class="status-select ${status}" onchange="updateOrderStatus('${o.id}', this)">
+            <select class="status-select" style="width:120px;" onchange="updateOrderStatus('${o.id}', this)">
               <option value="Pending" ${status === 'Pending' ? 'selected' : ''}>Pending</option>
               <option value="Shipped" ${status === 'Shipped' ? 'selected' : ''}>Shipped</option>
               <option value="Delivered" ${status === 'Delivered' ? 'selected' : ''}>Delivered</option>
@@ -1548,7 +1588,7 @@
     const phone = o.customer?.phone || o.customerPhone || o.phone || shipping.phone || "—";
     const addrText = buildAddressText(shipping);
 
-    const payment = o.paymentMethod || o.payment || o.method || o.gateway || "—";
+    const payment = getPaymentMethodText(o) || "—";
     const notes = o.notes || o.note || o.message || "—";
 
     const items = getOrderItems(o);
@@ -1592,7 +1632,7 @@
             <div class="dc-body">
               <div class="kv"><b>Status</b>
                 <span>
-                  <select class="status-select ${status}" style="width: 160px;" onchange="updateOrderStatusFromModal('${id}', this)">
+                  <select class="status-select" style="width: 160px;" onchange="updateOrderStatusFromModal('${id}', this)">
                     <option value="Pending" ${status === 'Pending' ? 'selected' : ''}>Pending</option>
                     <option value="Shipped" ${status === 'Shipped' ? 'selected' : ''}>Shipped</option>
                     <option value="Delivered" ${status === 'Delivered' ? 'selected' : ''}>Delivered</option>
@@ -1630,10 +1670,7 @@
 
   window.updateOrderStatusFromModal = async (id, selectEl) => {
     await updateOrderStatus(id, selectEl);
-    // keep modal UI in sync
-    if (selectedOrderId === id) {
-      openOrderDetails(id);
-    }
+    if (selectedOrderId === id) openOrderDetails(id);
   };
 
   // --- ACTIONS ---
@@ -1649,11 +1686,9 @@
     document.getElementById('pSalePrice').value = p.salePrice || '';
     document.getElementById('pStock').checked = !!p.stock;
 
-    // Checkboxes
     document.querySelectorAll('.var-shape').forEach(cb => cb.checked = (p.shapes || []).includes(cb.value));
     document.querySelectorAll('.var-size').forEach(cb => cb.checked = (p.sizes || []).includes(cb.value));
 
-    // Images
     const container = document.getElementById('imgContainer');
     container.innerHTML = '';
     (p.images && p.images.length ? p.images : ['']).forEach(url => addImageInput(url));
@@ -1669,11 +1704,27 @@
     renderDashboard(document.getElementById('searchInput')?.value || "");
   };
 
+  // ✅ ONLY control in Status column uses this
+  window.quickSetStockFromSelect = async (id, selectEl) => {
+    const val = (selectEl?.value || "").toLowerCase();
+    const inStock = val === "in";
+
+    await updateDoc(doc(db, "products", id), { stock: !!inStock });
+
+    const idx = products.findIndex(p => p.id === id);
+    if (idx !== -1) products[idx].stock = !!inStock;
+
+    showToast(inStock ? "Marked In Stock" : "Marked Out of Stock");
+    renderDashboard(document.getElementById('searchInput')?.value || "");
+    updateStats();
+  };
+
   window.toggleHome = async (id, isVisible) => {
     await updateDoc(doc(db, "products", id), { isHidden: !isVisible });
     showToast("Updated Home Visibility");
     await fetchProducts();
     renderHomeManager();
+    renderDashboard(document.getElementById('searchInput')?.value || "");
   };
 
   window.toggleBestSeller = async (id, isBest) => {
@@ -1683,20 +1734,26 @@
     renderBestSellersManager();
   };
 
+  window.toggleHiddenFromAction = async (id) => {
+    const p = products.find(x => x.id === id);
+    if (!p) return;
+    const nextHidden = !p.isHidden;
+    await updateDoc(doc(db, "products", id), { isHidden: nextHidden });
+    p.isHidden = nextHidden;
+    showToast(nextHidden ? "Product Hidden from Website" : "Product Visible on Website");
+    renderDashboard(document.getElementById('searchInput')?.value || "");
+  };
+
   window.updateOrderStatus = async (id, selectEl) => {
     const newStatus = selectEl.value;
-    selectEl.className = `status-select ${newStatus}`;
 
-    // ✅ This updates the same Firestore order doc, so customer side stays updated automatically
     await updateDoc(doc(db, "orders", id), { status: newStatus });
 
-    // keep local state synced (no re-fetch required)
     const idx = orders.findIndex(x => x.id === id);
     if (idx !== -1) orders[idx].status = newStatus;
 
     showToast(`Order marked as ${newStatus}`);
-
-    // update summary + table without losing filters
+    updateStats();
     renderOrders();
   };
 
@@ -1704,7 +1761,6 @@
     if (!confirm("Delete this order?")) return;
     await deleteDoc(doc(db, "orders", id));
 
-    // keep local state synced
     orders = orders.filter(o => o.id !== id);
 
     renderOrders();
@@ -1762,8 +1818,8 @@
         showToast("Product Updated!");
       } else {
         data.createdAt = serverTimestamp();
-        data.isHidden = false; // Default visible
-        data.isBestSeller = false; // Default not featured
+        data.isHidden = false;
+        data.isBestSeller = false;
         await addDoc(collection(db, "products"), data);
         showToast("Product Created!");
       }
@@ -1787,12 +1843,11 @@
     document.getElementById('pSalePrice').value = '';
     document.getElementById('pStock').checked = true;
 
-    // ✅ default checkboxes back to initial (the ones marked checked in HTML)
     document.querySelectorAll('.var-shape').forEach(cb => cb.checked = cb.hasAttribute('checked') || cb.defaultChecked);
     document.querySelectorAll('.var-size').forEach(cb => cb.checked = cb.hasAttribute('checked') || cb.defaultChecked);
 
     document.getElementById('imgContainer').innerHTML = '';
-    addImageInput(); // Add one empty row
+    addImageInput();
   }
 
   function showToast(msg) {
@@ -1803,19 +1858,16 @@
 
   // --- EVENT LISTENERS ---
   function setupEventListeners() {
-    // Nav Clicks
     navItems.dashboard.onclick = () => switchView('dashboard');
     navItems.home.onclick = () => switchView('home');
     navItems.bestSellers.onclick = () => switchView('bestSellers');
     navItems.orders.onclick = () => switchView('orders');
 
-    // ✅ Search
     const search = document.getElementById('searchInput');
     if (search) {
       search.addEventListener('input', (e) => renderDashboard(e.target.value));
     }
 
-    // ✅ Orders filters
     const oSearch = document.getElementById('ordersSearchInput');
     const oStatus = document.getElementById('ordersStatusFilter');
     const oReset = document.getElementById('ordersClearFiltersBtn');
@@ -1842,7 +1894,6 @@
       });
     }
 
-    // ✅ Modal events
     if (closeOrderModalBtn) closeOrderModalBtn.onclick = closeModal;
     if (orderModalOverlay) {
       orderModalOverlay.addEventListener('click', (e) => {
@@ -1861,7 +1912,6 @@
       };
     }
 
-    // Editor Buttons
     document.getElementById('addProductBtnMain').onclick = () => {
       resetEditor();
       switchView('editor');
@@ -1871,7 +1921,6 @@
     document.getElementById('saveBtn').onclick = saveProduct;
     document.getElementById('addImgBtn').onclick = () => addImageInput();
 
-    // Logout
     document.getElementById('logoutBtn').onclick = async () => {
       await signOut(auth);
       window.location.href = "login.html";
