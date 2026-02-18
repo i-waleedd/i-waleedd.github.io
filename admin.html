@@ -300,6 +300,22 @@
   }
   .status-select:focus { border-color: var(--primary); box-shadow: 0 0 0 3px rgba(255,126,141,0.18); }
 
+  /* ✅ small input for shipping manager */
+  .mini-input{
+    width: 140px;
+    padding: 10px 12px;
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    font-weight: 800;
+    font-size: 13px;
+    transition: 0.2s;
+    background: #fff;
+    color: #000;
+  }
+  .mini-input:focus{ border-color: var(--primary); box-shadow: 0 0 0 3px rgba(255,126,141,0.18); }
+  .mini-input.price{ width: 120px; text-align: left; }
+  .mini-input.city{ width: min(320px, 36vw); }
+
   /* ===== ORDERS (PRO) ===== */
   .orders-toolbar {
     display: flex;
@@ -755,6 +771,8 @@
     .prod-name{ font-size: 13px; }
 
     .search-box { width: 100%; display: none; }
+    .mini-input.city{ width: 100%; }
+    .mini-input.price{ width: 120px; }
   }
 
   @media (max-width: 360px) {
@@ -780,6 +798,9 @@
     <a id="navHomePage" class="nav-item"><i class='bx bxs-home'></i> Home Manager</a>
     <a id="navBestSellers" class="nav-item"><i class='bx bxs-star'></i> Best Sellers</a>
     <a id="navOrders" class="nav-item"><i class='bx bxs-shopping-bag'></i> Orders</a>
+
+    <!-- ✅ Shipping Rates Manager -->
+    <a id="navShipping" class="nav-item"><i class='bx bxs-truck'></i> Shipping Rates</a>
 
     <div style="flex:1"></div>
 
@@ -1002,6 +1023,55 @@
     </div>
   </div>
 
+  <!-- ✅ Shipping Rates View -->
+  <div id="shippingView" class="view-section">
+    <header class="topbar">
+      <div class="page-title">
+        <i class='bx bx-menu toggle-menu-btn' id="sidebarToggleBtn5"></i>
+        Shipping Rates
+      </div>
+      <button class="btn-primary" id="addShippingBtnMain">
+        <i class='bx bx-plus'></i> Add City
+      </button>
+    </header>
+
+    <div class="content-area">
+      <div class="table-card">
+        <div class="table-header" style="align-items:flex-start;">
+          <div style="display:flex; flex-direction:column; gap:6px;">
+            <h3 style="margin:0; font-size:16px; font-weight:900;">Delivery Cities & Prices</h3>
+            <p class="orders-subtitle" id="shippingSubtitle">Manage delivery cities shown on checkout. Prices are in PKR.</p>
+          </div>
+
+          <div class="orders-toolbar">
+            <div class="search-box" style="display:flex; width:280px;">
+              <i class='bx bx-search'></i>
+              <input type="text" id="shippingSearchInput" placeholder="Search city...">
+            </div>
+
+            <button class="btn-linkish" id="shippingRefreshBtn" type="button">
+              <i class='bx bx-refresh'></i> Refresh
+            </button>
+          </div>
+        </div>
+
+        <div style="overflow-x:auto;">
+          <table>
+            <thead>
+              <tr>
+                <th class="text-left">City</th>
+                <th class="text-left">Shipping Price</th>
+                <th class="text-center">Enabled</th>
+                <th class="text-right">Actions</th>
+              </tr>
+            </thead>
+            <tbody id="shippingTableBody"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <div id="editorView" class="view-section">
     <header class="topbar">
       <div style="display:flex; align-items:center; gap:10px;">
@@ -1121,6 +1191,10 @@
   let orders = [];
   let currentEditId = null;
 
+  // ✅ shipping rates state
+  let shippingRates = [];
+  let shippingQuery = "";
+
   // ✅ orders ui state
   let ordersQuery = "";
   let ordersStatus = "All";
@@ -1132,6 +1206,7 @@
     home: document.getElementById('homeView'),
     bestSellers: document.getElementById('bestSellerView'),
     orders: document.getElementById('ordersView'),
+    shipping: document.getElementById('shippingView'),
     editor: document.getElementById('editorView')
   };
 
@@ -1139,7 +1214,8 @@
     dashboard: document.getElementById('navDashboard'),
     home: document.getElementById('navHomePage'),
     bestSellers: document.getElementById('navBestSellers'),
-    orders: document.getElementById('navOrders')
+    orders: document.getElementById('navOrders'),
+    shipping: document.getElementById('navShipping')
   };
 
   const toast = document.getElementById('adminToast');
@@ -1165,6 +1241,7 @@
   document.getElementById('sidebarToggleBtn2').addEventListener('click', toggleSidebar);
   document.getElementById('sidebarToggleBtn3').addEventListener('click', toggleSidebar);
   document.getElementById('sidebarToggleBtn4').addEventListener('click', toggleSidebar);
+  document.getElementById('sidebarToggleBtn5').addEventListener('click', toggleSidebar);
 
   sidebarOverlay.addEventListener('click', closeSidebar);
   document.addEventListener('keydown', (e) => { if(e.key === 'Escape') closeSidebar(); });
@@ -1183,6 +1260,7 @@
   async function initAdmin() {
     await fetchProducts();
     await fetchOrders();
+    await fetchShippingRates();
     renderDashboard();
     setupEventListeners();
   }
@@ -1201,6 +1279,7 @@
     if (viewName === 'home') renderHomeManager();
     if (viewName === 'bestSellers') renderBestSellersManager();
     if (viewName === 'orders') renderOrders();
+    if (viewName === 'shipping') renderShippingManager();
   }
 
   // --- DATA FETCHING ---
@@ -1214,6 +1293,11 @@
     const snap = await getDocs(collection(db, "orders"));
     orders = snap.docs.map(d => ({ id: d.id, ...d.data() }));
     updateStats();
+  }
+
+  async function fetchShippingRates() {
+    const snap = await getDocs(collection(db, "shippingRates"));
+    shippingRates = snap.docs.map(d => ({ id: d.id, ...d.data() }));
   }
 
   // ✅ Revenue rules:
@@ -1379,7 +1463,7 @@
           <td class="text-center">
             <select
               class="status-select"
-              onchange="quickSetStockFromSelect('${p.id}', this)"
+              onchange="window.quickSetStockFromSelect('${p.id}', this)"
               title="Set stock status"
             >
               <option value="in" ${inStock ? 'selected' : ''}>In Stock</option>
@@ -1389,11 +1473,11 @@
 
           <td>
             <div class="actions-cell">
-              <button class="action-btn btn-hide" title="${hidden ? 'Unhide from website' : 'Hide from website'}" onclick="toggleHiddenFromAction('${p.id}')">
+              <button class="action-btn btn-hide" title="${hidden ? 'Unhide from website' : 'Hide from website'}" onclick="window.toggleHiddenFromAction('${p.id}')">
                 <i class='bx ${hidden ? 'bx-show' : 'bx-hide'}'></i>
               </button>
-              <button class="action-btn btn-edit" onclick="editProduct('${p.id}')"><i class='bx bx-edit'></i></button>
-              <button class="action-btn btn-delete" onclick="deleteProduct('${p.id}')"><i class='bx bx-trash'></i></button>
+              <button class="action-btn btn-edit" onclick="window.editProduct('${p.id}')"><i class='bx bx-edit'></i></button>
+              <button class="action-btn btn-delete" onclick="window.deleteProduct('${p.id}')"><i class='bx bx-trash'></i></button>
             </div>
           </td>
         </tr>
@@ -1420,7 +1504,7 @@
         </td>
         <td class="text-center">
           <label class="toggle-switch toggle-sm">
-            <input type="checkbox" ${!p.isHidden ? 'checked' : ''} onchange="toggleHome('${p.id}', this.checked)">
+            <input type="checkbox" ${!p.isHidden ? 'checked' : ''} onchange="window.toggleHome('${p.id}', this.checked)">
             <span class="slider"></span>
           </label>
         </td>
@@ -1443,7 +1527,7 @@
         </td>
         <td class="text-center">
           <label class="toggle-switch toggle-sm">
-            <input type="checkbox" ${p.isBestSeller ? 'checked' : ''} onchange="toggleBestSeller('${p.id}', this.checked)">
+            <input type="checkbox" ${p.isBestSeller ? 'checked' : ''} onchange="window.toggleBestSeller('${p.id}', this.checked)">
             <span class="slider"></span>
           </label>
         </td>
@@ -1511,7 +1595,7 @@
       const short = o.id.slice(0,6);
 
       return `
-        <tr class="order-row" onclick="openOrderDetails('${o.id}')">
+        <tr class="order-row" onclick="window.openOrderDetails('${o.id}')">
           <td>
             <span class="order-id-pill"><i class='bx bx-hash'></i> ${short}</span>
             <div class="mini-muted" style="margin-top:6px;">Tap to view full details</div>
@@ -1526,7 +1610,7 @@
           <td>${safeText(dateStr)}</td>
 
           <td class="text-center" onclick="event.stopPropagation()">
-            <select class="status-select" style="width:120px;" onchange="updateOrderStatus('${o.id}', this)">
+            <select class="status-select" style="width:120px;" onchange="window.updateOrderStatus('${o.id}', this)">
               <option value="Pending" ${status === 'Pending' ? 'selected' : ''}>Pending</option>
               <option value="Shipped" ${status === 'Shipped' ? 'selected' : ''}>Shipped</option>
               <option value="Delivered" ${status === 'Delivered' ? 'selected' : ''}>Delivered</option>
@@ -1535,7 +1619,7 @@
           </td>
 
           <td class="text-right" onclick="event.stopPropagation()">
-            <button class="action-btn btn-delete" onclick="deleteOrder('${o.id}')"><i class='bx bx-trash'></i></button>
+            <button class="action-btn btn-delete" onclick="window.deleteOrder('${o.id}')"><i class='bx bx-trash'></i></button>
           </td>
         </tr>
       `;
@@ -1543,6 +1627,75 @@
 
     if (filtered.length === 0) {
       tbody.innerHTML = `<tr><td colspan="6" style="text-align:center; color:rgba(0,0,0,0.65); padding:28px; font-weight:900;">No orders match your filters.</td></tr>`;
+    }
+  }
+
+  // ✅ Shipping Rates Manager
+  function normalizeCityName(v){
+    return String(v || "").trim().replace(/\s+/g, " ");
+  }
+
+  function num(v){
+    const n = Number(v);
+    return Number.isFinite(n) ? n : 0;
+  }
+
+  function getFilteredShippingRates(){
+    const q = (shippingQuery || "").trim().toLowerCase();
+    const list = [...shippingRates].map(r => ({
+      ...r,
+      city: normalizeCityName(r.city || r.name || r.id)
+    }));
+
+    return list
+      .filter(r => {
+        if (!q) return true;
+        return (r.city || "").toLowerCase().includes(q);
+      })
+      .sort((a,b) => (a.city || "").localeCompare(b.city || ""));
+  }
+
+  function renderShippingManager(){
+    const tbody = document.getElementById('shippingTableBody');
+    const subtitle = document.getElementById('shippingSubtitle');
+    const filtered = getFilteredShippingRates();
+
+    if (subtitle) subtitle.textContent = `Showing ${filtered.length} city${filtered.length === 1 ? '' : 'ies'} • Manage delivery cities shown on checkout. Prices are in PKR.`;
+
+    tbody.innerHTML = filtered.map(r => {
+      const city = normalizeCityName(r.city || r.name || r.id);
+      const price = num(r.price);
+      const enabled = (r.enabled === undefined) ? true : !!r.enabled;
+
+      return `
+        <tr>
+          <td class="text-left" style="font-weight:900;">
+            ${safeText(city || "—")}
+          </td>
+
+          <td class="text-left">
+            <input class="mini-input price" type="number" min="0" step="1" value="${price}" id="shipPrice-${r.id}">
+          </td>
+
+          <td class="text-center">
+            <label class="toggle-switch toggle-sm">
+              <input type="checkbox" ${enabled ? 'checked' : ''} id="shipEnabled-${r.id}">
+              <span class="slider"></span>
+            </label>
+          </td>
+
+          <td class="text-right">
+            <div class="actions-cell">
+              <button class="action-btn btn-edit" title="Save" onclick="window.saveShippingRate('${r.id}')"><i class='bx bx-save'></i></button>
+              <button class="action-btn btn-delete" title="Delete" onclick="window.deleteShippingRate('${r.id}')"><i class='bx bx-trash'></i></button>
+            </div>
+          </td>
+        </tr>
+      `;
+    }).join('');
+
+    if (filtered.length === 0) {
+      tbody.innerHTML = `<tr><td colspan="4" style="text-align:center; color:rgba(0,0,0,0.65); padding:28px; font-weight:900;">No shipping cities found.</td></tr>`;
     }
   }
 
@@ -1591,6 +1744,9 @@
     const payment = getPaymentMethodText(o) || "—";
     const notes = o.notes || o.note || o.message || "—";
 
+    const subtotal = num(o.subtotal ?? o.subTotal ?? o.itemsSubtotal ?? 0);
+    const shipFee = num(o.shippingFee ?? o.shipping_fee ?? o.deliveryFee ?? o.shipping ?? 0);
+
     const items = getOrderItems(o);
     const itemsHtml = items.length ? items.map((it) => {
       const img = safeImg(it.image || it.img || it.thumbnail || it.photo || it.images?.[0] || "");
@@ -1632,7 +1788,7 @@
             <div class="dc-body">
               <div class="kv"><b>Status</b>
                 <span>
-                  <select class="status-select" style="width: 160px;" onchange="updateOrderStatusFromModal('${id}', this)">
+                  <select class="status-select" style="width: 160px;" onchange="window.updateOrderStatusFromModal('${id}', this)">
                     <option value="Pending" ${status === 'Pending' ? 'selected' : ''}>Pending</option>
                     <option value="Shipped" ${status === 'Shipped' ? 'selected' : ''}>Shipped</option>
                     <option value="Delivered" ${status === 'Delivered' ? 'selected' : ''}>Delivered</option>
@@ -1640,6 +1796,8 @@
                   </select>
                 </span>
               </div>
+              ${subtotal ? `<div class="kv"><b>Subtotal</b><span>${currency(subtotal)}</span></div>` : ``}
+              ${shipFee || shipFee === 0 ? `<div class="kv"><b>Shipping</b><span>${shipFee <= 0 ? "Free" : currency(shipFee)}</span></div>` : ``}
               <div class="kv"><b>Total</b><span>${currency(total)}</span></div>
               <div class="kv"><b>Payment</b><span>${safeText(payment)}</span></div>
               <div class="kv"><b>Phone</b><span>${safeText(phone)}</span></div>
@@ -1669,8 +1827,8 @@
   };
 
   window.updateOrderStatusFromModal = async (id, selectEl) => {
-    await updateOrderStatus(id, selectEl);
-    if (selectedOrderId === id) openOrderDetails(id);
+    await window.updateOrderStatus(id, selectEl);
+    if (selectedOrderId === id) window.openOrderDetails(id);
   };
 
   // --- ACTIONS ---
@@ -1771,14 +1929,96 @@
     showToast("Order deleted");
   };
 
+  // ✅ Shipping actions (admin side for checkout)
+  window.saveShippingRate = async (id) => {
+    const priceEl = document.getElementById(`shipPrice-${id}`);
+    const enabledEl = document.getElementById(`shipEnabled-${id}`);
+
+    const rate = shippingRates.find(r => r.id === id);
+    if (!rate) return;
+
+    const city = normalizeCityName(rate.city || rate.name || rate.id);
+    const price = Math.max(0, Math.round(num(priceEl?.value)));
+    const enabled = !!enabledEl?.checked;
+
+    await updateDoc(doc(db, "shippingRates", id), {
+      city,
+      price,
+      enabled,
+      updatedAt: serverTimestamp()
+    });
+
+    const idx = shippingRates.findIndex(r => r.id === id);
+    if (idx !== -1) {
+      shippingRates[idx].city = city;
+      shippingRates[idx].price = price;
+      shippingRates[idx].enabled = enabled;
+    }
+
+    showToast("Shipping rate saved");
+    renderShippingManager();
+  };
+
+  window.deleteShippingRate = async (id) => {
+    if (!confirm("Delete this city from delivery list?")) return;
+
+    await deleteDoc(doc(db, "shippingRates", id));
+    shippingRates = shippingRates.filter(r => r.id !== id);
+
+    showToast("Shipping city deleted");
+    renderShippingManager();
+  };
+
+  async function addShippingCity(){
+    const city = normalizeCityName(prompt("Enter city name (e.g. Karachi):") || "");
+    if (!city) return;
+
+    const priceRaw = prompt("Enter shipping price in PKR (0 for Free):", "0");
+    if (priceRaw === null) return;
+
+    const price = Math.max(0, Math.round(num(priceRaw)));
+    const enabled = confirm("Enable delivery for this city?\n\nOK = Enabled\nCancel = Disabled");
+
+    // prevent duplicate by city name (case-insensitive)
+    const exists = shippingRates.some(r => normalizeCityName(r.city || r.name || r.id).toLowerCase() === city.toLowerCase());
+    if (exists) {
+      showToast("City already exists");
+      return;
+    }
+
+    await addDoc(collection(db, "shippingRates"), {
+      city,
+      price,
+      enabled,
+      createdAt: serverTimestamp(),
+      updatedAt: serverTimestamp()
+    });
+
+    showToast("City added");
+    await fetchShippingRates();
+    renderShippingManager();
+  }
+
   // --- EDITOR LOGIC ---
   function addImageInput(val = '') {
     const div = document.createElement('div');
     div.className = 'img-input-row';
-    div.innerHTML = `
-      <input type="text" class="form-control img-url-input" placeholder="Image URL" value="${val}">
-      <button type="button" class="btn-remove-img" onclick="this.parentElement.remove()"><i class='bx bx-x'></i></button>
-    `;
+
+    const input = document.createElement('input');
+    input.type = 'text';
+    input.className = 'form-control img-url-input';
+    input.placeholder = 'Image URL';
+    input.value = val || '';
+
+    const btn = document.createElement('button');
+    btn.type = 'button';
+    btn.className = 'btn-remove-img';
+    btn.innerHTML = "<i class='bx bx-x'></i>";
+    btn.addEventListener('click', () => div.remove());
+
+    div.appendChild(input);
+    div.appendChild(btn);
+
     document.getElementById('imgContainer').appendChild(div);
   }
 
@@ -1862,6 +2102,7 @@
     navItems.home.onclick = () => switchView('home');
     navItems.bestSellers.onclick = () => switchView('bestSellers');
     navItems.orders.onclick = () => switchView('orders');
+    navItems.shipping.onclick = () => switchView('shipping');
 
     const search = document.getElementById('searchInput');
     if (search) {
@@ -1892,6 +2133,28 @@
         if (oStatus) oStatus.value = "All";
         renderOrders();
       });
+    }
+
+    // ✅ shipping listeners
+    const sSearch = document.getElementById('shippingSearchInput');
+    const sRefresh = document.getElementById('shippingRefreshBtn');
+    const sAdd = document.getElementById('addShippingBtnMain');
+
+    if (sSearch) {
+      sSearch.addEventListener('input', (e) => {
+        shippingQuery = e.target.value || "";
+        renderShippingManager();
+      });
+    }
+    if (sRefresh) {
+      sRefresh.addEventListener('click', async () => {
+        await fetchShippingRates();
+        renderShippingManager();
+        showToast("Shipping list refreshed");
+      });
+    }
+    if (sAdd) {
+      sAdd.addEventListener('click', addShippingCity);
     }
 
     if (closeOrderModalBtn) closeOrderModalBtn.onclick = closeModal;

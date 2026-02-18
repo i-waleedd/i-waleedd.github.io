@@ -1,7 +1,7 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js";
 import { getAuth } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-auth.js";
 import { getFirestore, enableIndexedDbPersistence } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js";
-import { getAnalytics } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-analytics.js";
+import { getAnalytics, isSupported } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-analytics.js";
 
 const firebaseConfig = {
   apiKey: "AIzaSyDsTxlWCnYH-9Q7oHVOFetkMLwFzjF6fGQ",
@@ -19,7 +19,16 @@ const app = initializeApp(firebaseConfig);
 // 2. Export Services
 export const auth = getAuth(app);
 export const db = getFirestore(app);
-export const analytics = getAnalytics(app);
+
+// ✅ Safe analytics init (prevents crashes on unsupported environments)
+export let analytics = null;
+isSupported()
+  .then((ok) => {
+    if (ok) analytics = getAnalytics(app);
+  })
+  .catch(() => {
+    analytics = null;
+  });
 
 // 3. Enable Offline Persistence (Professional Speed Upgrade)
 // This makes the website load instantly for returning users even on slow internet.

@@ -995,6 +995,11 @@
       userDropdown.classList.toggle("show");
     });
 
+    /* ✅ FIX: clicking inside dropdown should not auto-close before item handlers finish */
+    userDropdown.addEventListener("click", (e) => {
+      e.stopPropagation();
+    });
+
     document.addEventListener("click", () => closeUserDropdown());
 
     ddAdmin.addEventListener("click", () => { window.location.href = "admin.html"; });
@@ -1136,7 +1141,10 @@
       }
 
       const imgs = Array.isArray(p.images) && p.images.length ? p.images : [(p.image || "")].filter(Boolean);
-      const imageSrc = (imgs && imgs[0]) ? imgs[0] : "";
+
+      /* ✅ FIX: avoid empty src="" (causes extra network request / broken image flash) */
+      const imageSrc = (imgs && imgs[0]) ? imgs[0] : "https://placehold.co/300x300/ffffff/2b1719?text=PressPlay+Nails";
+
       const imagesJson = escapeHtml(JSON.stringify(imgs || []));
 
       const ratingVal = Number(p.rating || 0);
@@ -1372,6 +1380,16 @@
       : "https://placehold.co/100x100/f3f4f6/9ca3af?text=No+Img";
   }
 
+  /* ✅ FIX: basic HTML escape for cart display (prevents localStorage/DOM injection) */
+  function esc(s){
+    return String(s ?? "")
+      .replace(/&/g, "&amp;")
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;")
+      .replace(/"/g, "&quot;")
+      .replace(/'/g, "&#039;");
+  }
+
   function updateCartCount() {
     const count = cart.reduce((sum, item) => sum + (item.qty || 0), 0);
     const el = document.getElementById("cart-count");
@@ -1405,7 +1423,7 @@
         <div class="cart-item">
           <img class="cart-thumb" src="${safeImg(item.image)}" alt="Item" onerror="this.src='https://placehold.co/100x100/f3f4f6/9ca3af?text=No+Img'">
           <div class="cart-meta">
-            <div class="cart-name">${item.name || "Item"}</div>
+            <div class="cart-name">${esc(item.name || "Item")}</div>
             <div class="cart-sub">Qty: ${qty}</div>
           </div>
           <div class="cart-right">
@@ -1499,6 +1517,11 @@
   function toggleMenu() {
     nav.classList.toggle("active");
     menuOverlay.classList.toggle("active");
+
+    /* ✅ FIX: prevent background scrolling when menu is open (same behavior as cart) */
+    const cartOpen = document.getElementById("cartDropdown")?.classList.contains("show");
+    const menuOpen = nav.classList.contains("active");
+    document.body.classList.toggle("no-scroll", menuOpen || cartOpen);
   }
 
   menuToggle.addEventListener("click", toggleMenu);

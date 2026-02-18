@@ -177,6 +177,18 @@
   /* TOAST */
   .toast { visibility: hidden; min-width: 300px; background-color: #2b1719; color: #fff; text-align: center; border-radius: 50px; padding: 16px; position: fixed; z-index: 3000; left: 50%; bottom: 30px; transform: translateX(-50%); font-size: 14px; box-shadow: 0 10px 30px rgba(0,0,0,0.3); opacity: 0; transition: all 0.4s ease; }
   .toast.show { visibility: visible; opacity: 1; bottom: 50px; }
+
+  /* ✅ phone input group (professional +92 fixed) */
+  .phone-row { display: flex; gap: 10px; }
+  .phone-prefix {
+    width: 92px;
+    text-align: center;
+    background: #f3f4f6;
+    color: #666;
+    font-weight: 600;
+    cursor: default;
+  }
+  .phone-number { flex: 1; }
 </style>
 </head>
 <body>
@@ -196,6 +208,14 @@
       <div class="section-title">Contact Information</div>
       <div class="input-group">
         <input type="email" id="email" placeholder="Email address" required>
+      </div>
+
+      <!-- ✅ Professional Pakistan phone (fixed +92 + 10 digits) -->
+      <div class="input-group">
+        <div class="phone-row">
+          <input class="phone-prefix" type="text" value="+92" readonly>
+          <input class="phone-number" type="text" id="phone" placeholder="3XXXXXXXXX" maxlength="10" inputmode="numeric" required>
+        </div>
       </div>
     </div>
 
@@ -217,21 +237,6 @@
         <div class="input-row">
           <select id="city" required>
             <option value="" disabled selected>Select City</option>
-            <option value="Karachi">Karachi</option>
-            <option value="Lahore">Lahore</option>
-            <option value="Islamabad">Islamabad</option>
-            <option value="Rawalpindi">Rawalpindi</option>
-            <option value="Faisalabad">Faisalabad</option>
-            <option value="Multan">Multan</option>
-            <option value="Peshawar">Peshawar</option>
-            <option value="Quetta">Quetta</option>
-            <option value="Gujranwala">Gujranwala</option>
-            <option value="Sialkot">Sialkot</option>
-            <option value="Hyderabad">Hyderabad</option>
-            <option value="Bahawalpur">Bahawalpur</option>
-            <option value="Sargodha">Sargodha</option>
-            <option value="Abbottabad">Abbottabad</option>
-            <option value="Other">Other</option>
           </select>
           <input type="text" id="zip" placeholder="Postal Code" required>
         </div>
@@ -295,7 +300,7 @@
       </div>
       <div class="cost-row">
         <span>Shipping</span>
-        <span style="color:green;">Free</span>
+        <span id="shippingPrice" style="color:green;">Free</span>
       </div>
     </div>
 
@@ -309,10 +314,209 @@
 
 <script type="module">
   import { db } from "./firebase.js";
-  import { collection, addDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js";
+  import { collection, addDoc, serverTimestamp, getDocs } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js";
 
   let cart = JSON.parse(localStorage.getItem("cart")) || [];
   const payButton = document.getElementById("payButton");
+
+  const citySelect = document.getElementById("city");
+  const shippingEl = document.getElementById("shippingPrice");
+
+  let SHIPPING_RATES = {};   // { "Karachi": 0, "Lahore": 200, ... }
+  let selectedShipping = 0;
+
+  function escapeHtml(str) {
+    return String(str ?? "")
+      .replaceAll("&", "&amp;")
+      .replaceAll("<", "&lt;")
+      .replaceAll(">", "&gt;")
+      .replaceAll('"', "&quot;")
+      .replaceAll("'", "&#039;");
+  }
+
+  function safeImg(url) {
+    const u = String(url || "").trim();
+    return u.length ? u : "https://placehold.co/100x100/E6D8C5/2b1719?text=Nails";
+  }
+
+  function num(v) {
+    const n = Number(v);
+    return Number.isFinite(n) ? n : 0;
+  }
+
+  function formatPKR(n) {
+    return "PKR " + num(n).toLocaleString();
+  }
+
+  function setShippingUI(value) {
+    const v = num(value);
+    selectedShipping = v;
+
+    if (v <= 0) {
+      shippingEl.textContent = "Free";
+      shippingEl.style.color = "green";
+    } else {
+      shippingEl.textContent = formatPKR(v);
+      shippingEl.style.color = "";
+    }
+  }
+
+  function computeSubtotal() {
+    return (cart || []).reduce((sum, item) => {
+      const price = num(item.price);
+      const qty = Math.max(0, num(item.qty));
+      return sum + (price * qty);
+    }, 0);
+  }
+
+  function updateTotalsUI() {
+    const subtotalEl = document.getElementById("subtotalPrice");
+    const totalEl = document.getElementById("totalPrice");
+
+    const subtotal = computeSubtotal();
+    const grandTotal = subtotal + num(selectedShipping);
+
+    subtotalEl.innerText = formatPKR(subtotal);
+    totalEl.innerText = formatPKR(grandTotal);
+  }
+
+  function isValidEmail(email) {
+    const e = String(email || "").trim();
+    return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(e);
+  }
+
+  function isValidName(v) {
+    const s = String(v || "").trim();
+    return s.length >= 2;
+  }
+
+  function isValidAddress(v) {
+    const s = String(v || "").trim();
+    return s.length >= 6;
+  }
+
+  function isValidZip(v) {
+    const s = String(v || "").trim();
+    // Pakistan postal codes are 5 digits, but allow 4-6 to avoid blocking edge cases
+    return /^\d{4,6}$/.test(s);
+  }
+
+  // ✅ Phone: fixed +92, user types 10 digits
+  // - digits only
+  // - if user types 0 first -> drop it
+  // - accept starting with "3" (mobile) => final format: +92 3XXXXXXXXX
+  const phoneInput = document.getElementById("phone");
+
+  function normalizePhoneDigits(raw) {
+    let v = String(raw || "").replace(/[^0-9]/g, "");
+
+    // If user pasted full number like 03XXXXXXXXX (11) -> drop leading 0
+    if (v.startsWith("0")) v = v.slice(1);
+
+    // If user pasted 92XXXXXXXXXX (12) or 923XXXXXXXXX (??) -> try to keep last 10 meaningful digits
+    // But since UI is fixed +92, we only keep the last 10 digits after country removal.
+    if (v.startsWith("92")) {
+      v = v.slice(2);
+      if (v.startsWith("0")) v = v.slice(1);
+    }
+
+    // limit to 10 digits
+    v = v.slice(0, 10);
+
+    return v;
+  }
+
+  phoneInput.addEventListener("input", () => {
+    phoneInput.value = normalizePhoneDigits(phoneInput.value);
+  });
+
+  phoneInput.addEventListener("paste", (e) => {
+    e.preventDefault();
+    const text = (e.clipboardData || window.clipboardData).getData("text");
+    phoneInput.value = normalizePhoneDigits(text);
+  });
+
+  function isValidPakPhone10Digits(value) {
+    // After +92 fixed: must be 10 digits
+    // Must start with 3 (mobile numbers): 3XXXXXXXXX
+    const v = String(value || "").trim();
+    return /^3\d{9}$/.test(v);
+  }
+
+  function fullPhoneE164() {
+    // +92 + 10 digits (starting with 3)
+    return "+92" + String(phoneInput.value || "").trim();
+  }
+
+  async function loadShippingCities() {
+    // Reads shipping cities/rates from Firestore:
+    // Collection: "shippingRates"
+    // Each document should have:
+    //   - city: "Karachi"
+    //   - price: 0 (or any number)
+    //   - enabled: true
+    //
+    // If nothing exists, it falls back to your old static list.
+
+    SHIPPING_RATES = {};
+    citySelect.innerHTML = '<option value="" disabled selected>Select City</option>';
+
+    try {
+      const snap = await getDocs(collection(db, "shippingRates"));
+      const rows = [];
+
+      snap.forEach(docSnap => {
+        const d = docSnap.data() || {};
+        const city = String(d.city || d.name || docSnap.id || "").trim();
+        const enabled = (d.enabled === undefined) ? true : !!d.enabled;
+        const price = num(d.price);
+
+        if (city && enabled) rows.push({ city, price });
+      });
+
+      rows.sort((a, b) => a.city.localeCompare(b.city));
+
+      if (rows.length) {
+        rows.forEach(r => {
+          SHIPPING_RATES[r.city] = r.price;
+          const opt = document.createElement("option");
+          opt.value = r.city;
+          opt.textContent = r.city;
+          citySelect.appendChild(opt);
+        });
+      } else {
+        throw new Error("No enabled shippingRates found");
+      }
+    } catch (err) {
+      // Fallback (your original cities list) + Free shipping
+      const fallbackCities = [
+        "Karachi","Lahore","Islamabad","Rawalpindi","Faisalabad","Multan","Peshawar","Quetta",
+        "Gujranwala","Sialkot","Hyderabad","Bahawalpur","Sargodha","Abbottabad","Other"
+      ];
+      fallbackCities.forEach(c => {
+        SHIPPING_RATES[c] = 0;
+        const opt = document.createElement("option");
+        opt.value = c;
+        opt.textContent = c;
+        citySelect.appendChild(opt);
+      });
+    }
+
+    // Default shipping display
+    setShippingUI(0);
+    updateTotalsUI();
+  }
+
+  // --- INITIAL LOAD ---
+  await loadShippingCities();
+
+  // --- WHEN CITY CHANGES -> update shipping + totals ---
+  citySelect.addEventListener("change", () => {
+    const city = citySelect.value;
+    const fee = (city && SHIPPING_RATES[city] !== undefined) ? SHIPPING_RATES[city] : 0;
+    setShippingUI(fee);
+    updateTotalsUI();
+  });
 
   // --- INITIAL RENDER ---
   renderSummary();
@@ -320,34 +524,33 @@
   // --- RENDER CART ---
   function renderSummary() {
     const container = document.getElementById("summaryItems");
-    const subtotalEl = document.getElementById("subtotalPrice");
-    const totalEl = document.getElementById("totalPrice");
 
     if (cart.length === 0) {
       container.innerHTML = '<p style="text-align:center; color:#999; padding:20px;">Your cart is empty.</p>';
       payButton.disabled = true;
       payButton.innerText = "Cart is Empty";
       payButton.style.background = "#ccc";
+      updateTotalsUI();
       return;
     }
 
     container.innerHTML = "";
-    let total = 0;
 
     cart.forEach(item => {
-      const itemTotal = item.price * item.qty;
-      total += itemTotal;
-      
-      const imgUrl = item.image ? item.image : 'https://placehold.co/100x100/E6D8C5/2b1719?text=Nails';
+      const price = num(item.price);
+      const qty = Math.max(0, num(item.qty));
+      const itemTotal = price * qty;
+
+      const imgUrl = safeImg(item.image);
 
       container.innerHTML += `
         <div class="cart-item">
           <div style="position:relative;">
-            <img src="${imgUrl}" class="item-img">
-            <div class="item-qty-badge">${item.qty}</div>
+            <img src="${escapeHtml(imgUrl)}" class="item-img" alt="Item" onerror="this.src='https://placehold.co/100x100/E6D8C5/2b1719?text=Nails'; this.alt='Image unavailable';">
+            <div class="item-qty-badge">${qty}</div>
           </div>
           <div class="item-info">
-            <div class="item-name">${item.name}</div>
+            <div class="item-name">${escapeHtml(item.name)}</div>
             <div class="item-meta">Standard Shipping</div>
           </div>
           <div class="item-price">PKR ${itemTotal.toLocaleString()}</div>
@@ -355,8 +558,7 @@
       `;
     });
 
-    subtotalEl.innerText = "PKR " + total.toLocaleString();
-    totalEl.innerText = "PKR " + total.toLocaleString();
+    updateTotalsUI();
   }
 
   // --- PAYMENT TOGGLE UI ---
@@ -388,14 +590,47 @@
 
     // 1. Validation
     const email = document.getElementById('email').value.trim();
+    const phone10 = document.getElementById('phone').value.trim();
     const fName = document.getElementById('fName').value.trim();
     const lName = document.getElementById('lName').value.trim();
     const address = document.getElementById('address').value.trim();
+    const apartment = document.getElementById('apartment').value.trim();
     const city = document.getElementById('city').value; // Value from Dropdown
     const zip = document.getElementById('zip').value.trim();
 
-    if(!email || !fName || !lName || !address || !city || !zip) {
+    if(!email || !phone10 || !fName || !lName || !address || !city || !zip) {
       showToast("Please fill in all shipping details.");
+      return;
+    }
+
+    if (!isValidEmail(email)) {
+      showToast("Please enter a valid email address.");
+      return;
+    }
+
+    if (!isValidPakPhone10Digits(phone10)) {
+      showToast("Please enter a valid Pakistan mobile number. Example: +92 3XXXXXXXXX");
+      return;
+    }
+
+    if (!isValidName(fName) || !isValidName(lName)) {
+      showToast("Please enter a valid first and last name.");
+      return;
+    }
+
+    if (!isValidAddress(address)) {
+      showToast("Please enter a valid address.");
+      return;
+    }
+
+    if (!isValidZip(zip)) {
+      showToast("Please enter a valid postal code.");
+      return;
+    }
+
+    // ensure selected city is actually in allowed list (admin-side cities)
+    if (SHIPPING_RATES[city] === undefined) {
+      showToast("Selected city is not available for delivery.");
       return;
     }
 
@@ -406,17 +641,48 @@
 
     try {
       const selectedPayment = document.querySelector('input[name="payment"]:checked').value;
-      const totalAmount = cart.reduce((sum, item) => sum + (item.price * item.qty), 0);
+
+      // normalize cart numbers
+      const cleanItems = (cart || []).map(it => ({
+        ...it,
+        price: num(it.price),
+        qty: Math.max(0, num(it.qty))
+      }));
+
+      const subtotalAmount = cleanItems.reduce((sum, item) => sum + (num(item.price) * num(item.qty)), 0);
+      const shippingFee = num(SHIPPING_RATES[city]);
+      const totalAmount = subtotalAmount + shippingFee;
+
+      const fullName = `${fName} ${lName}`.trim();
+      const phoneFull = fullPhoneE164();
 
       const orderData = {
         customer: {
-          name: `${fName} ${lName}`,
+          name: fullName,
           email: email,
+          phone: phoneFull,
           address: address,
+          apartment: apartment,
           city: city,
-          zip: zip
+          zip: zip,
+          country: "Pakistan"
         },
-        items: cart,
+
+        // ✅ add shipping object for admin.html compatibility (without removing your customer object)
+        shipping: {
+          name: fullName,
+          email: email,
+          phone: phoneFull,
+          line1: address,
+          line2: apartment,
+          city: city,
+          postalCode: zip,
+          country: "Pakistan"
+        },
+
+        items: cleanItems,
+        subtotal: subtotalAmount,
+        shippingFee: shippingFee,
         total: totalAmount,
         paymentMethod: selectedPayment,
         status: "Pending",
