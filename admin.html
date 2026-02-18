@@ -1030,7 +1030,7 @@
         <i class='bx bx-menu toggle-menu-btn' id="sidebarToggleBtn5"></i>
         Shipping Rates
       </div>
-      <button class="btn-primary" id="addShippingBtnMain">
+      <button class="btn-primary" id="addShippingBtnMain" type="button">
         <i class='bx bx-plus'></i> Add City
       </button>
     </header>
@@ -1630,7 +1630,7 @@
     }
   }
 
-  // ✅ Shipping Rates Manager
+  // ✅ Shipping Rates Manager (INTERNAL / NO POPUPS)
   function normalizeCityName(v){
     return String(v || "").trim().replace(/\s+/g, " ");
   }
@@ -1662,9 +1662,32 @@
 
     if (subtitle) subtitle.textContent = `Showing ${filtered.length} city${filtered.length === 1 ? '' : 'ies'} • Manage delivery cities shown on checkout. Prices are in PKR.`;
 
-    tbody.innerHTML = filtered.map(r => {
+    // ✅ Always show an "Add new city" row at the top (no prompts/confirm)
+    const addRow = `
+      <tr>
+        <td class="text-left">
+          <input class="mini-input city" type="text" id="newShipCity" placeholder="Enter city name (e.g. Karachi)">
+        </td>
+        <td class="text-left">
+          <input class="mini-input price" type="number" min="0" step="1" value="0" id="newShipPrice">
+        </td>
+        <td class="text-center">
+          <label class="toggle-switch toggle-sm">
+            <input type="checkbox" checked id="newShipEnabled">
+            <span class="slider"></span>
+          </label>
+        </td>
+        <td class="text-right">
+          <div class="actions-cell">
+            <button class="action-btn btn-edit" title="Add City" onclick="window.addShippingCityInline()"><i class='bx bx-plus'></i></button>
+          </div>
+        </td>
+      </tr>
+    `;
+
+    const rows = filtered.map(r => {
       const city = normalizeCityName(r.city || r.name || r.id);
-      const price = num(r.price);
+      const price = Math.max(0, Math.round(num(r.price)));
       const enabled = (r.enabled === undefined) ? true : !!r.enabled;
 
       return `
@@ -1694,8 +1717,11 @@
       `;
     }).join('');
 
+    tbody.innerHTML = addRow + rows;
+
     if (filtered.length === 0) {
-      tbody.innerHTML = `<tr><td colspan="4" style="text-align:center; color:rgba(0,0,0,0.65); padding:28px; font-weight:900;">No shipping cities found.</td></tr>`;
+      // Keep addRow visible even if there are no cities
+      // so we do nothing extra here.
     }
   }
 
@@ -1929,7 +1955,7 @@
     showToast("Order deleted");
   };
 
-  // ✅ Shipping actions (admin side for checkout)
+  // ✅ Shipping actions (admin side for checkout) — NO PROMPTS/CONFIRMS
   window.saveShippingRate = async (id) => {
     const priceEl = document.getElementById(`shipPrice-${id}`);
     const enabledEl = document.getElementById(`shipEnabled-${id}`);
@@ -1960,8 +1986,7 @@
   };
 
   window.deleteShippingRate = async (id) => {
-    if (!confirm("Delete this city from delivery list?")) return;
-
+    // no confirm popup (internal)
     await deleteDoc(doc(db, "shippingRates", id));
     shippingRates = shippingRates.filter(r => r.id !== id);
 
@@ -1969,17 +1994,20 @@
     renderShippingManager();
   };
 
-  async function addShippingCity(){
-    const city = normalizeCityName(prompt("Enter city name (e.g. Karachi):") || "");
-    if (!city) return;
+  window.addShippingCityInline = async () => {
+    const cityEl = document.getElementById('newShipCity');
+    const priceEl = document.getElementById('newShipPrice');
+    const enabledEl = document.getElementById('newShipEnabled');
 
-    const priceRaw = prompt("Enter shipping price in PKR (0 for Free):", "0");
-    if (priceRaw === null) return;
+    const city = normalizeCityName(cityEl?.value || "");
+    const price = Math.max(0, Math.round(num(priceEl?.value)));
+    const enabled = !!enabledEl?.checked;
 
-    const price = Math.max(0, Math.round(num(priceRaw)));
-    const enabled = confirm("Enable delivery for this city?\n\nOK = Enabled\nCancel = Disabled");
+    if (!city) {
+      showToast("Enter a city name");
+      return;
+    }
 
-    // prevent duplicate by city name (case-insensitive)
     const exists = shippingRates.some(r => normalizeCityName(r.city || r.name || r.id).toLowerCase() === city.toLowerCase());
     if (exists) {
       showToast("City already exists");
@@ -1994,10 +2022,14 @@
       updatedAt: serverTimestamp()
     });
 
+    if (cityEl) cityEl.value = "";
+    if (priceEl) priceEl.value = "0";
+    if (enabledEl) enabledEl.checked = true;
+
     showToast("City added");
     await fetchShippingRates();
     renderShippingManager();
-  }
+  };
 
   // --- EDITOR LOGIC ---
   function addImageInput(val = '') {
@@ -2138,7 +2170,7 @@
     // ✅ shipping listeners
     const sSearch = document.getElementById('shippingSearchInput');
     const sRefresh = document.getElementById('shippingRefreshBtn');
-    const sAdd = document.getElementById('addShippingBtnMain');
+    const sAddTop = document.getElementById('addShippingBtnMain');
 
     if (sSearch) {
       sSearch.addEventListener('input', (e) => {
@@ -2153,8 +2185,15 @@
         showToast("Shipping list refreshed");
       });
     }
-    if (sAdd) {
-      sAdd.addEventListener('click', addShippingCity);
+    if (sAddTop) {
+      // ✅ no popup: just jump to shipping view and focus input
+      sAddTop.addEventListener('click', () => {
+        switchView('shipping');
+        setTimeout(() => {
+          const el = document.getElementById('newShipCity');
+          if (el) el.focus();
+        }, 50);
+      });
     }
 
     if (closeOrderModalBtn) closeOrderModalBtn.onclick = closeModal;
