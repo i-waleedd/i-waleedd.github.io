@@ -660,9 +660,10 @@
     <div class="footer-col">
       <h4>Stay in the Loop</h4>
       <p>Subscribe for exclusive offers and new drops.</p>
-      <form class="newsletter-form" onsubmit="event.preventDefault(); showToast('Subscribed successfully!');">
-        <input type="email" placeholder="Enter your email" required>
-        <button type="submit"><i class='bx bx-send'></i></button>
+      <!-- ✅ Working newsletter form (no extra popup, uses same toast) -->
+      <form class="newsletter-form" id="newsletterForm">
+        <input type="email" id="newsletterEmail" placeholder="Enter your email" required>
+        <button type="submit" aria-label="Subscribe"><i class='bx bx-send'></i></button>
       </form>
     </div>
   </div>
@@ -716,25 +717,68 @@
         loginBtn.onclick = () => { window.location.href = "login.html"; };
       }
     });
+
+    // ✅ Newsletter submission (Firestore)
+    const newsletterForm = document.getElementById("newsletterForm");
+    if (newsletterForm) {
+      newsletterForm.addEventListener("submit", async (e) => {
+        e.preventDefault();
+
+        const emailEl = document.getElementById("newsletterEmail");
+        const email = (emailEl?.value || "").trim().toLowerCase();
+        if (!email) return;
+
+        const btn = newsletterForm.querySelector("button");
+        const prevHtml = btn.innerHTML;
+        btn.disabled = true;
+        btn.innerHTML = "<i class='bx bx-loader-alt bx-spin'></i>";
+
+        try {
+          await addDoc(collection(db, "newsletter"), {
+            email,
+            createdAt: serverTimestamp(),
+            source: "contact_footer"
+          });
+
+          showToast("Subscribed successfully!");
+          newsletterForm.reset();
+        } catch (err) {
+          console.error(err);
+          showToast("Subscription failed. Try again.");
+        } finally {
+          btn.disabled = false;
+          btn.innerHTML = prevHtml;
+        }
+      });
+    }
   });
 
   // --- FORM SUBMISSION LOGIC ---
   window.submitForm = async function(e) {
     e.preventDefault();
 
-    const name = document.getElementById("contactName").value;
-    const email = document.getElementById("contactEmail").value;
-    const message = document.getElementById("contactMessage").value;
+    const name = document.getElementById("contactName").value.trim();
+    const email = document.getElementById("contactEmail").value.trim();
+    const message = document.getElementById("contactMessage").value.trim();
     const btn = document.getElementById("submitBtn");
 
     btn.textContent = "Sending...";
     btn.disabled = true;
+
+    // ✅ internal validation (no alerts)
+    if (!name || !email || !message) {
+      showToast("Please fill all fields.");
+      btn.textContent = "Send Message";
+      btn.disabled = false;
+      return;
+    }
 
     try {
       await addDoc(collection(db, "messages"), {
         name,
         email,
         message,
+        uid: auth.currentUser ? auth.currentUser.uid : null,
         createdAt: serverTimestamp(),
         status: "New"
       });
@@ -744,7 +788,7 @@
 
     } catch (error) {
       console.error(error);
-      alert("Error sending message: " + error.message);
+      showToast("Error sending message. Try again.");
     } finally {
       btn.textContent = "Send Message";
       btn.disabled = false;
