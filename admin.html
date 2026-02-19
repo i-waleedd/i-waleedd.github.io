@@ -799,6 +799,10 @@
     <a id="navBestSellers" class="nav-item"><i class='bx bxs-star'></i> Best Sellers</a>
     <a id="navOrders" class="nav-item"><i class='bx bxs-shopping-bag'></i> Orders</a>
 
+    <!-- ✅ Messages & Subscribers -->
+    <a id="navMessages" class="nav-item"><i class='bx bxs-message-dots'></i> Messages</a>
+    <a id="navSubscribers" class="nav-item"><i class='bx bxs-envelope'></i> Subscribers</a>
+
     <!-- ✅ Shipping Rates Manager -->
     <a id="navShipping" class="nav-item"><i class='bx bxs-truck'></i> Shipping Rates</a>
 
@@ -1023,6 +1027,98 @@
     </div>
   </div>
 
+  <!-- ✅ Messages View -->
+  <div id="messagesView" class="view-section">
+    <header class="topbar">
+      <div class="page-title">
+        <i class='bx bx-menu toggle-menu-btn' id="sidebarToggleBtn6"></i>
+        Customer Messages
+      </div>
+    </header>
+
+    <div class="content-area">
+      <div class="table-card">
+        <div class="table-header" style="align-items:flex-start;">
+          <div style="display:flex; flex-direction:column; gap:6px;">
+            <h3 style="margin:0; font-size:16px; font-weight:900;">Messages</h3>
+            <p class="orders-subtitle" id="messagesSubtitle">Showing 0 messages</p>
+          </div>
+
+          <div class="orders-toolbar">
+            <div class="search-box" style="display:flex; width:280px;">
+              <i class='bx bx-search'></i>
+              <input type="text" id="messagesSearchInput" placeholder="Search name, email, message...">
+            </div>
+
+            <button class="btn-linkish" id="messagesRefreshBtn" type="button">
+              <i class='bx bx-refresh'></i> Refresh
+            </button>
+          </div>
+        </div>
+
+        <div style="overflow-x:auto;">
+          <table>
+            <thead>
+              <tr>
+                <th class="text-left">Customer</th>
+                <th class="text-left">Message</th>
+                <th class="text-left">Date</th>
+                <th class="text-center">Status</th>
+                <th class="text-right">Actions</th>
+              </tr>
+            </thead>
+            <tbody id="messagesTableBody"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ✅ Subscribers View -->
+  <div id="subscribersView" class="view-section">
+    <header class="topbar">
+      <div class="page-title">
+        <i class='bx bx-menu toggle-menu-btn' id="sidebarToggleBtn7"></i>
+        Newsletter Subscribers
+      </div>
+    </header>
+
+    <div class="content-area">
+      <div class="table-card">
+        <div class="table-header" style="align-items:flex-start;">
+          <div style="display:flex; flex-direction:column; gap:6px;">
+            <h3 style="margin:0; font-size:16px; font-weight:900;">Subscribers</h3>
+            <p class="orders-subtitle" id="subsSubtitle">Showing 0 subscribers</p>
+          </div>
+
+          <div class="orders-toolbar">
+            <div class="search-box" style="display:flex; width:280px;">
+              <i class='bx bx-search'></i>
+              <input type="text" id="subsSearchInput" placeholder="Search email...">
+            </div>
+
+            <button class="btn-linkish" id="subsRefreshBtn" type="button">
+              <i class='bx bx-refresh'></i> Refresh
+            </button>
+          </div>
+        </div>
+
+        <div style="overflow-x:auto;">
+          <table>
+            <thead>
+              <tr>
+                <th class="text-left">Email</th>
+                <th class="text-left">Date</th>
+                <th class="text-right">Action</th>
+              </tr>
+            </thead>
+            <tbody id="subsTableBody"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <!-- ✅ Shipping Rates View -->
   <div id="shippingView" class="view-section">
     <header class="topbar">
@@ -1200,12 +1296,20 @@
   let ordersStatus = "All";
   let selectedOrderId = null;
 
+  // ✅ messages + subscribers state
+  let messages = [];
+  let subscribers = [];
+  let messagesQuery = "";
+  let subsQuery = "";
+
   // --- DOM ELEMENTS ---
   const views = {
     dashboard: document.getElementById('listView'),
     home: document.getElementById('homeView'),
     bestSellers: document.getElementById('bestSellerView'),
     orders: document.getElementById('ordersView'),
+    messages: document.getElementById('messagesView'),
+    subscribers: document.getElementById('subscribersView'),
     shipping: document.getElementById('shippingView'),
     editor: document.getElementById('editorView')
   };
@@ -1215,6 +1319,8 @@
     home: document.getElementById('navHomePage'),
     bestSellers: document.getElementById('navBestSellers'),
     orders: document.getElementById('navOrders'),
+    messages: document.getElementById('navMessages'),
+    subscribers: document.getElementById('navSubscribers'),
     shipping: document.getElementById('navShipping')
   };
 
@@ -1242,6 +1348,8 @@
   document.getElementById('sidebarToggleBtn3').addEventListener('click', toggleSidebar);
   document.getElementById('sidebarToggleBtn4').addEventListener('click', toggleSidebar);
   document.getElementById('sidebarToggleBtn5').addEventListener('click', toggleSidebar);
+  document.getElementById('sidebarToggleBtn6').addEventListener('click', toggleSidebar);
+  document.getElementById('sidebarToggleBtn7').addEventListener('click', toggleSidebar);
 
   sidebarOverlay.addEventListener('click', closeSidebar);
   document.addEventListener('keydown', (e) => { if(e.key === 'Escape') closeSidebar(); });
@@ -1260,6 +1368,8 @@
   async function initAdmin() {
     await fetchProducts();
     await fetchOrders();
+    await fetchMessages();
+    await fetchSubscribers();
     await fetchShippingRates();
     renderDashboard();
     setupEventListeners();
@@ -1279,6 +1389,8 @@
     if (viewName === 'home') renderHomeManager();
     if (viewName === 'bestSellers') renderBestSellersManager();
     if (viewName === 'orders') renderOrders();
+    if (viewName === 'messages') renderMessages();
+    if (viewName === 'subscribers') renderSubscribers();
     if (viewName === 'shipping') renderShippingManager();
   }
 
@@ -1298,6 +1410,16 @@
   async function fetchShippingRates() {
     const snap = await getDocs(collection(db, "shippingRates"));
     shippingRates = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+  }
+
+  async function fetchMessages() {
+    const snap = await getDocs(collection(db, "messages"));
+    messages = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+  }
+
+  async function fetchSubscribers() {
+    const snap = await getDocs(collection(db, "newsletter"));
+    subscribers = snap.docs.map(d => ({ id: d.id, ...d.data() }));
   }
 
   // ✅ Revenue rules:
@@ -1431,6 +1553,20 @@
       addr.country
     ].filter(Boolean);
     return parts.length ? parts.join(", ") : "—";
+  }
+
+  function formatCreatedAt(x){
+    const raw = x?.createdAt ?? x?.created_at ?? x?.timestamp ?? x?.time ?? null;
+    try {
+      if (raw?.toDate) {
+        const d = raw.toDate();
+        return d ? d.toLocaleDateString(undefined, { year:'numeric', month:'short', day:'2-digit' }) : "—";
+      }
+      const d = raw ? new Date(raw) : null;
+      return (d && !isNaN(d.getTime())) ? d.toLocaleDateString(undefined, { year:'numeric', month:'short', day:'2-digit' }) : "—";
+    } catch {
+      return "—";
+    }
   }
 
   // --- RENDERING ---
@@ -1627,6 +1763,149 @@
 
     if (filtered.length === 0) {
       tbody.innerHTML = `<tr><td colspan="6" style="text-align:center; color:rgba(0,0,0,0.65); padding:28px; font-weight:900;">No orders match your filters.</td></tr>`;
+    }
+  }
+
+  // ✅ Messages
+  function getMessageDateValue(m){
+    const raw = m?.createdAt ?? m?.created_at ?? m?.timestamp ?? null;
+    try{
+      if(raw?.toDate) return raw.toDate();
+      const d = raw ? new Date(raw) : null;
+      return (d && !isNaN(d.getTime())) ? d : null;
+    }catch{
+      return null;
+    }
+  }
+
+  function getFilteredMessages(){
+    const q = (messagesQuery || "").trim().toLowerCase();
+    return [...messages]
+      .filter(m => {
+        if (!q) return true;
+        const name = String(m?.name || "").toLowerCase();
+        const email = String(m?.email || "").toLowerCase();
+        const msg = String(m?.message || "").toLowerCase();
+        return (name.includes(q) || email.includes(q) || msg.includes(q));
+      })
+      .sort((a,b) => {
+        const ad = getMessageDateValue(a)?.getTime?.() || 0;
+        const bd = getMessageDateValue(b)?.getTime?.() || 0;
+        return bd - ad;
+      });
+  }
+
+  function renderMessages(){
+    const tbody = document.getElementById('messagesTableBody');
+    const subtitle = document.getElementById('messagesSubtitle');
+    const filtered = getFilteredMessages();
+
+    if (subtitle) subtitle.textContent = `Showing ${filtered.length} message${filtered.length === 1 ? '' : 's'}`;
+
+    tbody.innerHTML = filtered.map(m => {
+      const name = m?.name || "—";
+      const email = m?.email || "—";
+      const msg = m?.message || "";
+      const dateStr = formatCreatedAt(m);
+      const status = String(m?.status || "New").trim() || "New";
+      const isNew = status.toLowerCase() === "new";
+
+      const preview = msg.length > 120 ? (msg.slice(0,120) + "…") : msg;
+
+      return `
+        <tr>
+          <td>
+            <div style="font-weight:900;">${safeText(name)}</div>
+            <div class="mini-muted">${safeText(email)}</div>
+          </td>
+
+          <td>
+            <div style="font-weight:800; color:#000; line-height:1.45; white-space:pre-wrap;">${safeText(preview)}</div>
+          </td>
+
+          <td>${safeText(dateStr)}</td>
+
+          <td class="text-center">
+            <span style="display:inline-flex; align-items:center; gap:8px; font-weight:900; color:rgba(0,0,0,0.75);">
+              <i class='bx ${isNew ? 'bxs-bell-ring' : 'bxs-check-circle'}' style="color:${isNew ? 'var(--primary)' : '#000'};"></i>
+              ${safeText(status)}
+            </span>
+          </td>
+
+          <td class="text-right">
+            <div class="actions-cell">
+              <button class="action-btn btn-edit" title="${isNew ? 'Mark as Replied' : 'Mark as New'}" onclick="window.toggleMessageStatus('${m.id}')">
+                <i class='bx ${isNew ? 'bx-check' : 'bx-undo'}'></i>
+              </button>
+              <button class="action-btn btn-delete" title="Delete" onclick="window.deleteMessage('${m.id}')">
+                <i class='bx bx-trash'></i>
+              </button>
+            </div>
+          </td>
+        </tr>
+      `;
+    }).join('');
+
+    if (filtered.length === 0) {
+      tbody.innerHTML = `<tr><td colspan="5" style="text-align:center; color:rgba(0,0,0,0.65); padding:28px; font-weight:900;">No messages found.</td></tr>`;
+    }
+  }
+
+  // ✅ Subscribers
+  function getSubDateValue(s){
+    const raw = s?.createdAt ?? s?.created_at ?? s?.timestamp ?? null;
+    try{
+      if(raw?.toDate) return raw.toDate();
+      const d = raw ? new Date(raw) : null;
+      return (d && !isNaN(d.getTime())) ? d : null;
+    }catch{
+      return null;
+    }
+  }
+
+  function getFilteredSubscribers(){
+    const q = (subsQuery || "").trim().toLowerCase();
+    return [...subscribers]
+      .filter(s => {
+        const email = String(s?.email || "").toLowerCase();
+        if (!q) return true;
+        return email.includes(q);
+      })
+      .sort((a,b) => {
+        const ad = getSubDateValue(a)?.getTime?.() || 0;
+        const bd = getSubDateValue(b)?.getTime?.() || 0;
+        return bd - ad;
+      });
+  }
+
+  function renderSubscribers(){
+    const tbody = document.getElementById('subsTableBody');
+    const subtitle = document.getElementById('subsSubtitle');
+    const filtered = getFilteredSubscribers();
+
+    if (subtitle) subtitle.textContent = `Showing ${filtered.length} subscriber${filtered.length === 1 ? '' : 's'}`;
+
+    tbody.innerHTML = filtered.map(s => {
+      const email = s?.email || "—";
+      const dateStr = formatCreatedAt(s);
+
+      return `
+        <tr>
+          <td style="font-weight:900;">${safeText(email)}</td>
+          <td>${safeText(dateStr)}</td>
+          <td class="text-right">
+            <div class="actions-cell">
+              <button class="action-btn btn-delete" title="Delete" onclick="window.deleteSubscriber('${s.id}')">
+                <i class='bx bx-trash'></i>
+              </button>
+            </div>
+          </td>
+        </tr>
+      `;
+    }).join('');
+
+    if (filtered.length === 0) {
+      tbody.innerHTML = `<tr><td colspan="3" style="text-align:center; color:rgba(0,0,0,0.65); padding:28px; font-weight:900;">No subscribers found.</td></tr>`;
     }
   }
 
@@ -1955,6 +2234,40 @@
     showToast("Order deleted");
   };
 
+  // ✅ Messages actions
+  window.toggleMessageStatus = async (id) => {
+    const m = messages.find(x => x.id === id);
+    if (!m) return;
+
+    const current = String(m?.status || "New").trim() || "New";
+    const isNew = current.toLowerCase() === "new";
+    const next = isNew ? "Replied" : "New";
+
+    await updateDoc(doc(db, "messages", id), { status: next });
+
+    m.status = next;
+
+    showToast(`Marked as ${next}`);
+    renderMessages();
+  };
+
+  window.deleteMessage = async (id) => {
+    if (!confirm("Delete this message?")) return;
+    await deleteDoc(doc(db, "messages", id));
+    messages = messages.filter(m => m.id !== id);
+    showToast("Message deleted");
+    renderMessages();
+  };
+
+  // ✅ Subscribers actions
+  window.deleteSubscriber = async (id) => {
+    if (!confirm("Delete this subscriber?")) return;
+    await deleteDoc(doc(db, "newsletter", id));
+    subscribers = subscribers.filter(s => s.id !== id);
+    showToast("Subscriber deleted");
+    renderSubscribers();
+  };
+
   // ✅ Shipping actions (admin side for checkout) — NO PROMPTS/CONFIRMS
   window.saveShippingRate = async (id) => {
     const priceEl = document.getElementById(`shipPrice-${id}`);
@@ -2134,6 +2447,8 @@
     navItems.home.onclick = () => switchView('home');
     navItems.bestSellers.onclick = () => switchView('bestSellers');
     navItems.orders.onclick = () => switchView('orders');
+    navItems.messages.onclick = () => switchView('messages');
+    navItems.subscribers.onclick = () => switchView('subscribers');
     navItems.shipping.onclick = () => switchView('shipping');
 
     const search = document.getElementById('searchInput');
@@ -2164,6 +2479,40 @@
         if (oSearch) oSearch.value = "";
         if (oStatus) oStatus.value = "All";
         renderOrders();
+      });
+    }
+
+    // ✅ messages listeners
+    const mSearch = document.getElementById('messagesSearchInput');
+    const mRefresh = document.getElementById('messagesRefreshBtn');
+    if (mSearch) {
+      mSearch.addEventListener('input', (e) => {
+        messagesQuery = e.target.value || "";
+        renderMessages();
+      });
+    }
+    if (mRefresh) {
+      mRefresh.addEventListener('click', async () => {
+        await fetchMessages();
+        renderMessages();
+        showToast("Messages refreshed");
+      });
+    }
+
+    // ✅ subscribers listeners
+    const subSearch = document.getElementById('subsSearchInput');
+    const subRefresh = document.getElementById('subsRefreshBtn');
+    if (subSearch) {
+      subSearch.addEventListener('input', (e) => {
+        subsQuery = e.target.value || "";
+        renderSubscribers();
+      });
+    }
+    if (subRefresh) {
+      subRefresh.addEventListener('click', async () => {
+        await fetchSubscribers();
+        renderSubscribers();
+        showToast("Subscribers refreshed");
       });
     }
 

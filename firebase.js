@@ -1,6 +1,12 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js";
 import { getAuth } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-auth.js";
-import { getFirestore, enableIndexedDbPersistence } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js";
+import {
+  getFirestore,
+  initializeFirestore,
+  persistentLocalCache,
+  persistentMultipleTabManager,
+  memoryLocalCache
+} from "https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js";
 import { getAnalytics, isSupported } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-analytics.js";
 
 const firebaseConfig = {
@@ -18,7 +24,25 @@ const app = initializeApp(firebaseConfig);
 
 // 2. Export Services
 export const auth = getAuth(app);
-export const db = getFirestore(app);
+
+// ✅ Firestore init using the NEW cache API (replaces enableIndexedDbPersistence)
+// - persistentLocalCache + persistentMultipleTabManager = works across multiple tabs
+// - fallback to memory cache if persistence isn't available
+let _db;
+try {
+  _db = initializeFirestore(app, {
+    localCache: persistentLocalCache({
+      tabManager: persistentMultipleTabManager()
+    })
+  });
+} catch (e) {
+  console.log("Firestore persistent cache not available, using memory cache.", e?.message || e);
+  _db = initializeFirestore(app, {
+    localCache: memoryLocalCache()
+  });
+}
+
+export const db = _db;
 
 // ✅ Safe analytics init (prevents crashes on unsupported environments)
 export let analytics = null;
@@ -29,13 +53,3 @@ isSupported()
   .catch(() => {
     analytics = null;
   });
-
-// 3. Enable Offline Persistence (Professional Speed Upgrade)
-// This makes the website load instantly for returning users even on slow internet.
-enableIndexedDbPersistence(db).catch((err) => {
-  if (err.code == 'failed-precondition') {
-      console.log("Offline persistence failed: Multiple tabs open.");
-  } else if (err.code == 'unimplemented') {
-      console.log("Offline persistence not supported by this browser.");
-  }
-});
