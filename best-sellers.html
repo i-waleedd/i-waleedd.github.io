@@ -961,9 +961,9 @@
     <div class="footer-col">
       <h4>Stay in the Loop</h4>
       <p>Subscribe for exclusive offers and new drops.</p>
-      <form class="newsletter-form" onsubmit="event.preventDefault(); showToast('Subscribed successfully!');">
-        <input type="email" placeholder="Enter your email" required>
-        <button type="submit"><i class='bx bx-send'></i></button>
+      <form class="newsletter-form" id="newsletterForm">
+        <input type="email" id="newsletterEmail" placeholder="Enter your email" required>
+        <button type="submit" id="newsletterBtn"><i class='bx bx-send'></i></button>
       </form>
     </div>
   </div>
@@ -1361,6 +1361,50 @@
       });
     }
   });
+</script>
+
+<!-- ✅ Footer Newsletter (Firestore) -->
+<script type="module">
+  import { db } from "./firebase.js";
+  import { collection, addDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js";
+
+  const form = document.getElementById("newsletterForm");
+  const emailInput = document.getElementById("newsletterEmail");
+  const btn = document.getElementById("newsletterBtn");
+
+  function normEmail(v){
+    return String(v || "").trim().toLowerCase();
+  }
+
+  if (form) {
+    form.addEventListener("submit", async (e) => {
+      e.preventDefault();
+
+      const email = normEmail(emailInput?.value);
+      if (!email) {
+        showToast("Please enter your email.");
+        return;
+      }
+
+      if (btn) btn.disabled = true;
+
+      try {
+        await addDoc(collection(db, "newsletter"), {
+          email,
+          page: "best-sellers",
+          createdAt: serverTimestamp()
+        });
+
+        if (emailInput) emailInput.value = "";
+        showToast("Subscribed successfully!");
+      } catch (err) {
+        console.error(err);
+        showToast("Subscription failed. Try again.");
+      } finally {
+        if (btn) btn.disabled = false;
+      }
+    });
+  }
 </script>
 
 <script>
