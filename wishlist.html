@@ -1124,7 +1124,9 @@
       const products = await fetchProducts();
       const all = (products || []).filter(p => !p.isHidden);
 
-      const wishedProducts = all.filter(p => wishlistIds.includes(p.id));
+      // ✅ Keep the wishlist order (same as user saved)
+      const byId = new Map(all.map(p => [p.id, p]));
+      const wishedProducts = wishlistIds.map(id => byId.get(id)).filter(Boolean);
 
       container.innerHTML = "";
 
@@ -1214,12 +1216,9 @@
             const nowWished = toggleWish(pid);
             if (!nowWished) {
               showToast("Removed from wishlist!");
-              // remove card from UI
               wrap.remove();
-              // if none left, re-render empty state
               if (!container.querySelector(".product-wrap")) loadWishlist();
             } else {
-              // edge case: user re-added somehow
               showToast("Added to wishlist!");
             }
           });
