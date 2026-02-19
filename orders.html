@@ -829,6 +829,11 @@
         userDropdown.classList.toggle("show");
       });
 
+      /* ✅ FIX: clicking inside dropdown should not auto-close before item handlers finish */
+      userDropdown.addEventListener("click", (e) => {
+        e.stopPropagation();
+      });
+
       document.addEventListener("click", () => closeUserDropdown());
 
       ddAdmin.addEventListener("click", () => { window.location.href = "admin.html"; });
@@ -1063,6 +1068,16 @@
         : "https://placehold.co/100x100/f3f4f6/9ca3af?text=No+Img";
     }
 
+    /* ✅ FIX: basic HTML escape for cart display (prevents localStorage/DOM injection) */
+    function esc(s){
+      return String(s ?? "")
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
+    }
+
     function updateCartCount() {
       const count = cart.reduce((sum, item) => sum + (item.qty || 0), 0);
       const el = document.getElementById("cart-count");
@@ -1096,7 +1111,7 @@
           <div class="cart-item">
             <img class="cart-thumb" src="${safeImg(item.image)}" alt="Item" onerror="this.src='https://placehold.co/100x100/f3f4f6/9ca3af?text=No+Img'">
             <div class="cart-meta">
-              <div class="cart-name">${item.name || "Item"}</div>
+              <div class="cart-name">${esc(item.name || "Item")}</div>
               <div class="cart-sub">Qty: ${qty}</div>
             </div>
             <div class="cart-right">
@@ -1176,9 +1191,10 @@
       nav.classList.toggle("active");
       menuOverlay.classList.toggle("active");
 
+      /* ✅ FIX: prevent background scrolling when menu is open (consistent with other pages) */
       const menuOpen = nav.classList.contains("active");
       const cartOpen = document.getElementById("cartDropdown")?.classList.contains("show");
-      document.body.classList.toggle("no-scroll", menuOpen && !cartOpen);
+      document.body.classList.toggle("no-scroll", menuOpen || cartOpen);
     }
 
     menuToggle.addEventListener("click", toggleMenu);

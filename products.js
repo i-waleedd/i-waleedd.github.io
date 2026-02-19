@@ -6,14 +6,14 @@ export async function fetchProducts() {
   try {
     // UPDATED: Added sorting so newest products (by creation date) show first
     const q = query(collection(db, "products"), orderBy("createdAt", "desc"));
-    
+
     const querySnapshot = await getDocs(q);
     const products = [];
-    
-    querySnapshot.forEach((doc) => {
-      products.push({ id: doc.id, ...doc.data() });
+
+    querySnapshot.forEach((docSnap) => {
+      products.push({ id: docSnap.id, ...docSnap.data() });
     });
-    
+
     return products;
   } catch (error) {
     // Fallback: If sorting fails (requires an index), fetch normally
@@ -21,8 +21,8 @@ export async function fetchProducts() {
     try {
       const querySnapshot = await getDocs(collection(db, "products"));
       const products = [];
-      querySnapshot.forEach((doc) => {
-        products.push({ id: doc.id, ...doc.data() });
+      querySnapshot.forEach((docSnap) => {
+        products.push({ id: docSnap.id, ...docSnap.data() });
       });
       return products;
     } catch (e) {

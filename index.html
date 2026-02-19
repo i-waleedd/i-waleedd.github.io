@@ -1054,9 +1054,10 @@
     <div class="footer-col">
       <h4>Stay in the Loop</h4>
       <p>Subscribe for exclusive offers and new drops.</p>
-      <form class="newsletter-form" onsubmit="event.preventDefault(); showToast('Subscribed successfully!');">
-        <input type="email" placeholder="Enter your email" required>
-        <button type="submit"><i class='bx bx-send'></i></button>
+      <!-- ✅ UPDATED: match best-sellers.html (Firestore newsletter) -->
+      <form class="newsletter-form" id="newsletterForm">
+        <input type="email" id="newsletterEmail" placeholder="Enter your email" required>
+        <button type="submit" id="newsletterBtn"><i class='bx bx-send'></i></button>
       </form>
     </div>
   </div>
@@ -1086,6 +1087,11 @@
     userBtn.addEventListener("click", (e) => {
       e.stopPropagation();
       userDropdown.classList.toggle("show");
+    });
+
+    /* ✅ FIX: clicking inside dropdown should not auto-close before item handlers finish */
+    userDropdown.addEventListener("click", (e) => {
+      e.stopPropagation();
     });
 
     document.addEventListener("click", () => closeUserDropdown());
@@ -1220,7 +1226,10 @@
       }
 
       const imgs = Array.isArray(p.images) && p.images.length ? p.images : [(p.image || "")].filter(Boolean);
-      const imageSrc = (imgs && imgs[0]) ? imgs[0] : "";
+
+      /* ✅ FIX: avoid empty src="" (causes extra network request / broken image flash) */
+      const imageSrc = (imgs && imgs[0]) ? imgs[0] : "https://placehold.co/300x300/ffffff/2b1719?text=PressPlay+Nails";
+
       const imagesJson = escapeHtml(JSON.stringify(imgs || []));
 
       const ratingVal = Number(p.rating || 0);
@@ -1456,6 +1465,50 @@
   });
 </script>
 
+<!-- ✅ Footer Newsletter (Firestore) -->
+<script type="module">
+  import { db } from "./firebase.js";
+  import { collection, addDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js";
+
+  const form = document.getElementById("newsletterForm");
+  const emailInput = document.getElementById("newsletterEmail");
+  const btn = document.getElementById("newsletterBtn");
+
+  function normEmail(v){
+    return String(v || "").trim().toLowerCase();
+  }
+
+  if (form) {
+    form.addEventListener("submit", async (e) => {
+      e.preventDefault();
+
+      const email = normEmail(emailInput?.value);
+      if (!email) {
+        showToast("Please enter your email.");
+        return;
+      }
+
+      if (btn) btn.disabled = true;
+
+      try {
+        await addDoc(collection(db, "newsletter"), {
+          email,
+          page: "index",
+          createdAt: serverTimestamp()
+        });
+
+        if (emailInput) emailInput.value = "";
+        showToast("Subscribed successfully!");
+      } catch (err) {
+        console.error(err);
+        showToast("Subscription failed. Try again.");
+      } finally {
+        if (btn) btn.disabled = false;
+      }
+    });
+  }
+</script>
+
 <script>
   function showToast(message) {
     const toast = document.getElementById("toast");
@@ -1471,6 +1524,16 @@
     return (url && String(url).trim().length)
       ? url
       : "https://placehold.co/100x100/f3f4f6/9ca3af?text=No+Img";
+  }
+
+  /* ✅ FIX: basic HTML escape for cart display (prevents localStorage/DOM injection) */
+  function esc(s){
+    return String(s ?? "")
+      .replace(/&/g, "&amp;")
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;")
+      .replace(/"/g, "&quot;")
+      .replace(/'/g, "&#039;");
   }
 
   function updateCartCount() {
@@ -1506,7 +1569,7 @@
         <div class="cart-item">
           <img class="cart-thumb" src="${safeImg(item.image)}" alt="Item" onerror="this.src='https://placehold.co/100x100/f3f4f6/9ca3af?text=No+Img'">
           <div class="cart-meta">
-            <div class="cart-name">${item.name || "Item"}</div>
+            <div class="cart-name">${esc(item.name || "Item")}</div>
             <div class="cart-sub">Qty: ${qty}</div>
           </div>
           <div class="cart-right">
@@ -1600,6 +1663,11 @@
   function toggleMenu() {
     nav.classList.toggle("active");
     menuOverlay.classList.toggle("active");
+
+    /* ✅ FIX: prevent background scrolling when menu is open (same behavior as cart) */
+    const cartOpen = document.getElementById("cartDropdown")?.classList.contains("show");
+    const menuOpen = nav.classList.contains("active");
+    document.body.classList.toggle("no-scroll", menuOpen || cartOpen);
   }
 
   menuToggle.addEventListener("click", toggleMenu);

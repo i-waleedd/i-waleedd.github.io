@@ -11,92 +11,360 @@
 <link href="https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css" rel="stylesheet">
 
 <style>
+  :root{
+    --primary:#ff7e8d;
+    --primary-hover:#ff6b7d;
+
+    /* ✅ Match other pages */
+    --bg:#ffffff;
+    --text:#2b1719;
+    --muted:rgba(43,23,25,.72);
+    --border:rgba(0,0,0,0.12);
+    --soft:rgba(0,0,0,0.04);
+
+    --card:#ffffff;
+    --shadow:0 22px 70px rgba(0,0,0,0.14);
+
+    /* ✅ Login hero image (swap anytime) */
+    --hero-image: url("https://images.unsplash.com/photo-1520975916090-3105956dac38?auto=format&fit=crop&w=1600&q=75");
+  }
+
   * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Poppins', sans-serif; }
-  body { background: #E6D8C5; min-height: 100vh; display: flex; align-items: center; justify-content: center; }
-  
-  .login-card { width: 100%; max-width: 420px; background: #E6D8C5; padding: 40px; border-radius: 18px; box-shadow: 0 16px 45px rgba(0,0,0,0.15); }
-  .brand { text-align: center; margin-bottom: 6px; font-size: 26px; font-weight: 700; letter-spacing: 1px; }
-  .subtitle { text-align: center; font-size: 14px; color: #555; margin-bottom: 30px; }
-  
-  .field { margin-bottom: 18px; }
-  .field label { display: block; font-size: 13px; font-weight: 500; margin-bottom: 6px; }
-  .field input { width: 100%; padding: 12px 14px; border-radius: 10px; border: 1px solid rgba(0,0,0,0.2); font-size: 14px; outline: none; background: #fff; }
-  .field input:focus { border-color: #ff7e8d; }
-  
-  .action-row { display: flex; justify-content: space-between; align-items: center; font-size: 13px; margin-bottom: 20px; }
-  .action-row a { color: #ff7e8d; text-decoration: none; font-weight: 500; }
-  
-  .login-btn { width: 100%; padding: 14px; background: #ff7e8d; color: #fff; border: none; border-radius: 30px; font-size: 15px; font-weight: 600; cursor: pointer; transition: all 0.3s ease; }
-  .login-btn:hover { transform: translateY(-2px); box-shadow: 0 10px 24px rgba(255,126,141,0.45); }
-  
+
+  body {
+    background: radial-gradient(1100px 600px at 20% 20%, rgba(255,126,141,0.10), transparent 55%),
+                radial-gradient(900px 600px at 80% 40%, rgba(0,0,0,0.06), transparent 60%),
+                var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 22px;
+  }
+
+  /* ===== Split Layout (PC) ===== */
+  .auth-shell{
+    width: min(1080px, 96vw);
+    background: var(--card);
+    border: 1px solid rgba(0,0,0,0.10);
+    border-radius: 20px;
+    box-shadow: var(--shadow);
+    overflow: hidden;
+    display: grid;
+    grid-template-columns: 1.05fr 0.95fr;
+    min-height: 620px;
+  }
+
+  /* Left hero panel */
+  .auth-hero{
+    position: relative;
+    background: var(--soft);
+    overflow: hidden;
+  }
+
+  .auth-hero::before{
+    content:"";
+    position:absolute;
+    inset:0;
+    background-image: var(--hero-image);
+    background-size: cover;
+    background-position: center;
+    transform: scale(1.02);
+    filter: saturate(0.95) contrast(1.05);
+  }
+
+  .auth-hero::after{
+    content:"";
+    position:absolute;
+    inset:0;
+    background: linear-gradient(180deg, rgba(0,0,0,0.15) 0%, rgba(0,0,0,0.55) 70%, rgba(0,0,0,0.62) 100%);
+  }
+
+  .hero-content{
+    position:absolute;
+    left: 34px;
+    right: 34px;
+    bottom: 34px;
+    color: #fff;
+    z-index: 2;
+  }
+
+  .hero-title{
+    font-size: 40px;
+    font-weight: 800;
+    letter-spacing: 0.2px;
+    line-height: 1.05;
+    text-shadow: 0 14px 40px rgba(0,0,0,0.35);
+    margin-bottom: 10px;
+  }
+
+  .hero-sub{
+    max-width: 420px;
+    font-size: 13px;
+    line-height: 1.6;
+    color: rgba(255,255,255,0.88);
+  }
+
+  /* Right form panel */
+  .auth-form{
+    position: relative;
+    padding: 34px 34px 28px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+  }
+
+  .top-link{
+    position: absolute;
+    top: 16px;
+    right: 18px;
+    font-size: 11px;
+    font-weight: 700;
+    color: rgba(43,23,25,0.55);
+    letter-spacing: 0.4px;
+    text-transform: uppercase;
+    text-decoration: none;
+    padding: 8px 10px;
+    border-radius: 999px;
+    transition: .2s;
+  }
+  .top-link:hover{
+    color: var(--text);
+    background: rgba(0,0,0,0.04);
+  }
+
+  .brand {
+    font-size: 26px;
+    font-weight: 800;
+    letter-spacing: 0.6px;
+    margin-bottom: 6px;
+  }
+
+  .subtitle {
+    font-size: 13px;
+    color: rgba(43,23,25,0.70);
+    margin-bottom: 22px;
+  }
+
+  .field { margin-bottom: 16px; }
+  .field label {
+    display: block;
+    font-size: 12px;
+    font-weight: 700;
+    margin-bottom: 6px;
+    color: rgba(43,23,25,0.82);
+    letter-spacing: 0.2px;
+  }
+  .field input {
+    width: 100%;
+    padding: 12px 14px;
+    border-radius: 12px;
+    border: 1px solid rgba(0,0,0,0.14);
+    font-size: 14px;
+    outline: none;
+    background: #fff;
+    color: var(--text);
+    transition: border-color .2s, box-shadow .2s, transform .1s;
+  }
+  .field input:focus {
+    border-color: rgba(255,126,141,0.75);
+    box-shadow: 0 0 0 3px rgba(255,126,141,0.15);
+  }
+
+  .action-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 13px;
+    margin: 6px 0 16px;
+  }
+  .action-row a {
+    color: var(--primary);
+    text-decoration: none;
+    font-weight: 700;
+  }
+  .action-row a:hover { color: var(--primary-hover); }
+
+  .login-btn {
+    width: 100%;
+    padding: 14px;
+    background: var(--primary);
+    color: #fff;
+    border: none;
+    border-radius: 999px;
+    font-size: 15px;
+    font-weight: 800;
+    cursor: pointer;
+    transition: all 0.25s ease;
+    box-shadow: 0 14px 28px rgba(255,126,141,0.25);
+  }
+  .login-btn:hover {
+    background: var(--primary-hover);
+    transform: translateY(-2px);
+  }
+  .login-btn:disabled {
+    opacity: .65;
+    cursor: not-allowed;
+    transform: none;
+  }
+
   /* GOOGLE BUTTON */
-  .divider { display: flex; align-items: center; margin: 24px 0; color: #666; font-size: 12px; }
-  .divider::before, .divider::after { content: ""; flex: 1; height: 1px; background: #ccc; }
+  .divider {
+    display: flex;
+    align-items: center;
+    margin: 18px 0;
+    color: rgba(43,23,25,0.55);
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.3px;
+    text-transform: uppercase;
+  }
+  .divider::before, .divider::after {
+    content: "";
+    flex: 1;
+    height: 1px;
+    background: rgba(0,0,0,0.12);
+  }
   .divider span { padding: 0 10px; }
 
-  .google-btn { 
-    width: 100%; padding: 12px; background: #fff; color: #333; 
-    border: 1px solid #ddd; border-radius: 30px; 
-    font-size: 14px; font-weight: 500; cursor: pointer; 
-    display: flex; align-items: center; justify-content: center; gap: 10px;
+  .google-btn {
+    width: 100%;
+    padding: 12px;
+    background: #fff;
+    color: #333;
+    border: 1px solid rgba(0,0,0,0.14);
+    border-radius: 999px;
+    font-size: 14px;
+    font-weight: 700;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
     transition: 0.2s;
   }
-  .google-btn:hover { background: #f9f9f9; border-color: #ccc; }
+  .google-btn:hover {
+    background: rgba(0,0,0,0.02);
+    border-color: rgba(255,126,141,0.45);
+  }
   .google-btn img { width: 18px; height: 18px; }
 
-  .error { margin-top: 14px; color: #c0392b; font-size: 13px; display: none; text-align: center; padding: 10px; background: #fceceb; border-radius: 8px; }
-  .footer-text { margin-top: 26px; text-align: center; font-size: 13px; color: #555; }
-  .footer-text a { color: #ff7e8d; font-weight: 600; text-decoration: none; }
-  
-  @media (max-width: 480px) { .login-card { padding: 30px 22px; } }
+  .error {
+    margin-top: 14px;
+    color: #991b1b;
+    font-size: 13px;
+    display: none;
+    text-align: center;
+    padding: 10px;
+    background: rgba(153,27,27,0.08);
+    border-radius: 12px;
+    border: 1px solid rgba(153,27,27,0.18);
+    font-weight: 700;
+  }
+
+  .footer-text {
+    margin-top: 18px;
+    text-align: center;
+    font-size: 13px;
+    color: rgba(43,23,25,0.70);
+  }
+  .footer-text a {
+    color: var(--primary);
+    font-weight: 800;
+    text-decoration: none;
+  }
+  .footer-text a:hover { color: var(--primary-hover); }
+
+  /* ===== Responsive ===== */
+  @media (max-width: 900px) {
+    body{ padding: 16px; }
+    .auth-shell{
+      grid-template-columns: 1fr;
+      min-height: unset;
+      border-radius: 18px;
+    }
+    .auth-hero{
+      min-height: 260px;
+    }
+    .hero-content{
+      left: 20px;
+      right: 20px;
+      bottom: 20px;
+    }
+    .hero-title{ font-size: 32px; }
+    .auth-form{
+      padding: 26px 20px 20px;
+    }
+    .top-link{
+      top: 12px;
+      right: 12px;
+    }
+  }
+
+  @media (max-width: 480px) {
+    .auth-hero{ min-height: 220px; }
+    .hero-title{ font-size: 28px; }
+  }
 </style>
 </head>
 
 <body>
 
-<div class="login-card">
-  <div class="brand">PressPlay Nails</div>
-  <div class="subtitle">Welcome back ✨</div>
-
-  <div class="field">
-    <label>Email</label>
-    <input type="email" id="email" placeholder="you@example.com">
+<div class="auth-shell">
+  <div class="auth-hero" aria-hidden="true">
+    <div class="hero-content">
+      <div class="hero-title">Welcome Back.</div>
+      <div class="hero-sub">Access your curated wishlist, order history, and exclusive member privileges — in minutes.</div>
+    </div>
   </div>
 
-  <div class="field">
-    <label>Password</label>
-    <input type="password" id="password" placeholder="••••••••">
-  </div>
+  <div class="auth-form">
+    <a class="top-link" href="index.html">Back to Store</a>
 
-  <div class="action-row">
-    <span></span>
-    <a href="#" onclick="resetPassword()">Forgot password?</a>
-  </div>
+    <div class="brand">PressPlay Nails</div>
+    <div class="subtitle">Sign in to continue ✨</div>
 
-  <button class="login-btn" id="loginBtn" onclick="login()">Login</button>
+    <div class="field">
+      <label>Email</label>
+      <input type="email" id="email" placeholder="you@example.com" autocomplete="email">
+    </div>
 
-  <div class="divider"><span>OR</span></div>
+    <div class="field">
+      <label>Password</label>
+      <input type="password" id="password" placeholder="••••••••" autocomplete="current-password">
+    </div>
 
-  <button class="google-btn" onclick="loginWithGoogle()">
-    <img src="https://upload.wikimedia.org/wikipedia/commons/c/c1/Google_%22G%22_logo.svg" alt="Google">
-    Continue with Google
-  </button>
+    <div class="action-row">
+      <span></span>
+      <a href="#" onclick="resetPassword(); return false;">Forgot password?</a>
+    </div>
 
-  <div class="error" id="errorMsg"></div>
+    <button class="login-btn" id="loginBtn" onclick="login()">Login</button>
 
-  <div class="footer-text">
-    New here?
-    <a href="signup.html">Create an account</a>
+    <div class="divider"><span>OR</span></div>
+
+    <button class="google-btn" onclick="loginWithGoogle()">
+      <img src="https://upload.wikimedia.org/wikipedia/commons/c/c1/Google_%22G%22_logo.svg" alt="Google">
+      Continue with Google
+    </button>
+
+    <div class="error" id="errorMsg"></div>
+
+    <div class="footer-text">
+      New here?
+      <a href="signup.html">Create an account</a>
+    </div>
   </div>
 </div>
 
 <script type="module">
 import { auth, db } from "./firebase.js";
-import { 
-  signInWithEmailAndPassword, 
-  sendPasswordResetEmail, 
-  GoogleAuthProvider, 
-  signInWithPopup 
+import {
+  signInWithEmailAndPassword,
+  sendPasswordResetEmail,
+  GoogleAuthProvider,
+  signInWithPopup
 } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-auth.js";
 import { doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js";
 
@@ -107,6 +375,17 @@ function showError(msg) {
   el.style.display = "block";
   setTimeout(() => el.style.display = "none", 4000);
 }
+
+// Allow Enter to submit
+document.addEventListener("keydown", (e) => {
+  if (e.key === "Enter") {
+    const active = document.activeElement;
+    if (active && (active.id === "email" || active.id === "password")) {
+      e.preventDefault();
+      window.login();
+    }
+  }
+});
 
 // --- EMAIL LOGIN ---
 window.login = async function() {
@@ -128,7 +407,7 @@ window.login = async function() {
     await checkAdminAndRedirect(user);
   } catch (error) {
     let msg = error.message;
-    if(msg.includes("invalid-credential")) msg = "Incorrect email or password.";
+    if (msg.includes("invalid-credential")) msg = "Incorrect email or password.";
     showError(msg);
     btn.textContent = "Login";
     btn.disabled = false;
@@ -138,11 +417,11 @@ window.login = async function() {
 // --- GOOGLE LOGIN ---
 window.loginWithGoogle = async function() {
   const provider = new GoogleAuthProvider();
-  
+
   try {
     const result = await signInWithPopup(auth, provider);
     const user = result.user;
-    
+
     // Check if new user -> save to DB (Optional for future use)
     // await setDoc(doc(db, "users", user.uid), { email: user.email, name: user.displayName }, { merge: true });
 
@@ -179,7 +458,7 @@ window.resetPassword = function() {
     return;
   }
   sendPasswordResetEmail(auth, email)
-    .then(() => alert("Password reset link sent to your email!"))
+    .then(() => showError("Password reset link sent to your email!"))
     .catch(err => showError(err.message));
 };
 </script>

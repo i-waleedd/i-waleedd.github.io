@@ -988,6 +988,9 @@
       userDropdown.classList.toggle("show");
     });
 
+    /* ✅ FIX: clicking inside dropdown shouldn't immediately close it */
+    userDropdown.addEventListener("click", (e) => e.stopPropagation());
+
     document.addEventListener("click", () => closeUserDropdown());
 
     ddAdmin.addEventListener("click", () => { window.location.href = "admin.html"; });
@@ -1355,6 +1358,15 @@
     setTimeout(() => { toast.className = toast.className.replace("show", ""); }, 3000);
   }
 
+  function escapeHtml(str) {
+    return String(str ?? "")
+      .replace(/&/g, "&amp;")
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;")
+      .replace(/"/g, "&quot;")
+      .replace(/'/g, "&#039;");
+  }
+
   // ========= CART (Fixed + Better UI) =========
   let cart = JSON.parse(localStorage.getItem("cart")) || [];
 
@@ -1397,7 +1409,7 @@
         <div class="cart-item">
           <img class="cart-thumb" src="${safeImg(item.image)}" alt="Item" onerror="this.src='https://placehold.co/100x100/f3f4f6/9ca3af?text=No+Img'">
           <div class="cart-meta">
-            <div class="cart-name">${item.name || "Item"}</div>
+            <div class="cart-name">${escapeHtml(item.name || "Item")}</div>
             <div class="cart-sub">Qty: ${qty}</div>
           </div>
           <div class="cart-right">

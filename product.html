@@ -1111,7 +1111,7 @@
     </div>
   </footer>
 
-  <!-- ✅ YOUR ORIGINAL JS (UNCHANGED) -->
+  <!-- ✅ YOUR ORIGINAL JS (MINIMALLY FIXED) -->
   <script type="module">
     import { auth, db } from "./firebase.js";
     import { onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-auth.js";
@@ -1149,6 +1149,16 @@
       }catch{ return ""; }
     }
 
+    /* ✅ FIX: prevent HTML injection when rendering user content */
+    function escapeHtml(str){
+      return String(str ?? "")
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
+    }
+
     // ===== Menu (mobile) =====
     const nav = document.getElementById("navLinks");
     const menuOverlay = document.getElementById("menuOverlay");
@@ -1183,6 +1193,10 @@
         e.stopPropagation();
         userDropdown.classList.toggle("show");
       });
+
+      /* ✅ FIX: clicking inside dropdown shouldn't immediately close it */
+      userDropdown.addEventListener("click", (e)=> e.stopPropagation());
+
       document.addEventListener("click", ()=> closeUserDropdown());
 
       ddAdmin.addEventListener("click", ()=> window.location.href="admin.html");
@@ -1244,7 +1258,7 @@
 
             <div class="cart-mid">
               <div class="cart-name-row">
-                <div class="cart-name">${item.name}</div>
+                <div class="cart-name">${escapeHtml(item.name)}</div>
                 <button class="remove-btn" onclick="removeItem(${index})" aria-label="Remove item">
                   <i class='bx bx-trash'></i>
                 </button>
@@ -1252,7 +1266,7 @@
 
               <div class="cart-controls">
                 <button onclick="changeQty(${index}, -1)" aria-label="Decrease quantity">−</button>
-                <div class="cart-qty">${item.qty}</div>
+                <div class="cart-qty">${Number(item.qty || 0)}</div>
                 <button onclick="changeQty(${index}, 1)" aria-label="Increase quantity">+</button>
               </div>
             </div>
@@ -1269,6 +1283,7 @@
     }
 
     window.changeQty = function(index, change){
+      if(!cart[index]) return;
       cart[index].qty = (cart[index].qty || 1) + change;
       if(cart[index].qty <= 0) cart.splice(index, 1);
       localStorage.setItem("cart", JSON.stringify(cart));
@@ -1277,6 +1292,7 @@
     };
 
     window.removeItem = function(index){
+      if(!cart[index]) return;
       cart.splice(index, 1);
       localStorage.setItem("cart", JSON.stringify(cart));
       updateCartCount();
@@ -1525,12 +1541,12 @@
           <div class="review-item">
             <div class="review-top">
               <div style="display:flex; gap:10px; align-items:center; flex-wrap:wrap;">
-                <div class="review-name">${name}</div>
+                <div class="review-name">${escapeHtml(name)}</div>
                 <div class="review-stars">${stars}</div>
               </div>
-              <div class="review-date">${date}</div>
+              <div class="review-date">${escapeHtml(date)}</div>
             </div>
-            <div class="review-text">${(r.text || "").replace(/</g,"&lt;")}</div>
+            <div class="review-text">${escapeHtml(r.text || "")}</div>
           </div>
         `;
       });
