@@ -953,9 +953,10 @@
     <div class="footer-col">
       <h4>Stay in the Loop</h4>
       <p>Subscribe for exclusive offers and new drops.</p>
-      <form class="newsletter-form" onsubmit="event.preventDefault(); showToast('Subscribed successfully!');">
-        <input type="email" placeholder="Enter your email" required>
-        <button type="submit"><i class='bx bx-send'></i></button>
+      <!-- ✅ UPDATED: match index.html (Firestore newsletter) -->
+      <form class="newsletter-form" id="newsletterForm">
+        <input type="email" id="newsletterEmail" placeholder="Enter your email" required>
+        <button type="submit" id="newsletterBtn"><i class='bx bx-send'></i></button>
       </form>
     </div>
   </div>
@@ -1121,6 +1122,9 @@
     }
 
     PRODUCTS.forEach(p => {
+      /* ✅ FIX: ensure we ALWAYS have a valid Firestore document id for product.html?id=... */
+      const pid = String(p.id || p.docId || p.productId || p._id || "").trim();
+
       let priceDisplay = `PKR ${Number(p.price || 0).toLocaleString()}`;
       let badgeHtml = "";
 
@@ -1132,19 +1136,22 @@
       }
 
       const imgs = Array.isArray(p.images) && p.images.length ? p.images : [(p.image || "")].filter(Boolean);
-      const imageSrc = (imgs && imgs[0]) ? imgs[0] : "";
+
+      /* ✅ FIX: avoid empty src="" (broken image flash + extra request) */
+      const imageSrc = (imgs && imgs[0]) ? imgs[0] : "https://placehold.co/300x300/ffffff/2b1719?text=PressPlay+Nails";
+
       const imagesJson = escapeHtml(JSON.stringify(imgs || []));
 
       const ratingVal = Number(p.rating || 0);
-      const wished = isWished(p.id);
+      const wished = pid ? isWished(pid) : false;
 
       container.innerHTML += `
-        <div class="product-wrap" data-product-id="${p.id}">
-          <div class="product-card" data-product-id="${p.id}">
+        <div class="product-wrap" data-product-id="${escapeHtml(pid)}">
+          <div class="product-card" data-product-id="${escapeHtml(pid)}">
             ${badgeHtml}
 
             <div class="product-media" data-images="${imagesJson}">
-              <button class="wish-btn ${wished ? "active" : ""}" type="button" aria-label="Add to wishlist" data-wish="1" data-id="${escapeHtml(p.id)}">
+              <button class="wish-btn ${wished ? "active" : ""}" type="button" aria-label="Add to wishlist" data-wish="1" data-id="${escapeHtml(pid)}">
                 <i class='bx ${wished ? "bxs-heart" : "bx-heart"}'></i>
               </button>
 
@@ -1172,7 +1179,7 @@
     });
 
     container.querySelectorAll(".product-wrap").forEach(wrap => {
-      const pid = wrap.getAttribute("data-product-id");
+      const pid = (wrap.getAttribute("data-product-id") || "").trim();
       const card = wrap.querySelector(".product-card");
       const media = wrap.querySelector(".product-media");
       const img = wrap.querySelector('[data-img="1"]');
@@ -1189,6 +1196,10 @@
         wishBtn.addEventListener("click", (e) => {
           e.preventDefault();
           e.stopPropagation();
+          if (!pid) {
+            showToast("This product is missing an ID.");
+            return;
+          }
           const nowWished = toggleWish(pid);
           wishBtn.classList.toggle("active", nowWished);
           const icon = wishBtn.querySelector("i");
@@ -1322,6 +1333,10 @@
 
       // Click -> product details page
       card.addEventListener("click", () => {
+        if (!pid) {
+          showToast("This product is missing an ID.");
+          return;
+        }
         window.location.href = `product.html?id=${encodeURIComponent(pid)}`;
       });
 
@@ -1347,6 +1362,50 @@
       });
     }
   });
+</script>
+
+<!-- ✅ Footer Newsletter (Firestore) -->
+<script type="module">
+  import { db } from "./firebase.js";
+  import { collection, addDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js";
+
+  const form = document.getElementById("newsletterForm");
+  const emailInput = document.getElementById("newsletterEmail");
+  const btn = document.getElementById("newsletterBtn");
+
+  function normEmail(v){
+    return String(v || "").trim().toLowerCase();
+  }
+
+  if (form) {
+    form.addEventListener("submit", async (e) => {
+      e.preventDefault();
+
+      const email = normEmail(emailInput?.value);
+      if (!email) {
+        showToast("Please enter your email.");
+        return;
+      }
+
+      if (btn) btn.disabled = true;
+
+      try {
+        await addDoc(collection(db, "newsletter"), {
+          email,
+          page: "products",
+          createdAt: serverTimestamp()
+        });
+
+        if (emailInput) emailInput.value = "";
+        showToast("Subscribed successfully!");
+      } catch (err) {
+        console.error(err);
+        showToast("Subscription failed. Try again.");
+      } finally {
+        if (btn) btn.disabled = false;
+      }
+    });
+  }
 </script>
 
 <!-- ===== Toast + Cart + Menu (match index.html behavior) ===== -->
@@ -1504,10 +1563,10 @@
     nav.classList.toggle("active");
     menuOverlay.classList.toggle("active");
 
-    // lock scroll only if menu opened AND cart not open
+    /* ✅ FIX: prevent background scrolling when menu OR cart is open (match index.html) */
     const menuOpen = nav.classList.contains("active");
     const cartOpen = document.getElementById("cartDropdown")?.classList.contains("show");
-    document.body.classList.toggle("no-scroll", menuOpen && !cartOpen);
+    document.body.classList.toggle("no-scroll", menuOpen || cartOpen);
   }
 
   menuToggle.addEventListener("click", toggleMenu);

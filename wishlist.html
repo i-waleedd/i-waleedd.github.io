@@ -25,6 +25,9 @@
       --dior-muted: rgba(17,17,17,0.62);
       --dior-border: rgba(17,17,17,0.12);
       --dior-soft: rgba(17,17,17,0.06);
+
+      /* ✅ added for consistency with newer pages */
+      --border: rgba(255,126,141,.55);
     }
 
     * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -164,7 +167,8 @@
       right: 5%;
       top: calc(36px + 70px - 6px);
       background: var(--bg);
-      border: 1px solid rgba(0,0,0,0.12);
+      /* ✅ FIX #3: match new pink-outline theme */
+      border: 1px solid var(--border);
       border-radius: 14px;
       box-shadow: 0 10px 30px rgba(0,0,0,0.12);
       padding: 10px;
@@ -187,8 +191,8 @@
       border: 1px solid transparent;
     }
     .user-dd-item:hover {
-      background: rgba(255,255,255,0.35);
-      border-color: rgba(0,0,0,0.08);
+      background: rgba(255,126,141,0.10);
+      border-color: rgba(255,126,141,0.25);
     }
     .user-dd-item i { font-size: 18px; }
 
@@ -659,6 +663,7 @@
     }
     .checkout-btn:hover { background: var(--primary-hover); }
 
+    /* ✅ FIX #4: keep only ONE definition */
     body.no-scroll { overflow: hidden; }
 
     /* ================= FOOTER ================= */
@@ -994,6 +999,9 @@
         e.stopPropagation();
         userDropdown.classList.toggle("show");
       });
+
+      /* ✅ FIX: clicking inside dropdown shouldn't immediately close it */
+      userDropdown.addEventListener("click", (e) => e.stopPropagation());
 
       document.addEventListener("click", () => closeUserDropdown());
 
@@ -1389,6 +1397,16 @@
       setTimeout(() => { toast.className = toast.className.replace("show", ""); }, 3000);
     }
 
+    /* ✅ FIX #2: escape cart item name (XSS-safe) */
+    function escapeHtml(str) {
+      return String(str ?? "")
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
+    }
+
     // ========= CART (Fixed + Better UI) =========
     let cart = JSON.parse(localStorage.getItem("cart")) || [];
 
@@ -1431,7 +1449,7 @@
           <div class="cart-item">
             <img class="cart-thumb" src="${safeImg(item.image)}" alt="Item" onerror="this.src='https://placehold.co/100x100/f3f4f6/9ca3af?text=No+Img'">
             <div class="cart-meta">
-              <div class="cart-name">${item.name || "Item"}</div>
+              <div class="cart-name">${escapeHtml(item.name || "Item")}</div>
               <div class="cart-sub">Qty: ${qty}</div>
             </div>
             <div class="cart-right">
@@ -1473,7 +1491,10 @@
       const overlay = document.getElementById("cartOverlay");
       dropdown.classList.remove("show");
       overlay.classList.remove("show");
-      document.body.classList.remove("no-scroll");
+
+      /* ✅ keep scroll locked if menu is open */
+      const menuOpen = document.getElementById("navLinks")?.classList.contains("active");
+      document.body.classList.toggle("no-scroll", !!menuOpen);
     }
 
     window.toggleCart = function(open) {
@@ -1487,7 +1508,10 @@
 
       dropdown.classList.toggle("show", shouldOpen);
       overlay.classList.toggle("show", shouldOpen);
-      document.body.classList.toggle("no-scroll", shouldOpen);
+
+      /* ✅ FIX #1: lock scroll if EITHER menu or cart is open */
+      const menuOpen = document.getElementById("navLinks")?.classList.contains("active");
+      document.body.classList.toggle("no-scroll", !!menuOpen || shouldOpen);
 
       renderCart();
     };
@@ -1513,17 +1537,19 @@
       nav.classList.remove("active");
       menuOverlay.classList.remove("active");
 
+      /* ✅ FIX #1: lock scroll if cart open; otherwise unlock */
       const cartOpen = document.getElementById("cartDropdown")?.classList.contains("show");
-      if (!cartOpen) document.body.classList.remove("no-scroll");
+      document.body.classList.toggle("no-scroll", !!cartOpen);
     }
 
     function toggleMenu() {
       nav.classList.toggle("active");
       menuOverlay.classList.toggle("active");
 
+      /* ✅ FIX #1: lock scroll if EITHER menu or cart is open */
       const menuOpen = nav.classList.contains("active");
       const cartOpen = document.getElementById("cartDropdown")?.classList.contains("show");
-      document.body.classList.toggle("no-scroll", menuOpen && !cartOpen);
+      document.body.classList.toggle("no-scroll", menuOpen || cartOpen);
     }
 
     menuToggle.addEventListener("click", toggleMenu);
@@ -1537,8 +1563,41 @@
       if (e.key === "Escape") closeMenu();
     });
 
+    // ========= INIT =========
     updateCartCount();
     renderCart();
   </script>
+
+  <!-- ✅ FIX #5: Cart UI updated to match newer “grid” cart style used in product.html -->
+  <style>
+    /* Override cart item UI to newer layout without changing structure */
+    .cart-item{
+      display:grid;
+      grid-template-columns:46px 1fr auto;
+      gap:12px;
+      align-items:center;
+      padding:10px;
+      border:1px solid rgba(0,0,0,0.08);
+      border-radius:12px;
+      background:#fff;
+      margin-bottom:12px;
+    }
+    .cart-item:last-child{ margin-bottom:0; }
+    .cart-thumb{
+      width:46px;height:46px;
+      border-radius:10px;
+      border:1px solid rgba(0,0,0,0.10);
+      background:#fafafa;
+    }
+    .cart-meta{
+      min-width:0;
+    }
+    .cart-name{
+      font-weight:900;
+    }
+    .cart-right{
+      gap:6px;
+    }
+  </style>
 </body>
 </html>

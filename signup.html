@@ -236,6 +236,7 @@
     border-color: rgba(255,126,141,0.45);
   }
   .google-btn img{ width:18px; height:18px; }
+  .google-btn:disabled{ opacity:.65; cursor:not-allowed; }
 
   .error{
     margin-top:14px;
@@ -303,31 +304,34 @@
     <div class="brand">PressPlay Nails</div>
     <div class="subtitle">Create your account ✨</div>
 
-    <div class="field">
-      <label>Email</label>
-      <input type="email" id="email" placeholder="you@example.com" autocomplete="email">
-    </div>
+    <!-- ✅ FIX: real form (Enter works reliably + accessibility) -->
+    <form id="signupForm" novalidate>
+      <div class="field">
+        <label for="email">Email</label>
+        <input type="email" id="email" placeholder="you@example.com" autocomplete="email" required>
+      </div>
 
-    <div class="field">
-      <label>Password</label>
-      <input type="password" id="password" placeholder="••••••••" autocomplete="new-password">
-    </div>
+      <div class="field">
+        <label for="password">Password</label>
+        <input type="password" id="password" placeholder="••••••••" autocomplete="new-password" required>
+      </div>
 
-    <div class="field">
-      <label>Confirm Password</label>
-      <input type="password" id="confirmPassword" placeholder="••••••••" autocomplete="new-password">
-    </div>
+      <div class="field">
+        <label for="confirmPassword">Confirm Password</label>
+        <input type="password" id="confirmPassword" placeholder="••••••••" autocomplete="new-password" required>
+      </div>
 
-    <button class="signup-btn" id="signupBtn" onclick="signup()">Sign Up</button>
+      <button class="signup-btn" id="signupBtn" type="submit">Sign Up</button>
+    </form>
 
     <div class="divider"><span>OR</span></div>
 
-    <button class="google-btn" onclick="signupWithGoogle()">
+    <button class="google-btn" id="googleBtn" type="button">
       <img src="https://upload.wikimedia.org/wikipedia/commons/c/c1/Google_%22G%22_logo.svg" alt="Google">
       Continue with Google
     </button>
 
-    <div class="error" id="errorMsg"></div>
+    <div class="error" id="errorMsg" role="alert" aria-live="polite"></div>
 
     <div class="footer-text">
       Already have an account?
@@ -341,80 +345,147 @@ import { auth } from "./firebase.js";
 import {
   createUserWithEmailAndPassword,
   GoogleAuthProvider,
-  signInWithPopup
+  signInWithPopup,
+  updateProfile
 } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-auth.js";
 
-// --- HELPER: SHOW ERROR ---
-function showError(msg) {
-  const el = document.getElementById("errorMsg");
-  el.textContent = msg;
-  el.style.display = "block";
-  setTimeout(() => el.style.display = "none", 4000);
+/* =====================
+   ✅ Safe redirect support (optional)
+   Example: signup.html?redirect=wishlist.html
+===================== */
+function getSafeRedirect() {
+  const params = new URLSearchParams(window.location.search);
+  const raw = (params.get("redirect") || "").trim();
+
+  if (!raw) return "";
+
+  const ok =
+    /^[a-zA-Z0-9/_-]+\.html$/.test(raw) &&
+    !raw.includes("..") &&
+    !raw.startsWith("/") &&
+    !raw.startsWith("//") &&
+    !raw.startsWith("http");
+
+  return ok ? raw : "";
 }
 
-// Allow Enter to submit
-document.addEventListener("keydown", (e) => {
-  if (e.key === "Enter") {
-    const active = document.activeElement;
-    if (active && (active.id === "email" || active.id === "password" || active.id === "confirmPassword")) {
-      e.preventDefault();
-      window.signup();
+let hideTimer = null;
+function showError(msg) {
+  const el = document.getElementById("errorMsg");
+  if (!el) return;
+
+  if (hideTimer) clearTimeout(hideTimer);
+
+  el.textContent = msg;
+  el.style.display = "block";
+
+  hideTimer = setTimeout(() => {
+    el.style.display = "none";
+    el.textContent = "";
+  }, 4200);
+}
+
+function setLoading(isLoading) {
+  const signupBtn = document.getElementById("signupBtn");
+  const googleBtn = document.getElementById("googleBtn");
+
+  signupBtn.disabled = isLoading;
+  googleBtn.disabled = isLoading;
+
+  signupBtn.textContent = isLoading ? "Creating Account..." : "Sign Up";
+}
+
+/* ✅ Friendlier error mapping */
+function friendlyFirebaseError(err) {
+  const code = (err && err.code) ? String(err.code) : "";
+  const msg = (err && err.message) ? String(err.message) : "Something went wrong.";
+
+  if (code.includes("auth/email-already-in-use")) return "This email is already registered.";
+  if (code.includes("auth/invalid-email")) return "Please enter a valid email address.";
+  if (code.includes("auth/weak-password")) return "Password is too weak. Use at least 6 characters.";
+  if (code.includes("auth/network-request-failed")) return "Network error. Please check your internet and try again.";
+  if (code.includes("auth/popup-closed-by-user")) return "Google sign-up was cancelled.";
+  if (code.includes("auth/account-exists-with-different-credential")) return "This email is already linked to another sign-in method.";
+
+  // fallback
+  if (msg.toLowerCase().includes("email-already-in-use")) return "This email is already registered.";
+  if (msg.toLowerCase().includes("weak-password")) return "Password is too weak. Use at least 6 characters.";
+  return "Sign up failed. Please try again.";
+}
+
+function validateEmailSimple(email) {
+  // simple, practical email check (not overly strict)
+  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(String(email || "").trim());
+}
+
+document.addEventListener("DOMContentLoaded", () => {
+  const form = document.getElementById("signupForm");
+  const googleBtn = document.getElementById("googleBtn");
+
+  form.addEventListener("submit", async (e) => {
+    e.preventDefault();
+
+    const email = document.getElementById("email").value.trim();
+    const password = document.getElementById("password").value.trim();
+    const confirmPassword = document.getElementById("confirmPassword").value.trim();
+
+    // Validation (better UX)
+    if (!email || !password || !confirmPassword) {
+      showError("Please fill in all fields.");
+      return;
     }
-  }
+
+    if (!validateEmailSimple(email)) {
+      showError("Please enter a valid email address.");
+      return;
+    }
+
+    if (password.length < 6) {
+      showError("Password must be at least 6 characters.");
+      return;
+    }
+
+    if (password !== confirmPassword) {
+      showError("Passwords do not match.");
+      return;
+    }
+
+    setLoading(true);
+
+    try {
+      const cred = await createUserWithEmailAndPassword(auth, email, password);
+
+      // Optional: set a simple display name from email prefix (harmless + nice for reviews)
+      try {
+        const prefix = (email.split("@")[0] || "").replace(/[._-]+/g, " ").trim();
+        if (prefix) await updateProfile(cred.user, { displayName: prefix });
+      } catch {
+        // ignore profile failures
+      }
+
+      const safeRedirect = getSafeRedirect();
+      window.location.href = safeRedirect || "index.html";
+    } catch (err) {
+      showError(friendlyFirebaseError(err));
+      setLoading(false);
+    }
+  });
+
+  googleBtn.addEventListener("click", async () => {
+    setLoading(true);
+
+    try {
+      const provider = new GoogleAuthProvider();
+      await signInWithPopup(auth, provider);
+
+      const safeRedirect = getSafeRedirect();
+      window.location.href = safeRedirect || "index.html";
+    } catch (err) {
+      showError(friendlyFirebaseError(err));
+      setLoading(false);
+    }
+  });
 });
-
-// --- EMAIL SIGNUP ---
-window.signup = async function () {
-  const email = document.getElementById("email").value.trim();
-  const password = document.getElementById("password").value.trim();
-  const confirmPassword = document.getElementById("confirmPassword").value.trim();
-  const btn = document.getElementById("signupBtn");
-
-  // Validation
-  if (!email || !password || !confirmPassword) {
-    showError("Please fill in all fields");
-    return;
-  }
-
-  if (password !== confirmPassword) {
-    showError("Passwords do not match");
-    return;
-  }
-
-  if (password.length < 6) {
-    showError("Password must be at least 6 characters");
-    return;
-  }
-
-  // Set Loading State
-  btn.textContent = "Creating Account...";
-  btn.disabled = true;
-
-  try {
-    // Create user in Firebase
-    await createUserWithEmailAndPassword(auth, email, password);
-    // Success -> Redirect
-    window.location.href = "index.html";
-
-  } catch (error) {
-    let msg = error.message;
-    if (msg.includes("email-already-in-use")) msg = "This email is already registered.";
-    showError(msg);
-    btn.textContent = "Sign Up";
-    btn.disabled = false;
-  }
-};
-
-// --- GOOGLE SIGNUP ---
-window.signupWithGoogle = async function() {
-  const provider = new GoogleAuthProvider();
-  try {
-    await signInWithPopup(auth, provider);
-    window.location.href = "index.html";
-  } catch (error) {
-    showError(error.message);
-  }
-};
 </script>
 
 </body>

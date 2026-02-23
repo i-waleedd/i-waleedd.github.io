@@ -249,6 +249,10 @@
     border-color: rgba(255,126,141,0.45);
   }
   .google-btn img { width: 18px; height: 18px; }
+  .google-btn:disabled{
+    opacity:.65;
+    cursor:not-allowed;
+  }
 
   .error {
     margin-top: 14px;
@@ -325,31 +329,34 @@
     <div class="brand">PressPlay Nails</div>
     <div class="subtitle">Sign in to continue ✨</div>
 
-    <div class="field">
-      <label>Email</label>
-      <input type="email" id="email" placeholder="you@example.com" autocomplete="email">
-    </div>
+    <!-- ✅ FIX: real form (Enter works reliably + accessibility) -->
+    <form id="loginForm" novalidate>
+      <div class="field">
+        <label for="email">Email</label>
+        <input type="email" id="email" placeholder="you@example.com" autocomplete="email" required>
+      </div>
 
-    <div class="field">
-      <label>Password</label>
-      <input type="password" id="password" placeholder="••••••••" autocomplete="current-password">
-    </div>
+      <div class="field">
+        <label for="password">Password</label>
+        <input type="password" id="password" placeholder="••••••••" autocomplete="current-password" required>
+      </div>
 
-    <div class="action-row">
-      <span></span>
-      <a href="#" onclick="resetPassword(); return false;">Forgot password?</a>
-    </div>
+      <div class="action-row">
+        <span></span>
+        <a href="#" id="forgotLink">Forgot password?</a>
+      </div>
 
-    <button class="login-btn" id="loginBtn" onclick="login()">Login</button>
+      <button class="login-btn" id="loginBtn" type="submit">Login</button>
+    </form>
 
     <div class="divider"><span>OR</span></div>
 
-    <button class="google-btn" onclick="loginWithGoogle()">
+    <button class="google-btn" id="googleBtn" type="button">
       <img src="https://upload.wikimedia.org/wikipedia/commons/c/c1/Google_%22G%22_logo.svg" alt="Google">
       Continue with Google
     </button>
 
-    <div class="error" id="errorMsg"></div>
+    <div class="error" id="errorMsg" role="alert" aria-live="polite"></div>
 
     <div class="footer-text">
       New here?
@@ -359,108 +366,155 @@
 </div>
 
 <script type="module">
-import { auth, db } from "./firebase.js";
+import { auth } from "./firebase.js";
 import {
   signInWithEmailAndPassword,
   sendPasswordResetEmail,
   GoogleAuthProvider,
   signInWithPopup
 } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-auth.js";
-import { doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js";
 
-// --- HELPER: SHOW ERROR ---
+/* =====================
+   ✅ FIX #5: safe redirect param support
+   Example: login.html?redirect=wishlist.html
+   - only allows local .html pages (no http, no //, no ..)
+===================== */
+function getSafeRedirect() {
+  const params = new URLSearchParams(window.location.search);
+  const raw = (params.get("redirect") || "").trim();
+
+  if (!raw) return ""; // no redirect specified
+
+  // Allow only simple local html filenames / paths like "products.html" or "shop/products.html"
+  const ok =
+    /^[a-zA-Z0-9/_-]+\.html$/.test(raw) &&
+    !raw.includes("..") &&
+    !raw.startsWith("/") &&
+    !raw.startsWith("//") &&
+    !raw.startsWith("http");
+
+  return ok ? raw : "";
+}
+
+function setLoading(isLoading) {
+  const loginBtn = document.getElementById("loginBtn");
+  const googleBtn = document.getElementById("googleBtn");
+
+  loginBtn.disabled = isLoading;
+  googleBtn.disabled = isLoading;
+
+  loginBtn.textContent = isLoading ? "Logging in..." : "Login";
+}
+
+let hideTimer = null;
 function showError(msg) {
   const el = document.getElementById("errorMsg");
+  if (!el) return;
+
+  if (hideTimer) clearTimeout(hideTimer);
+
   el.textContent = msg;
   el.style.display = "block";
-  setTimeout(() => el.style.display = "none", 4000);
+  hideTimer = setTimeout(() => {
+    el.style.display = "none";
+    el.textContent = "";
+  }, 4200);
 }
 
-// Allow Enter to submit
-document.addEventListener("keydown", (e) => {
-  if (e.key === "Enter") {
-    const active = document.activeElement;
-    if (active && (active.id === "email" || active.id === "password")) {
-      e.preventDefault();
-      window.login();
-    }
-  }
-});
+/* ✅ FIX #4: friendly error mapping */
+function friendlyFirebaseError(err) {
+  const code = (err && err.code) ? String(err.code) : "";
+  const msg = (err && err.message) ? String(err.message) : "Something went wrong.";
 
-// --- EMAIL LOGIN ---
-window.login = async function() {
-  const email = document.getElementById("email").value.trim();
-  const password = document.getElementById("password").value.trim();
-  const btn = document.getElementById("loginBtn");
+  if (code.includes("auth/invalid-credential")) return "Incorrect email or password.";
+  if (code.includes("auth/user-not-found")) return "No account found with this email.";
+  if (code.includes("auth/wrong-password")) return "Incorrect email or password.";
+  if (code.includes("auth/too-many-requests")) return "Too many attempts. Please try again in a few minutes.";
+  if (code.includes("auth/network-request-failed")) return "Network error. Please check your internet and try again.";
+  if (code.includes("auth/popup-closed-by-user")) return "Google sign-in was cancelled.";
+  if (code.includes("auth/account-exists-with-different-credential")) return "This email is already linked to another sign-in method.";
 
-  if (!email || !password) {
-    showError("Please fill in all fields");
-    return;
-  }
+  // fallback (don’t show raw firebase stacky text if possible)
+  if (msg.toLowerCase().includes("invalid-credential")) return "Incorrect email or password.";
+  return "Login failed. Please try again.";
+}
 
-  btn.textContent = "Logging in...";
-  btn.disabled = true;
-
-  try {
-    const userCredential = await signInWithEmailAndPassword(auth, email, password);
-    const user = userCredential.user;
-    await checkAdminAndRedirect(user);
-  } catch (error) {
-    let msg = error.message;
-    if (msg.includes("invalid-credential")) msg = "Incorrect email or password.";
-    showError(msg);
-    btn.textContent = "Login";
-    btn.disabled = false;
-  }
-};
-
-// --- GOOGLE LOGIN ---
-window.loginWithGoogle = async function() {
-  const provider = new GoogleAuthProvider();
-
-  try {
-    const result = await signInWithPopup(auth, provider);
-    const user = result.user;
-
-    // Check if new user -> save to DB (Optional for future use)
-    // await setDoc(doc(db, "users", user.uid), { email: user.email, name: user.displayName }, { merge: true });
-
-    await checkAdminAndRedirect(user);
-  } catch (error) {
-    showError(error.message);
-  }
-};
-
-// --- REDIRECT LOGIC ---
 async function checkAdminAndRedirect(user) {
-  try {
-    // 1. Check strict Admin List
-    // If you want to use the database check:
-    // const adminSnap = await getDoc(doc(db, "admin", user.uid));
-    // if (adminSnap.exists()) { ... }
+  const safeRedirect = getSafeRedirect();
 
-    // 2. Simple Email Check (More robust for now)
-    if (user.email === "workwithwaleed1@gmail.com") {
-      window.location.href = "admin.html";
-    } else {
-      window.location.href = "index.html";
-    }
-  } catch (e) {
-    window.location.href = "index.html";
-  }
-}
-
-// --- RESET PASSWORD ---
-window.resetPassword = function() {
-  const email = document.getElementById("email").value.trim();
-  if (!email) {
-    showError("Please enter your email address first");
+  // admin goes admin.html always
+  if (user?.email === "workwithwaleed1@gmail.com") {
+    window.location.href = "admin.html";
     return;
   }
-  sendPasswordResetEmail(auth, email)
-    .then(() => showError("Password reset link sent to your email!"))
-    .catch(err => showError(err.message));
-};
+
+  // user -> redirect if given, else home
+  window.location.href = safeRedirect || "index.html";
+}
+
+/* =====================
+   ✅ FIX #1/#2: no inline onclick; form submit handler
+===================== */
+document.addEventListener("DOMContentLoaded", () => {
+  const form = document.getElementById("loginForm");
+  const forgot = document.getElementById("forgotLink");
+  const googleBtn = document.getElementById("googleBtn");
+
+  form.addEventListener("submit", async (e) => {
+    e.preventDefault();
+
+    const email = document.getElementById("email").value.trim();
+    const password = document.getElementById("password").value.trim();
+
+    if (!email || !password) {
+      showError("Please fill in all fields.");
+      return;
+    }
+
+    setLoading(true);
+
+    try {
+      const cred = await signInWithEmailAndPassword(auth, email, password);
+      await checkAdminAndRedirect(cred.user);
+    } catch (err) {
+      showError(friendlyFirebaseError(err));
+      setLoading(false);
+    }
+  });
+
+  forgot.addEventListener("click", async (e) => {
+    e.preventDefault();
+    const email = document.getElementById("email").value.trim();
+
+    if (!email) {
+      showError("Please enter your email address first.");
+      return;
+    }
+
+    setLoading(true);
+    try {
+      await sendPasswordResetEmail(auth, email);
+      showError("Password reset link sent to your email!");
+    } catch (err) {
+      showError(friendlyFirebaseError(err));
+    } finally {
+      setLoading(false);
+    }
+  });
+
+  googleBtn.addEventListener("click", async () => {
+    setLoading(true);
+
+    try {
+      const provider = new GoogleAuthProvider();
+      const result = await signInWithPopup(auth, provider);
+      await checkAdminAndRedirect(result.user);
+    } catch (err) {
+      showError(friendlyFirebaseError(err));
+      setLoading(false);
+    }
+  });
+});
 </script>
 
 </body>

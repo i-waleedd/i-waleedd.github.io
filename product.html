@@ -42,6 +42,9 @@
     a{color:inherit;text-decoration:none}
     button,input,select,textarea{font-family:inherit}
 
+    /* Prevent background scrolling when overlays open */
+    body.no-scroll{ overflow:hidden; }
+
     /* ================= PROMO BAR ================= */
     .promo-bar{
       background:var(--primary);
@@ -179,6 +182,18 @@
       min-width:16px;
       text-align:center;
       line-height:1.2;
+      transform-origin:center;
+    }
+    .cart-icon span.vibrate{ animation:cartVibe 2s infinite; }
+    @keyframes cartVibe{
+      0%,82%{ transform:translate(0,0) rotate(0deg); }
+      84%{ transform:translate(-1px,0) rotate(-2deg); }
+      86%{ transform:translate(1px,0) rotate(2deg); }
+      88%{ transform:translate(-1px,0) rotate(-2deg); }
+      90%{ transform:translate(1px,0) rotate(2deg); }
+      92%{ transform:translate(-1px,0) rotate(-2deg); }
+      94%{ transform:translate(1px,0) rotate(2deg); }
+      96%,100%{ transform:translate(0,0) rotate(0deg); }
     }
 
     /* ✅ User dropdown now white + pink outline */
@@ -946,6 +961,9 @@
       <div class="user-dd-item" id="ddAdmin" style="display:none;">
         <i class='bx bx-shield-quarter'></i> Admin Dashboard
       </div>
+      <div class="user-dd-item" id="ddWishlist">
+        <i class='bx bx-heart'></i> Wishlist
+      </div>
       <div class="user-dd-item" id="ddOrders">
         <i class='bx bx-receipt'></i> Orders
       </div>
@@ -1117,7 +1135,8 @@
     import { onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-auth.js";
     import {
       doc, getDoc, setDoc, deleteDoc, serverTimestamp,
-      collection, onSnapshot, query, orderBy
+      collection, onSnapshot, query, orderBy,
+      where, limit, getDocs
     } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js";
 
     // ===== Toast =====
@@ -1167,11 +1186,22 @@
     function closeMenu(){
       nav.classList.remove("active");
       menuOverlay.classList.remove("active");
+
+      // Only unlock scroll if cart is not open (match other pages)
+      const cartOpen = document.getElementById("cartDropdown")?.classList.contains("show");
+      if (!cartOpen) document.body.classList.remove("no-scroll");
     }
+
     function toggleMenu(){
       nav.classList.toggle("active");
       menuOverlay.classList.toggle("active");
+
+      // Lock scroll if menu open OR cart open (match other pages)
+      const menuOpen = nav.classList.contains("active");
+      const cartOpen = document.getElementById("cartDropdown")?.classList.contains("show");
+      document.body.classList.toggle("no-scroll", menuOpen || cartOpen);
     }
+
     menuToggle.addEventListener("click", toggleMenu);
     menuOverlay.addEventListener("click", closeMenu);
     nav.querySelectorAll("a").forEach(a => a.addEventListener("click", closeMenu));
@@ -1184,6 +1214,7 @@
       const userDropdown = document.getElementById("userDropdown");
 
       const ddAdmin = document.getElementById("ddAdmin");
+      const ddWishlist = document.getElementById("ddWishlist");
       const ddOrders = document.getElementById("ddOrders");
       const ddLogout = document.getElementById("ddLogout");
 
@@ -1200,6 +1231,7 @@
       document.addEventListener("click", ()=> closeUserDropdown());
 
       ddAdmin.addEventListener("click", ()=> window.location.href="admin.html");
+      ddWishlist.addEventListener("click", ()=> window.location.href="wishlist.html");
       ddOrders.addEventListener("click", ()=> window.location.href="orders.html");
       ddLogout.addEventListener("click", async ()=>{
         await signOut(auth);
@@ -1230,7 +1262,10 @@
     function updateCartCount(){
       const count = cart.reduce((sum, item)=> sum + (item.qty || 0), 0);
       const el = document.getElementById("cart-count");
-      if(el) el.textContent = count;
+      if(el){
+        el.textContent = count;
+        el.classList.toggle("vibrate", count > 0);
+      }
     }
 
     function renderCart(){
@@ -1299,16 +1334,50 @@
       renderCart();
     };
 
-    window.toggleCart = function(){
+    function closeCart(){
       const dropdown = document.getElementById("cartDropdown");
       const overlay = document.getElementById("cartOverlay");
-      dropdown.classList.toggle("show");
-      overlay.classList.toggle("show");
+      dropdown.classList.remove("show");
+      overlay.classList.remove("show");
+
+      // Only unlock scroll if menu is not open (match other pages)
+      const menuOpen = document.getElementById("navLinks")?.classList.contains("active");
+      document.body.classList.toggle("no-scroll", !!menuOpen);
+    }
+
+    window.toggleCart = function(open){
+      const dropdown = document.getElementById("cartDropdown");
+      const overlay = document.getElementById("cartOverlay");
+
+      // ✅ if menu is open, close it first (match other pages)
+      closeMenu();
+
+      const isOpen = dropdown.classList.contains("show");
+      const shouldOpen = (open === true) ? true : !isOpen;
+
+      dropdown.classList.toggle("show", shouldOpen);
+      overlay.classList.toggle("show", shouldOpen);
+      document.body.classList.toggle("no-scroll", shouldOpen);
+
       renderCart();
     };
 
+    // Sync cart across tabs/windows
+    window.addEventListener("storage", (e) => {
+      if (e.key === "cart") {
+        cart = JSON.parse(localStorage.getItem("cart")) || [];
+        updateCartCount();
+        renderCart();
+      }
+    });
+
+    // Close cart with ESC (match other pages)
+    document.addEventListener("keydown", (e) => {
+      if (e.key === "Escape") closeCart();
+    });
+
     // ===== Product =====
-    const productId = getParam("id");
+    let productId = getParam("id");
     if(!productId){
       showToast("Product not found.", "error");
       setTimeout(()=> window.location.href="products.html", 900);
@@ -1373,16 +1442,70 @@
       });
     }
 
+    /* ✅ FIX: Make product loading work whether URL "id" is:
+       - Firestore document id
+       - OR a custom field like product.id (number/string) stored inside the document */
+    async function resolveProductById(anyId){
+      const raw = String(anyId || "").trim();
+      if(!raw) return null;
+
+      // 1) Try as Firestore document id
+      try{
+        const snap = await getDoc(doc(db, "products", raw));
+        if(snap.exists()){
+          return { id: snap.id, ...snap.data() };
+        }
+      }catch{}
+
+      // 2) Try query by field: id == "raw"
+      try{
+        const q1 = query(collection(db, "products"), where("id", "==", raw), limit(1));
+        const s1 = await getDocs(q1);
+        if(!s1.empty){
+          const d = s1.docs[0];
+          return { id: d.id, ...d.data() };
+        }
+      }catch{}
+
+      // 3) Try query by field: id == Number(raw) (handles number IDs)
+      const asNum = Number(raw);
+      if(Number.isFinite(asNum)){
+        try{
+          const q2 = query(collection(db, "products"), where("id", "==", asNum), limit(1));
+          const s2 = await getDocs(q2);
+          if(!s2.empty){
+            const d = s2.docs[0];
+            return { id: d.id, ...d.data() };
+          }
+        }catch{}
+      }
+
+      return null;
+    }
+
     async function loadProduct(){
       try{
-        const snap = await getDoc(doc(db, "products", productId));
-        if(!snap.exists()){
+        // ✅ Use robust resolver instead of assuming doc id
+        const resolved = await resolveProductById(productId);
+
+        if(!resolved){
           showToast("Product not found.", "error");
           setTimeout(()=> window.location.href="products.html", 900);
           return;
         }
 
-        product = { id: snap.id, ...snap.data() };
+        product = resolved;
+
+        // ✅ If URL id was not the doc id, switch runtime productId to doc id
+        // (keeps reviews + verified purchase marker consistent with doc id)
+        if(productId !== product.id){
+          productId = product.id;
+          try{
+            const u = new URL(window.location.href);
+            u.searchParams.set("id", productId);
+            window.history.replaceState({}, "", u.toString());
+          }catch{}
+        }
 
         pTitle.textContent = product.name || "Product";
         pDesc.textContent = product.description || "No description available.";
@@ -1681,6 +1804,28 @@
         e.target.alt = 'Image unavailable';
       }
     }, true);
+  </script>
+
+  <!-- ✅ FIX: Newsletter subscribe submit (works even if inline "event" isn't available) -->
+  <script>
+    document.addEventListener("DOMContentLoaded", () => {
+      const form = document.querySelector("footer .newsletter-form");
+      if (!form) return;
+
+      form.addEventListener("submit", (e) => {
+        e.preventDefault();
+        if (typeof window.showToast === "function") {
+          window.showToast("Subscribed successfully!");
+        } else {
+          const toast = document.getElementById("toast");
+          if (toast) {
+            toast.textContent = "Subscribed successfully!";
+            toast.className = "toast show";
+            setTimeout(() => { toast.className = toast.className.replace("show", ""); }, 3000);
+          }
+        }
+      });
+    });
   </script>
 </body>
 </html>

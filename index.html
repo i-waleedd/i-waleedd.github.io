@@ -1442,10 +1442,12 @@
         window.location.href = `product.html?id=${encodeURIComponent(pid)}`;
       });
 
-      img.addEventListener("error", () => {
-        img.src = 'https://placehold.co/300x300/ffffff/2b1719?text=PressPlay+Nails';
-        img.alt = 'Image unavailable';
-      });
+      if (img) {
+        img.addEventListener("error", () => {
+          img.src = 'https://placehold.co/300x300/ffffff/2b1719?text=PressPlay+Nails';
+          img.alt = 'Image unavailable';
+        });
+      }
     });
   }
 
@@ -1468,7 +1470,7 @@
 <!-- ✅ Footer Newsletter (Firestore) -->
 <script type="module">
   import { db } from "./firebase.js";
-  import { collection, addDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js";
+  import { doc, setDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js";
 
   const form = document.getElementById("newsletterForm");
   const emailInput = document.getElementById("newsletterEmail");
@@ -1476,6 +1478,10 @@
 
   function normEmail(v){
     return String(v || "").trim().toLowerCase();
+  }
+
+  function isValidEmail(email) {
+    return /^.+@.+\..+$/.test(String(email || "").trim());
   }
 
   if (form) {
@@ -1488,14 +1494,20 @@
         return;
       }
 
+      if (!isValidEmail(email)) {
+        showToast("Please enter a valid email (e.g. name@gmail.com).");
+        return;
+      }
+
       if (btn) btn.disabled = true;
 
       try {
-        await addDoc(collection(db, "newsletter"), {
+        // ✅ Use email as docId to prevent duplicates
+        await setDoc(doc(db, "newsletter", email), {
           email,
           page: "index",
           createdAt: serverTimestamp()
-        });
+        }, { merge: true });
 
         if (emailInput) emailInput.value = "";
         showToast("Subscribed successfully!");

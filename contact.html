@@ -660,8 +660,8 @@
     <div class="footer-col">
       <h4>Stay in the Loop</h4>
       <p>Subscribe for exclusive offers and new drops.</p>
-      <!-- ✅ Working newsletter form (no extra popup, uses same toast) -->
-      <form class="newsletter-form" id="newsletterForm">
+      <!-- ✅ No external popup, only toast -->
+      <form class="newsletter-form" id="newsletterForm" novalidate>
         <input type="email" id="newsletterEmail" placeholder="Enter your email" required>
         <button type="submit" aria-label="Subscribe"><i class='bx bx-send'></i></button>
       </form>
@@ -675,7 +675,15 @@
 <script type="module">
   import { auth, db } from "./firebase.js";
   import { onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-auth.js";
-  import { collection, addDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js";
+  import { collection, addDoc, serverTimestamp, doc, setDoc } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js";
+
+  function normEmail(v){
+    return String(v || "").trim().toLowerCase();
+  }
+
+  function isValidEmail(email) {
+    return /^.+@.+\..+$/.test(String(email || "").trim());
+  }
 
   document.addEventListener("DOMContentLoaded", () => {
     const loginBtn = document.getElementById("loginBtn");
@@ -718,15 +726,24 @@
       }
     });
 
-    // ✅ Newsletter submission (Firestore)
+    // ✅ Newsletter submission (Firestore) - NO DUPLICATES
     const newsletterForm = document.getElementById("newsletterForm");
     if (newsletterForm) {
       newsletterForm.addEventListener("submit", async (e) => {
         e.preventDefault();
 
         const emailEl = document.getElementById("newsletterEmail");
-        const email = (emailEl?.value || "").trim().toLowerCase();
-        if (!email) return;
+        const email = normEmail(emailEl?.value);
+
+        if (!email) {
+          showToast("Please enter your email.");
+          return;
+        }
+
+        if (!isValidEmail(email)) {
+          showToast("Please enter a valid email (e.g. name@gmail.com).");
+          return;
+        }
 
         const btn = newsletterForm.querySelector("button");
         const prevHtml = btn.innerHTML;
@@ -734,11 +751,12 @@
         btn.innerHTML = "<i class='bx bx-loader-alt bx-spin'></i>";
 
         try {
-          await addDoc(collection(db, "newsletter"), {
+          // ✅ Use email as docId to prevent duplicates
+          await setDoc(doc(db, "newsletter", email), {
             email,
             createdAt: serverTimestamp(),
             source: "contact_footer"
-          });
+          }, { merge: true });
 
           showToast("Subscribed successfully!");
           newsletterForm.reset();
@@ -758,7 +776,7 @@
     e.preventDefault();
 
     const name = document.getElementById("contactName").value.trim();
-    const email = document.getElementById("contactEmail").value.trim();
+    const email = normEmail(document.getElementById("contactEmail").value);
     const message = document.getElementById("contactMessage").value.trim();
     const btn = document.getElementById("submitBtn");
 
@@ -768,6 +786,13 @@
     // ✅ internal validation (no alerts)
     if (!name || !email || !message) {
       showToast("Please fill all fields.");
+      btn.textContent = "Send Message";
+      btn.disabled = false;
+      return;
+    }
+
+    if (!isValidEmail(email)) {
+      showToast("Please enter a valid email.");
       btn.textContent = "Send Message";
       btn.disabled = false;
       return;
@@ -808,7 +833,7 @@
   updateCartCount();
 
   function updateCartCount() {
-    const count = cart.reduce((sum, item) => sum + item.qty, 0);
+    const count = cart.reduce((sum, item) => sum + (item.qty || 0), 0);
     const el = document.getElementById("cart-count");
     if (el) {
       el.textContent = count;
@@ -827,7 +852,7 @@
     }
 
     cart.forEach((item, index) => {
-      total += item.price * item.qty;
+      total += (item.price || 0) * (item.qty || 0);
       itemsDiv.innerHTML += `
         <div class="cart-item">
           <span>${item.name} <small>x${item.qty}</small></span>
@@ -835,7 +860,7 @@
             <button onclick="changeQty(${index}, -1)">−</button>
             <button onclick="changeQty(${index}, 1)">+</button>
           </div>
-          <strong>PKR ${(item.price * item.qty).toLocaleString()}</strong>
+          <strong>PKR ${((item.price || 0) * (item.qty || 0)).toLocaleString()}</strong>
         </div>
       `;
     });
@@ -843,7 +868,8 @@
   }
 
   window.changeQty = function(index, change) {
-    cart[index].qty += change;
+    if (!cart[index]) return;
+    cart[index].qty = (cart[index].qty || 0) + change;
     if (cart[index].qty <= 0) cart.splice(index, 1);
     localStorage.setItem("cart", JSON.stringify(cart));
     updateCartCount();

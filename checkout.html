@@ -210,11 +210,11 @@
         <input type="email" id="email" placeholder="Email address" required>
       </div>
 
-      <!-- ✅ Professional Pakistan phone (fixed +92 + 10 digits) -->
+      <!-- ✅ Phone is OPTIONAL (fixed +92 + 10 digits if provided) -->
       <div class="input-group">
         <div class="phone-row">
           <input class="phone-prefix" type="text" value="+92" readonly>
-          <input class="phone-number" type="text" id="phone" placeholder="3XXXXXXXXX" maxlength="10" inputmode="numeric" required>
+          <input class="phone-number" type="text" id="phone" placeholder="3XXXXXXXXX" maxlength="10" inputmode="numeric">
         </div>
       </div>
     </div>
@@ -254,8 +254,8 @@
           <input type="radio" name="payment" value="card" checked>
           <label>Credit / Debit Card</label>
           <div class="card-icons">
-            <img src="https://upload.wikimedia.org/wikipedia/commons/4/41/Visa_Logo.png">
-            <img src="https://upload.wikimedia.org/wikipedia/commons/2/2a/Mastercard-logo.svg">
+            <img src="https://upload.wikimedia.org/wikipedia/commons/4/41/Visa_Logo.png" alt="Visa">
+            <img src="https://upload.wikimedia.org/wikipedia/commons/2/2a/Mastercard-logo.svg" alt="Mastercard">
           </div>
         </div>
         
@@ -401,7 +401,7 @@
     return /^\d{4,6}$/.test(s);
   }
 
-  // ✅ Phone: fixed +92, user types 10 digits
+  // ✅ Phone: fixed +92, user types 10 digits (OPTIONAL)
   // - digits only
   // - if user types 0 first -> drop it
   // - accept starting with "3" (mobile) => final format: +92 3XXXXXXXXX
@@ -413,8 +413,7 @@
     // If user pasted full number like 03XXXXXXXXX (11) -> drop leading 0
     if (v.startsWith("0")) v = v.slice(1);
 
-    // If user pasted 92XXXXXXXXXX (12) or 923XXXXXXXXX (??) -> try to keep last 10 meaningful digits
-    // But since UI is fixed +92, we only keep the last 10 digits after country removal.
+    // If user pasted 92XXXXXXXXXX -> remove 92 (UI already has +92)
     if (v.startsWith("92")) {
       v = v.slice(2);
       if (v.startsWith("0")) v = v.slice(1);
@@ -590,7 +589,7 @@
 
     // 1. Validation
     const email = document.getElementById('email').value.trim();
-    const phone10 = document.getElementById('phone').value.trim();
+    const phone10 = document.getElementById('phone').value.trim(); // OPTIONAL
     const fName = document.getElementById('fName').value.trim();
     const lName = document.getElementById('lName').value.trim();
     const address = document.getElementById('address').value.trim();
@@ -598,7 +597,8 @@
     const city = document.getElementById('city').value; // Value from Dropdown
     const zip = document.getElementById('zip').value.trim();
 
-    if(!email || !phone10 || !fName || !lName || !address || !city || !zip) {
+    // ✅ Phone removed from required list
+    if(!email || !fName || !lName || !address || !city || !zip) {
       showToast("Please fill in all shipping details.");
       return;
     }
@@ -608,7 +608,8 @@
       return;
     }
 
-    if (!isValidPakPhone10Digits(phone10)) {
+    // ✅ Phone is optional: validate only if provided
+    if (phone10 && !isValidPakPhone10Digits(phone10)) {
       showToast("Please enter a valid Pakistan mobile number. Example: +92 3XXXXXXXXX");
       return;
     }
@@ -654,7 +655,9 @@
       const totalAmount = subtotalAmount + shippingFee;
 
       const fullName = `${fName} ${lName}`.trim();
-      const phoneFull = fullPhoneE164();
+
+      // ✅ phone stored as empty string if not provided
+      const phoneFull = phone10 ? fullPhoneE164() : "";
 
       const orderData = {
         customer: {
