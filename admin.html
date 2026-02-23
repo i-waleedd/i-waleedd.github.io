@@ -1588,12 +1588,12 @@
             <div class="prod-cell">
               <img src="${safeImg(p.images?.[0])}" class="prod-thumb" onerror="this.src='https://placehold.co/100x100/f3f4f6/9ca3af?text=No+Img'">
               <div style="display:flex; flex-direction:column; gap:6px;">
-                <span class="prod-name">${p.name || '-'}</span>
+                <span class="prod-name">${safeText(p.name || '-')}</span>
                 ${hidden ? `<span class="mini-muted" style="font-weight:900;"><i class='bx bx-hide'></i> Hidden on Website</span>` : ``}
               </div>
             </div>
           </td>
-          <td>PKR ${(p.price || 0).toLocaleString()}</td>
+          <td>PKR ${(Number(p.price || 0)).toLocaleString()}</td>
 
           <!-- ✅ STATUS COLUMN: ONLY ONE CONTROL -->
           <td class="text-center">
@@ -1632,7 +1632,7 @@
         <td>
           <div class="prod-cell">
             <img src="${safeImg(p.images?.[0])}" class="prod-thumb" onerror="this.src='https://placehold.co/100x100/f3f4f6/9ca3af?text=No+Img'">
-            <span class="prod-name">${p.name || '-'}</span>
+            <span class="prod-name">${safeText(p.name || '-')}</span>
           </div>
         </td>
         <td class="text-center">
@@ -1655,7 +1655,7 @@
         <td>
           <div class="prod-cell">
             <img src="${safeImg(p.images?.[0])}" class="prod-thumb" onerror="this.src='https://placehold.co/100x100/f3f4f6/9ca3af?text=No+Img'">
-            <span class="prod-name">${p.name || '-'}</span>
+            <span class="prod-name">${safeText(p.name || '-')}</span>
           </div>
         </td>
         <td class="text-center">
