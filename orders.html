@@ -847,6 +847,11 @@
         setTimeout(() => window.location.href = "index.html", 900);
       });
 
+      // ✅ Login button redirect (keeps behavior consistent across pages)
+      loginBtn.addEventListener("click", () => {
+        window.location.href = "login.html?next=orders.html";
+      });
+
       // Only UI here (orders loading handled in next script)
       onAuthStateChanged(auth, (user) => {
         if (user) {
@@ -1053,7 +1058,7 @@
   <!-- ✅ Footer Newsletter (Firestore) -->
   <script type="module">
     import { db } from "./firebase.js";
-    import { collection, addDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js";
+    import { doc, setDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js";
 
     const form = document.getElementById("newsletterForm");
     const emailInput = document.getElementById("newsletterEmail");
@@ -1076,11 +1081,13 @@
         if (btn) btn.disabled = true;
 
         try {
-          await addDoc(collection(db, "newsletter"), {
+          // ✅ IMPORTANT: rules require docId == request.resource.data.email
+          // so we use the email as the document ID instead of addDoc()
+          await setDoc(doc(db, "newsletter", email), {
             email,
             page: "orders",
             createdAt: serverTimestamp()
-          });
+          }, { merge: true });
 
           if (emailInput) emailInput.value = "";
           showToast("Subscribed successfully!");
