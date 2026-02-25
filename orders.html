@@ -810,7 +810,7 @@
   <!-- ===== AUTH (UI + Redirect) ===== -->
   <script type="module">
     import { auth } from "./firebase.js";
-    import { onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-auth.js";
+    import { onAuthStateChanged, signOut, signInAnonymously } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-auth.js";
 
     document.addEventListener("DOMContentLoaded", () => {
       const loginBtn = document.getElementById("loginBtn");
@@ -853,13 +853,21 @@
       });
 
       // Only UI here (orders loading handled in next script)
-      onAuthStateChanged(auth, (user) => {
+      onAuthStateChanged(auth, async (user) => {
         if (user) {
-          loginBtn.style.display = "none";
+          // ✅ If anonymous guest, keep Login button visible (optional) but also allow viewing orders
+          loginBtn.style.display = user.isAnonymous ? "inline-flex" : "none";
           userBtn.style.display = "inline-flex";
           ddAdmin.style.display = (user.email === "workwithwaleed1@gmail.com") ? "flex" : "none";
         } else {
-          window.location.href = "login.html?next=orders.html";
+          // ✅ Guest Orders: ensure anonymous session so guests can view their orders
+          try {
+            await signInAnonymously(auth);
+          } catch (e) {
+            console.error("Anonymous sign-in failed:", e);
+            // If anonymous sign-in fails, fallback to login redirect (keeps previous behavior safe)
+            window.location.href = "login.html?next=orders.html";
+          }
         }
       });
     });
@@ -868,7 +876,7 @@
   <!-- ===== ORDERS PAGE LOGIC (customer-side) ===== -->
   <script type="module">
     import { auth, db } from "./firebase.js";
-    import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-auth.js";
+    import { onAuthStateChanged, signInAnonymously } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-auth.js";
     import { collection, query, where, orderBy, getDocs } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js";
 
     const root = document.getElementById("ordersRoot");
@@ -1048,9 +1056,34 @@
       }
     }
 
-    onAuthStateChanged(auth, (user) => {
-      if (!user) return; // auth script handles redirect
-      setSubtitle("Here are your recent purchases.");
+    onAuthStateChanged(auth, async (user) => {
+      if (!user) {
+        // ✅ Guest Orders: ensure anonymous session exists, then load orders
+        try {
+          const cred = await signInAnonymously(auth);
+          setSubtitle("Guest checkout detected — showing your guest orders.");
+          loadOrdersForUid(cred.user.uid);
+        } catch (e) {
+          console.error("Anonymous sign-in failed:", e);
+          setSubtitle("Please login to view your orders.", false);
+          root.innerHTML = `
+            <div class="empty-state">
+              <i class='bx bx-lock'></i>
+              <div class="title">Login required</div>
+              <div class="sub">We couldn’t start a guest session. Please login to see your orders.</div>
+              <a href="login.html?next=orders.html" style="margin-top:10px;">
+                <button class="pill-btn primary" type="button">
+                  <i class='bx bx-log-in'></i>
+                  <span>Login</span>
+                </button>
+              </a>
+            </div>
+          `;
+        }
+        return;
+      }
+
+      setSubtitle(user.isAnonymous ? "Guest checkout detected — showing your guest orders." : "Here are your recent purchases.");
       loadOrdersForUid(user.uid);
     });
   </script>

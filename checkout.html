@@ -313,7 +313,8 @@
 </div>
 
 <script type="module">
-  import { db } from "./firebase.js";
+  import { auth, db } from "./firebase.js";
+  import { onAuthStateChanged, signInAnonymously } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-auth.js";
   import { collection, addDoc, serverTimestamp, getDocs } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js";
 
   let cart = JSON.parse(localStorage.getItem("cart")) || [];
@@ -324,6 +325,22 @@
 
   let SHIPPING_RATES = {};   // { "Karachi": 0, "Lahore": 200, ... }
   let selectedShipping = 0;
+
+  // ✅ Ensure user session exists (anonymous for guests)
+  let currentUser = null;
+
+  onAuthStateChanged(auth, async (user) => {
+    if (user) {
+      currentUser = user;
+    } else {
+      try {
+        const cred = await signInAnonymously(auth);
+        currentUser = cred.user;
+      } catch (e) {
+        console.error("Anonymous sign-in failed:", e);
+      }
+    }
+  });
 
   function escapeHtml(str) {
     return String(str ?? "")
@@ -587,6 +604,20 @@
   window.handlePayment = async function() {
     if (cart.length === 0) return;
 
+    // Ensure signed-in user exists (anonymous for guests) before creating order
+    if (!auth.currentUser) {
+      try {
+        const cred = await signInAnonymously(auth);
+        currentUser = cred.user;
+      } catch (e) {
+        console.error("Anonymous sign-in failed:", e);
+        showToast("Could not start guest checkout. Please refresh and try again.");
+        return;
+      }
+    } else {
+      currentUser = auth.currentUser;
+    }
+
     // 1. Validation
     const email = document.getElementById('email').value.trim();
     const phone10 = document.getElementById('phone').value.trim(); // OPTIONAL
@@ -660,6 +691,8 @@
       const phoneFull = phone10 ? fullPhoneE164() : "";
 
       const orderData = {
+        uid: currentUser.uid,
+
         customer: {
           name: fullName,
           email: email,

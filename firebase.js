@@ -1,13 +1,11 @@
-import { initializeApp } from "https://www.gstatic.com/firebasejs/12.8.0/firebase-app.js";
-import { getAuth } from "https://www.gstatic.com/firebasejs/12.8.0/firebase-auth.js";
+import { initializeApp } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js";
+import { getAuth } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-auth.js";
 import {
   getFirestore,
-  initializeFirestore,
-  persistentLocalCache,
-  persistentMultipleTabManager,
-  memoryLocalCache
-} from "https://www.gstatic.com/firebasejs/12.8.0/firebase-firestore.js";
-import { getAnalytics, isSupported } from "https://www.gstatic.com/firebasejs/12.8.0/firebase-analytics.js";
+  enableIndexedDbPersistence,
+  enableMultiTabIndexedDbPersistence
+} from "https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js";
+import { getAnalytics, isSupported } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-analytics.js";
 
 const firebaseConfig = {
   apiKey: "AIzaSyDsTxlWCnYH-9Q7oHVOFetkMLwFzjF6fGQ",
@@ -26,41 +24,46 @@ const app = initializeApp(firebaseConfig);
 // 2. Export Services
 export const auth = getAuth(app);
 
-// ✅ Firestore init using the NEW cache API (replaces enableIndexedDbPersistence)
-// - persistentLocalCache + persistentMultipleTabManager = works across multiple tabs
-// - fallback to memory cache if persistence isn't available
-// - if Firestore was already initialized elsewhere, reuse the existing instance
-let _db;
-try {
-  _db = initializeFirestore(app, {
-    localCache: persistentLocalCache({
-      tabManager: persistentMultipleTabManager()
-    })
-  });
-} catch (e) {
-  const msg = String(e?.message || e || "");
-  const isAlreadyInitialized =
-    msg.toLowerCase().includes("already been initialized") ||
-    msg.toLowerCase().includes("has already been started") ||
-    e?.code === "failed-precondition";
+// ✅ Firestore init with IndexedDB persistence (v9 API)
+// - multi-tab persistence when possible
+// - fallback to single-tab persistence
+// - final fallback = no persistence (still works)
+export const db = getFirestore(app);
 
-  if (isAlreadyInitialized) {
-    // Reuse existing Firestore instance (prevents double-initialize crash)
-    _db = getFirestore(app);
-  } else {
-    console.log("Firestore persistent cache not available, using memory cache.", e?.message || e);
-    try {
-      _db = initializeFirestore(app, {
-        localCache: memoryLocalCache()
-      });
-    } catch (e2) {
-      // If this also fails (e.g., already initialized), reuse existing instance
-      _db = getFirestore(app);
+(async () => {
+  try {
+    await enableMultiTabIndexedDbPersistence(db);
+  } catch (e) {
+    const code = String(e?.code || "");
+    const msg = String(e?.message || e || "").toLowerCase();
+
+    const isAlreadyEnabled =
+      code === "failed-precondition" ||
+      msg.includes("persistence can only be enabled") ||
+      msg.includes("already been enabled");
+
+    const isUnsupported = code === "unimplemented";
+
+    if (isUnsupported) {
+      console.log("Firestore persistence not supported in this browser/environment.");
+      return;
+    }
+
+    // If multi-tab fails, try single-tab persistence (common fallback)
+    if (!isAlreadyEnabled) {
+      try {
+        await enableIndexedDbPersistence(db);
+      } catch (e2) {
+        const code2 = String(e2?.code || "");
+        if (code2 === "unimplemented") {
+          console.log("Firestore persistence not supported in this browser/environment.");
+        } else {
+          console.log("Firestore persistence could not be enabled, continuing without persistence.", e2?.message || e2);
+        }
+      }
     }
   }
-}
-
-export const db = _db;
+})();
 
 // ✅ Safe analytics init (prevents crashes on unsupported environments)
 // - Analytics requires a browser environment and typically HTTPS (localhost is OK)

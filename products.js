@@ -1,5 +1,5 @@
 import { db } from "./firebase.js";
-import { collection, getDocs, query, orderBy } from "https://www.gstatic.com/firebasejs/12.8.0/firebase-firestore.js";
+import { collection, getDocs, query, orderBy } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js";
 
 // This function is imported by index.html, products.html, and best-sellers.html
 export async function fetchProducts() {
