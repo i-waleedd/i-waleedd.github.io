@@ -62,7 +62,7 @@
   .input-group { margin-bottom: 14px; }
   .input-row { display: flex; gap: 14px; }
   
-  input, select {
+  input, select, textarea {
     width: 100%;
     padding: 14px;
     border: 1px solid var(--border);
@@ -72,8 +72,9 @@
     transition: 0.2s;
     font-family: inherit;
   }
-  input:focus, select:focus { border-color: var(--primary); outline: none; box-shadow: 0 0 0 3px rgba(255, 126, 141, 0.1); }
+  input:focus, select:focus, textarea:focus { border-color: var(--primary); outline: none; box-shadow: 0 0 0 3px rgba(255, 126, 141, 0.1); }
   label { display: block; margin-bottom: 6px; font-size: 12px; font-weight: 500; color: var(--gray); }
+  textarea { resize: vertical; min-height: 90px; }
 
   /* --- PAYMENT BOX --- */
   .payment-options { border: 1px solid var(--border); border-radius: 8px; overflow: hidden; background: #fff; }
@@ -95,7 +96,7 @@
   .card-icons { display: flex; gap: 5px; opacity: 0.7; }
   .card-icons img { height: 20px; }
 
-  /* Card Details Transition */
+  /* Payment Details Transition */
   .card-details-panel {
     max-height: 0;
     overflow: hidden;
@@ -103,7 +104,23 @@
     background: #fafafa;
     padding: 0 16px;
   }
-  .card-details-panel.open { padding: 16px; max-height: 300px; border-bottom: 1px solid var(--border); }
+  .card-details-panel.open { padding: 16px; max-height: 800px; border-bottom: 1px solid var(--border); }
+
+  .pay-info-box {
+    background: #fff;
+    border: 1px dashed rgba(255, 126, 141, 0.5);
+    border-radius: 8px;
+    padding: 14px;
+    margin-bottom: 14px;
+  }
+  .pay-info-box p {
+    margin: 0 0 8px 0;
+    color: var(--text);
+    font-size: 13px;
+    line-height: 1.6;
+  }
+  .pay-info-box p:last-child { margin-bottom: 0; }
+  .pay-info-box strong { font-weight: 600; }
 
   /* --- ORDER SUMMARY (RIGHT) --- */
   .order-summary {
@@ -250,29 +267,60 @@
       <div class="section-title">Payment Method</div>
       <div class="payment-options">
         
-        <div class="pay-option active" id="opt-card" onclick="selectPayment('card')">
-          <input type="radio" name="payment" value="card" checked>
-          <label>Credit / Debit Card</label>
-          <div class="card-icons">
-            <img src="https://upload.wikimedia.org/wikipedia/commons/4/41/Visa_Logo.png" alt="Visa">
-            <img src="https://upload.wikimedia.org/wikipedia/commons/2/2a/Mastercard-logo.svg" alt="Mastercard">
-          </div>
+        <div class="pay-option active" id="opt-easypaisa" onclick="selectPayment('easypaisa')">
+          <input type="radio" name="payment" value="easypaisa" checked>
+          <label>Easypaisa</label>
         </div>
         
-        <div class="card-details-panel open" id="card-panel">
-          <div class="input-group">
-            <input type="text" placeholder="Card number" maxlength="19" oninput="this.value = this.value.replace(/[^0-9]/g, '')">
+        <div class="card-details-panel open" id="easypaisa-panel">
+          <div class="pay-info-box">
+            <p><strong>Send payment to:</strong> 03180090089</p>
+            <p><strong>Account Title:</strong> Waleed Ahmed</p>
+            <p><strong>Payment Method:</strong> Easypaisa Transfer</p>
           </div>
           <div class="input-group">
-            <div class="input-row">
-              <input type="text" placeholder="MM" maxlength="2" style="width:70px; text-align:center;" oninput="this.value = this.value.replace(/[^0-9]/g, '')">
-              <span style="align-self:center; font-weight:bold; color:#ccc;">/</span>
-              <input type="text" placeholder="YY" maxlength="2" style="width:70px; text-align:center;" oninput="this.value = this.value.replace(/[^0-9]/g, '')">
-              
-              <input type="text" placeholder="CVC" maxlength="3" style="flex:1;" oninput="this.value = this.value.replace(/[^0-9]/g, '')">
+            <input type="text" id="payerName" placeholder="Sender name">
+          </div>
+          <div class="input-group">
+            <div class="phone-row">
+              <input class="phone-prefix" type="text" value="+92" readonly>
+              <input class="phone-number" type="text" id="payerPhone" placeholder="3XXXXXXXXX" maxlength="10" inputmode="numeric">
             </div>
           </div>
-          <div class="input-group"><input placeholder="Name on card"></div>
+          <div class="input-group">
+            <input type="text" id="paymentRef" placeholder="Transaction ID / Reference Number">
+          </div>
+          <div class="input-group">
+            <textarea id="paymentNote" placeholder="Optional note (e.g. paid from brother's account)"></textarea>
+          </div>
+        </div>
+
+        <div class="pay-option" id="opt-alfalah" onclick="selectPayment('alfalah')">
+          <input type="radio" name="payment" value="alfalah">
+          <label>Bank Alfalah Transfer</label>
+        </div>
+
+        <div class="card-details-panel" id="alfalah-panel">
+          <div class="pay-info-box">
+            <p><strong>Bank:</strong> Bank Alfalah</p>
+            <p><strong>Account Title:</strong> Waleed Ahmed</p>
+            <p><strong>Account Number / IBAN:</strong> PK15 ALFH 0057 0010 1046 4823</p>
+          </div>
+          <div class="input-group">
+            <input type="text" id="payerNameBank" placeholder="Sender name">
+          </div>
+          <div class="input-group">
+            <div class="phone-row">
+              <input class="phone-prefix" type="text" value="+92" readonly>
+              <input class="phone-number" type="text" id="payerPhoneBank" placeholder="3XXXXXXXXX" maxlength="10" inputmode="numeric">
+            </div>
+          </div>
+          <div class="input-group">
+            <input type="text" id="paymentRefBank" placeholder="Transaction ID / Reference Number">
+          </div>
+          <div class="input-group">
+            <textarea id="paymentNoteBank" placeholder="Optional note"></textarea>
+          </div>
         </div>
 
         <div class="pay-option" id="opt-cod" onclick="selectPayment('cod')">
@@ -283,7 +331,7 @@
       </div>
     </div>
 
-    <button class="checkout-btn" id="payButton" onclick="handlePayment()">Pay Now</button>
+    <button class="checkout-btn" id="payButton" onclick="handlePayment()">Submit Order</button>
     <a href="index.html" class="back-link"><i class='bx bx-left-arrow-alt'></i> Return to Store</a>
   </div>
 
@@ -414,66 +462,50 @@
 
   function isValidZip(v) {
     const s = String(v || "").trim();
-    // Pakistan postal codes are 5 digits, but allow 4-6 to avoid blocking edge cases
     return /^\d{4,6}$/.test(s);
   }
 
-  // ✅ Phone: fixed +92, user types 10 digits (OPTIONAL)
-  // - digits only
-  // - if user types 0 first -> drop it
-  // - accept starting with "3" (mobile) => final format: +92 3XXXXXXXXX
   const phoneInput = document.getElementById("phone");
+  const payerPhoneInput = document.getElementById("payerPhone");
+  const payerPhoneBankInput = document.getElementById("payerPhoneBank");
 
   function normalizePhoneDigits(raw) {
     let v = String(raw || "").replace(/[^0-9]/g, "");
 
-    // If user pasted full number like 03XXXXXXXXX (11) -> drop leading 0
     if (v.startsWith("0")) v = v.slice(1);
 
-    // If user pasted 92XXXXXXXXXX -> remove 92 (UI already has +92)
     if (v.startsWith("92")) {
       v = v.slice(2);
       if (v.startsWith("0")) v = v.slice(1);
     }
 
-    // limit to 10 digits
     v = v.slice(0, 10);
 
     return v;
   }
 
-  phoneInput.addEventListener("input", () => {
-    phoneInput.value = normalizePhoneDigits(phoneInput.value);
-  });
+  [phoneInput, payerPhoneInput, payerPhoneBankInput].forEach(input => {
+    input.addEventListener("input", () => {
+      input.value = normalizePhoneDigits(input.value);
+    });
 
-  phoneInput.addEventListener("paste", (e) => {
-    e.preventDefault();
-    const text = (e.clipboardData || window.clipboardData).getData("text");
-    phoneInput.value = normalizePhoneDigits(text);
+    input.addEventListener("paste", (e) => {
+      e.preventDefault();
+      const text = (e.clipboardData || window.clipboardData).getData("text");
+      input.value = normalizePhoneDigits(text);
+    });
   });
 
   function isValidPakPhone10Digits(value) {
-    // After +92 fixed: must be 10 digits
-    // Must start with 3 (mobile numbers): 3XXXXXXXXX
     const v = String(value || "").trim();
     return /^3\d{9}$/.test(v);
   }
 
-  function fullPhoneE164() {
-    // +92 + 10 digits (starting with 3)
-    return "+92" + String(phoneInput.value || "").trim();
+  function fullPhoneE164(value) {
+    return "+92" + String(value || "").trim();
   }
 
   async function loadShippingCities() {
-    // Reads shipping cities/rates from Firestore:
-    // Collection: "shippingRates"
-    // Each document should have:
-    //   - city: "Karachi"
-    //   - price: 0 (or any number)
-    //   - enabled: true
-    //
-    // If nothing exists, it falls back to your old static list.
-
     SHIPPING_RATES = {};
     citySelect.innerHTML = '<option value="" disabled selected>Select City</option>';
 
@@ -504,7 +536,6 @@
         throw new Error("No enabled shippingRates found");
       }
     } catch (err) {
-      // Fallback (your original cities list) + Free shipping
       const fallbackCities = [
         "Karachi","Lahore","Islamabad","Rawalpindi","Faisalabad","Multan","Peshawar","Quetta",
         "Gujranwala","Sialkot","Hyderabad","Bahawalpur","Sargodha","Abbottabad","Other"
@@ -518,15 +549,12 @@
       });
     }
 
-    // Default shipping display
     setShippingUI(0);
     updateTotalsUI();
   }
 
-  // --- INITIAL LOAD ---
   await loadShippingCities();
 
-  // --- WHEN CITY CHANGES -> update shipping + totals ---
   citySelect.addEventListener("change", () => {
     const city = citySelect.value;
     const fee = (city && SHIPPING_RATES[city] !== undefined) ? SHIPPING_RATES[city] : 0;
@@ -534,10 +562,8 @@
     updateTotalsUI();
   });
 
-  // --- INITIAL RENDER ---
   renderSummary();
 
-  // --- RENDER CART ---
   function renderSummary() {
     const container = document.getElementById("summaryItems");
 
@@ -577,34 +603,45 @@
     updateTotalsUI();
   }
 
-  // --- PAYMENT TOGGLE UI ---
   window.selectPayment = function(type) {
-    const cardOpt = document.getElementById("opt-card");
+    const easypaisaOpt = document.getElementById("opt-easypaisa");
+    const alfalahOpt = document.getElementById("opt-alfalah");
     const codOpt = document.getElementById("opt-cod");
-    const panel = document.getElementById("card-panel");
-    const radioCard = document.querySelector('input[value="card"]');
+
+    const easypaisaPanel = document.getElementById("easypaisa-panel");
+    const alfalahPanel = document.getElementById("alfalah-panel");
+
+    const radioEasypaisa = document.querySelector('input[value="easypaisa"]');
+    const radioAlfalah = document.querySelector('input[value="alfalah"]');
     const radioCod = document.querySelector('input[value="cod"]');
 
-    if(type === 'card') {
-      cardOpt.classList.add("active");
-      codOpt.classList.remove("active");
-      panel.classList.add("open");
-      payButton.innerText = "Pay Now";
-      radioCard.checked = true;
+    easypaisaOpt.classList.remove("active");
+    alfalahOpt.classList.remove("active");
+    codOpt.classList.remove("active");
+
+    easypaisaPanel.classList.remove("open");
+    alfalahPanel.classList.remove("open");
+
+    if(type === 'easypaisa') {
+      easypaisaOpt.classList.add("active");
+      easypaisaPanel.classList.add("open");
+      payButton.innerText = "Submit Order";
+      radioEasypaisa.checked = true;
+    } else if (type === 'alfalah') {
+      alfalahOpt.classList.add("active");
+      alfalahPanel.classList.add("open");
+      payButton.innerText = "Submit Order";
+      radioAlfalah.checked = true;
     } else {
       codOpt.classList.add("active");
-      cardOpt.classList.remove("active");
-      panel.classList.remove("open");
       payButton.innerText = "Complete Order";
       radioCod.checked = true;
     }
   };
 
-  // --- SUBMIT ORDER ---
   window.handlePayment = async function() {
     if (cart.length === 0) return;
 
-    // Ensure signed-in user exists (anonymous for guests) before creating order
     if (!auth.currentUser) {
       try {
         const cred = await signInAnonymously(auth);
@@ -618,17 +655,15 @@
       currentUser = auth.currentUser;
     }
 
-    // 1. Validation
     const email = document.getElementById('email').value.trim();
-    const phone10 = document.getElementById('phone').value.trim(); // OPTIONAL
+    const phone10 = document.getElementById('phone').value.trim();
     const fName = document.getElementById('fName').value.trim();
     const lName = document.getElementById('lName').value.trim();
     const address = document.getElementById('address').value.trim();
     const apartment = document.getElementById('apartment').value.trim();
-    const city = document.getElementById('city').value; // Value from Dropdown
+    const city = document.getElementById('city').value;
     const zip = document.getElementById('zip').value.trim();
 
-    // ✅ Phone removed from required list
     if(!email || !fName || !lName || !address || !city || !zip) {
       showToast("Please fill in all shipping details.");
       return;
@@ -639,7 +674,6 @@
       return;
     }
 
-    // ✅ Phone is optional: validate only if provided
     if (phone10 && !isValidPakPhone10Digits(phone10)) {
       showToast("Please enter a valid Pakistan mobile number. Example: +92 3XXXXXXXXX");
       return;
@@ -660,21 +694,73 @@
       return;
     }
 
-    // ensure selected city is actually in allowed list (admin-side cities)
     if (SHIPPING_RATES[city] === undefined) {
       showToast("Selected city is not available for delivery.");
       return;
     }
 
-    // 2. Button Loading State
+    const selectedPayment = document.querySelector('input[name="payment"]:checked').value;
+
+    let paymentProof = null;
+    let paymentStatus = "pending_cod";
+
+    if (selectedPayment === "easypaisa") {
+      const payerName = document.getElementById("payerName").value.trim();
+      const payerPhone = document.getElementById("payerPhone").value.trim();
+      const paymentRef = document.getElementById("paymentRef").value.trim();
+      const paymentNote = document.getElementById("paymentNote").value.trim();
+
+      if (!payerName || !payerPhone || !paymentRef) {
+        showToast("Please fill Easypaisa payment details.");
+        return;
+      }
+
+      if (!isValidPakPhone10Digits(payerPhone)) {
+        showToast("Please enter a valid sender mobile number.");
+        return;
+      }
+
+      paymentStatus = "awaiting_verification";
+      paymentProof = {
+        payerName,
+        payerPhone: fullPhoneE164(payerPhone),
+        referenceId: paymentRef,
+        note: paymentNote,
+        submittedAt: new Date().toISOString()
+      };
+    }
+
+    if (selectedPayment === "alfalah") {
+      const payerName = document.getElementById("payerNameBank").value.trim();
+      const payerPhone = document.getElementById("payerPhoneBank").value.trim();
+      const paymentRef = document.getElementById("paymentRefBank").value.trim();
+      const paymentNote = document.getElementById("paymentNoteBank").value.trim();
+
+      if (!payerName || !payerPhone || !paymentRef) {
+        showToast("Please fill Bank Alfalah payment details.");
+        return;
+      }
+
+      if (!isValidPakPhone10Digits(payerPhone)) {
+        showToast("Please enter a valid sender mobile number.");
+        return;
+      }
+
+      paymentStatus = "awaiting_verification";
+      paymentProof = {
+        payerName,
+        payerPhone: fullPhoneE164(payerPhone),
+        referenceId: paymentRef,
+        note: paymentNote,
+        submittedAt: new Date().toISOString()
+      };
+    }
+
     const originalText = payButton.innerText;
     payButton.disabled = true;
     payButton.innerHTML = "<i class='bx bx-loader-alt bx-spin'></i> Processing...";
 
     try {
-      const selectedPayment = document.querySelector('input[name="payment"]:checked').value;
-
-      // normalize cart numbers
       const cleanItems = (cart || []).map(it => ({
         ...it,
         price: num(it.price),
@@ -686,9 +772,7 @@
       const totalAmount = subtotalAmount + shippingFee;
 
       const fullName = `${fName} ${lName}`.trim();
-
-      // ✅ phone stored as empty string if not provided
-      const phoneFull = phone10 ? fullPhoneE164() : "";
+      const phoneFull = phone10 ? fullPhoneE164(phone10) : "";
 
       const orderData = {
         uid: currentUser.uid,
@@ -704,7 +788,6 @@
           country: "Pakistan"
         },
 
-        // ✅ add shipping object for admin.html compatibility (without removing your customer object)
         shipping: {
           name: fullName,
           email: email,
@@ -721,14 +804,15 @@
         shippingFee: shippingFee,
         total: totalAmount,
         paymentMethod: selectedPayment,
+        paymentStatus: paymentStatus,
+        isPaid: false,
+        paymentProof: paymentProof,
         status: "Pending",
         createdAt: serverTimestamp()
       };
 
-      // 3. Save to Firebase
       await addDoc(collection(db, "orders"), orderData);
 
-      // 4. Success
       localStorage.removeItem("cart");
       showToast("Order Confirmed! Redirecting...");
       

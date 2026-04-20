@@ -1,0 +1,232 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // =========================================================
+    // Helpers
+    // =========================================================
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    // ✅ Admin = only your email
+    function isAdmin() {
+      return isSignedIn()
+        && request.auth.token.email != null
+        && request.auth.token.email == "workwithwaleed1@gmail.com";
+    }
+
+    // Basic helpers for safer validation
+    function hasField(field) {
+      return field in request.resource.data;
+    }
+
+    function isNonEmptyString(v) {
+      return v is string && v.size() >= 1;
+    }
+
+    function isPositiveNumber(v) {
+      return v is number && v >= 0;
+    }
+
+    // ✅ Added: basic email sanity check
+    function looksLikeEmail(v) {
+      return v is string
+        && v.size() >= 5
+        && v.matches('^.+@.+\\..+$');
+    }
+
+    // ✅ Optional string helper
+    function isOptionalString(v) {
+      return !(v is string) || v.size() >= 0;
+    }
+
+    // ✅ Added: minimal message validation to prevent blank/spam docs
+    function validMessageShape() {
+      return
+        hasField("name")
+        && hasField("email")
+        && hasField("message")
+        && isNonEmptyString(request.resource.data.name)
+        && looksLikeEmail(request.resource.data.email)
+        && isNonEmptyString(request.resource.data.message);
+    }
+
+    // ✅ Newsletter validation
+    function validNewsletterShape() {
+      return
+        hasField("email")
+        && looksLikeEmail(request.resource.data.email);
+    }
+
+    // ✅ docId must equal email
+    function newsletterDocIdMatchesEmail(docId) {
+      return validNewsletterShape()
+        && docId == request.resource.data.email;
+    }
+
+    // ✅ Customer object validation for checkout/admin compatibility
+    function validCustomerShape() {
+      return request.resource.data.customer is map
+        && request.resource.data.customer.keys().hasAll(["name", "email", "address", "city", "zip", "country"])
+        && isNonEmptyString(request.resource.data.customer.name)
+        && looksLikeEmail(request.resource.data.customer.email)
+        && isNonEmptyString(request.resource.data.customer.address)
+        && isNonEmptyString(request.resource.data.customer.city)
+        && isNonEmptyString(request.resource.data.customer.zip)
+        && isNonEmptyString(request.resource.data.customer.country)
+        && (
+          !("phone" in request.resource.data.customer)
+          || request.resource.data.customer.phone is string
+        )
+        && (
+          !("apartment" in request.resource.data.customer)
+          || request.resource.data.customer.apartment is string
+        );
+    }
+
+    // ✅ Shipping object validation used by updated checkout/admin
+    function validShippingShape() {
+      return !("shipping" in request.resource.data)
+        || (
+          request.resource.data.shipping is map
+          && request.resource.data.shipping.keys().hasAll(["name", "email", "line1", "city", "postalCode", "country"])
+          && isNonEmptyString(request.resource.data.shipping.name)
+          && looksLikeEmail(request.resource.data.shipping.email)
+          && isNonEmptyString(request.resource.data.shipping.line1)
+          && isNonEmptyString(request.resource.data.shipping.city)
+          && isNonEmptyString(request.resource.data.shipping.postalCode)
+          && isNonEmptyString(request.resource.data.shipping.country)
+          && (
+            !("phone" in request.resource.data.shipping)
+            || request.resource.data.shipping.phone is string
+          )
+          && (
+            !("line2" in request.resource.data.shipping)
+            || request.resource.data.shipping.line2 is string
+          )
+        );
+    }
+
+    // ✅ Item validation
+    function validOrderItems() {
+      return request.resource.data.items is list
+        && request.resource.data.items.size() > 0;
+    }
+
+    // ✅ Minimal order validation updated for new checkout/admin structure
+    function validOrderShape() {
+      return
+        hasField("customer")
+        && hasField("items")
+        && hasField("total")
+        && hasField("paymentMethod")
+        && hasField("status")
+        && hasField("subtotal")
+        && hasField("shippingFee")
+        && validCustomerShape()
+        && validShippingShape()
+        && validOrderItems()
+        && isPositiveNumber(request.resource.data.subtotal)
+        && isPositiveNumber(request.resource.data.shippingFee)
+        && isPositiveNumber(request.resource.data.total)
+        && isNonEmptyString(request.resource.data.paymentMethod)
+        && isNonEmptyString(request.resource.data.status);
+    }
+
+    // =========================================================
+    // 1. PRODUCTS COLLECTION
+    // =========================================================
+    match /products/{productId} {
+      allow read: if true;
+      allow create, update, delete: if isAdmin();
+    }
+
+    // =========================================================
+    // ✅ 1.5 SHIPPING RATES
+    // =========================================================
+    match /shippingRates/{docId} {
+      allow read: if true;
+      allow create, update, delete: if isAdmin();
+    }
+
+    // =========================================================
+    // 2. ORDERS COLLECTION
+    // =========================================================
+    match /orders/{orderId} {
+
+      // ✅ Guest checkout + logged-in checkout
+      // ✅ Requires uid to match authenticated/anonymous user
+      allow create: if isSignedIn()
+        && validOrderShape()
+        && hasField("uid")
+        && request.resource.data.uid == request.auth.uid;
+
+      // ✅ customer read only if order belongs to them
+      // ✅ admin can read all
+      allow read: if isAdmin()
+        || (isSignedIn() && resource.data.uid == request.auth.uid);
+
+      // ✅ only admin can change or delete orders
+      allow update, delete: if isAdmin();
+    }
+
+    // =========================================================
+    // 3. MESSAGES COLLECTION
+    // =========================================================
+    match /messages/{messageId} {
+      allow create: if validMessageShape();
+      allow read, delete: if isAdmin();
+      allow update: if false;
+    }
+
+    // =========================================================
+    // ✅ 3.5 NEWSLETTER SUBSCRIBERS
+    // =========================================================
+    match /newsletter/{docId} {
+      // ✅ Supports pages using setDoc(doc(db,"newsletter", email), ...)
+      allow create, update: if newsletterDocIdMatchesEmail(docId);
+
+      allow read, delete: if isAdmin();
+    }
+
+    // =========================================================
+    // 4. ADMIN/USER COLLECTIONS
+    // =========================================================
+    match /admins/{adminId} {
+      allow read, write: if isAdmin();
+    }
+
+    match /admin/{adminId} {
+      allow read, write: if isAdmin();
+    }
+
+    match /users/{userId} {
+      allow read, write: if isSignedIn() && request.auth.uid == userId;
+    }
+
+    // =========================================================
+    // 5. VERIFIED PURCHASE MARKERS
+    // =========================================================
+    match /userPurchases/{uid}/products/{productId} {
+      allow read: if isSignedIn() && request.auth.uid == uid;
+      allow create, update, delete: if isAdmin();
+    }
+
+    // =========================================================
+    // 6. REVIEWS SYSTEM
+    // =========================================================
+    match /reviews/{productId}/items/{uid} {
+      allow read: if true;
+
+      allow create, update, delete: if isSignedIn()
+        && request.auth.uid == uid
+        && exists(/databases/$(database)/documents/userPurchases/$(uid)/products/$(productId));
+    }
+
+    match /reviews/{productId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+  }
+}

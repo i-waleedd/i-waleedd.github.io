@@ -1266,8 +1266,10 @@
         <h3 id="orderModalTitle">Order Details</h3>
         <div class="mini-muted" id="orderModalSubtitle">—</div>
       </div>
-      <div style="display:flex; align-items:center; gap:10px;">
+      <div style="display:flex; align-items:center; gap:10px; flex-wrap:wrap;">
         <button class="btn-linkish" id="copyOrderIdBtn" type="button"><i class='bx bx-copy'></i> Copy ID</button>
+        <button class="btn-linkish" id="markPaidBtn" type="button"><i class='bx bx-check-circle'></i> Mark as Paid</button>
+        <button class="btn-linkish" id="rejectPaymentBtn" type="button"><i class='bx bx-x-circle'></i> Reject Payment</button>
         <button class="btn-secondary" id="closeOrderModalBtn" type="button" style="padding:10px 12px; border-radius:12px;"><i class='bx bx-x'></i> Close</button>
       </div>
     </div>
@@ -1279,7 +1281,7 @@
   import { auth, db } from "./firebase.js";
   import { onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-auth.js";
   import {
-    collection, getDocs, addDoc, doc, updateDoc, deleteDoc, serverTimestamp
+    collection, getDocs, addDoc, doc, updateDoc, deleteDoc, serverTimestamp, setDoc
   } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js";
 
   // --- STATE ---
@@ -1498,8 +1500,12 @@
     document.getElementById('statRevenue').textContent = "PKR " + earned.toLocaleString();
   }
 
+  function productThumb(p){
+    return safeImg(p?.images?.[0] || p?.image || "");
+  }
+
   function safeImg(url){
-    return url && url.trim().length ? url : "https://placehold.co/100x100/f3f4f6/9ca3af?text=No+Img";
+    return url && String(url).trim().length ? String(url).trim() : "https://placehold.co/100x100/f3f4f6/9ca3af?text=No+Img";
   }
 
   function getOrderDateValue(o){
@@ -1544,8 +1550,8 @@
     if (!addr) return "—";
     if (typeof addr === "string") return addr;
     const parts = [
-      addr.line1 || addr.address1 || addr.street,
-      addr.line2 || addr.address2,
+      addr.line1 || addr.address1 || addr.street || addr.address,
+      addr.line2 || addr.address2 || addr.apartment,
       addr.area,
       addr.city,
       addr.state,
@@ -1586,7 +1592,7 @@
         <tr>
           <td>
             <div class="prod-cell">
-              <img src="${safeImg(p.images?.[0])}" class="prod-thumb" onerror="this.src='https://placehold.co/100x100/f3f4f6/9ca3af?text=No+Img'">
+              <img src="${productThumb(p)}" class="prod-thumb" onerror="this.src='https://placehold.co/100x100/f3f4f6/9ca3af?text=No+Img'">
               <div style="display:flex; flex-direction:column; gap:6px;">
                 <span class="prod-name">${safeText(p.name || '-')}</span>
                 ${hidden ? `<span class="mini-muted" style="font-weight:900;"><i class='bx bx-hide'></i> Hidden on Website</span>` : ``}
@@ -1631,7 +1637,7 @@
       <tr>
         <td>
           <div class="prod-cell">
-            <img src="${safeImg(p.images?.[0])}" class="prod-thumb" onerror="this.src='https://placehold.co/100x100/f3f4f6/9ca3af?text=No+Img'">
+            <img src="${productThumb(p)}" class="prod-thumb" onerror="this.src='https://placehold.co/100x100/f3f4f6/9ca3af?text=No+Img'">
             <span class="prod-name">${safeText(p.name || '-')}</span>
           </div>
         </td>
@@ -1654,7 +1660,7 @@
       <tr>
         <td>
           <div class="prod-cell">
-            <img src="${safeImg(p.images?.[0])}" class="prod-thumb" onerror="this.src='https://placehold.co/100x100/f3f4f6/9ca3af?text=No+Img'">
+            <img src="${productThumb(p)}" class="prod-thumb" onerror="this.src='https://placehold.co/100x100/f3f4f6/9ca3af?text=No+Img'">
             <span class="prod-name">${safeText(p.name || '-')}</span>
           </div>
         </td>
@@ -1997,11 +2003,6 @@
     }).join('');
 
     tbody.innerHTML = addRow + rows;
-
-    if (filtered.length === 0) {
-      // Keep addRow visible even if there are no cities
-      // so we do nothing extra here.
-    }
   }
 
   // ✅ Modal logic
@@ -2011,6 +2012,8 @@
   const orderModalBody = document.getElementById('orderModalBody');
   const closeOrderModalBtn = document.getElementById('closeOrderModalBtn');
   const copyOrderIdBtn = document.getElementById('copyOrderIdBtn');
+  const markPaidBtn = document.getElementById('markPaidBtn');
+  const rejectPaymentBtn = document.getElementById('rejectPaymentBtn');
 
   function openModal(){
     orderModalOverlay.classList.add('show');
@@ -2042,12 +2045,22 @@
     orderModalTitle.textContent = `Order #${id.slice(0,6)}`;
     orderModalSubtitle.textContent = `${name}${email ? " • " + email : ""} • ${dateStr}`;
 
-    const shipping = o.shipping || o.address || o.delivery || {};
+    const shipping = o.shipping || o.address || o.delivery || o.customer || {};
     const phone = o.customer?.phone || o.customerPhone || o.phone || shipping.phone || "—";
     const addrText = buildAddressText(shipping);
 
     const payment = getPaymentMethodText(o) || "—";
+    const paymentStatus = String(o?.paymentStatus || (o?.isPaid ? "paid" : "unpaid") || "—");
     const notes = o.notes || o.note || o.message || "—";
+
+    const paymentProof = o?.paymentProof || {};
+    const proofName = paymentProof?.payerName || "—";
+    const proofPhone = paymentProof?.payerPhone || "—";
+    const proofRef = paymentProof?.referenceId || "—";
+    const proofNote = paymentProof?.note || "—";
+    const proofSubmitted = paymentProof?.submittedAt
+      ? new Date(paymentProof.submittedAt).toLocaleString()
+      : "—";
 
     const subtotal = num(o.subtotal ?? o.subTotal ?? o.itemsSubtotal ?? 0);
     const shipFee = num(o.shippingFee ?? o.shipping_fee ?? o.deliveryFee ?? o.shipping ?? 0);
@@ -2105,7 +2118,20 @@
               ${shipFee || shipFee === 0 ? `<div class="kv"><b>Shipping</b><span>${shipFee <= 0 ? "Free" : currency(shipFee)}</span></div>` : ``}
               <div class="kv"><b>Total</b><span>${currency(total)}</span></div>
               <div class="kv"><b>Payment</b><span>${safeText(payment)}</span></div>
+              <div class="kv"><b>Payment Status</b><span>${safeText(paymentStatus)}</span></div>
+              <div class="kv"><b>Paid</b><span>${o?.isPaid ? "Yes" : "No"}</span></div>
               <div class="kv"><b>Phone</b><span>${safeText(phone)}</span></div>
+            </div>
+          </div>
+
+          <div class="detail-card">
+            <div class="dc-head"><span><i class='bx bxs-credit-card'></i> Payment Proof</span></div>
+            <div class="dc-body">
+              <div class="kv"><b>Sender Name</b><span>${safeText(proofName)}</span></div>
+              <div class="kv"><b>Sender Phone</b><span>${safeText(proofPhone)}</span></div>
+              <div class="kv"><b>Reference ID</b><span>${safeText(proofRef)}</span></div>
+              <div class="kv"><b>Submitted At</b><span>${safeText(proofSubmitted)}</span></div>
+              <div class="kv"><b>Note</b><span>${safeText(proofNote)}</span></div>
             </div>
           </div>
 
@@ -2127,6 +2153,18 @@
         </div>
       </div>
     `;
+
+    if (markPaidBtn) {
+      const manualPayment = ["easypaisa", "alfalah"].includes(String(payment).toLowerCase());
+      markPaidBtn.style.display = manualPayment ? "inline-flex" : "none";
+      markPaidBtn.onclick = () => window.markOrderPaid(id);
+    }
+
+    if (rejectPaymentBtn) {
+      const manualPayment = ["easypaisa", "alfalah"].includes(String(payment).toLowerCase());
+      rejectPaymentBtn.style.display = manualPayment ? "inline-flex" : "none";
+      rejectPaymentBtn.onclick = () => window.rejectPayment(id);
+    }
 
     openModal();
   };
@@ -2154,7 +2192,8 @@
 
     const container = document.getElementById('imgContainer');
     container.innerHTML = '';
-    (p.images && p.images.length ? p.images : ['']).forEach(url => addImageInput(url));
+    const existingImages = (Array.isArray(p.images) && p.images.length) ? p.images : [(p.image || '')].filter(Boolean);
+    (existingImages.length ? existingImages : ['']).forEach(url => addImageInput(url));
 
     switchView('editor');
   };
@@ -2218,6 +2257,45 @@
     showToast(`Order marked as ${newStatus}`);
     updateStats();
     renderOrders();
+  };
+
+ window.markOrderPaid = async (id) => {
+  await updateDoc(doc(db, "orders", id), {
+    isPaid: true,
+    paymentStatus: "confirmed",
+    paidAt: serverTimestamp()
+  });
+
+  const idx = orders.findIndex(x => x.id === id);
+  if (idx !== -1) {
+    orders[idx].isPaid = true;
+    orders[idx].paymentStatus = "confirmed";
+    orders[idx].paidAt = new Date();
+  }
+
+  showToast("Payment confirmed");
+  updateStats();
+  renderOrders();
+
+  if (selectedOrderId === id) window.openOrderDetails(id);
+};
+
+  window.rejectPayment = async (id) => {
+    await updateDoc(doc(db, "orders", id), {
+      isPaid: false,
+      paymentStatus: "rejected"
+    });
+
+    const idx = orders.findIndex(x => x.id === id);
+    if (idx !== -1) {
+      orders[idx].isPaid = false;
+      orders[idx].paymentStatus = "rejected";
+    }
+
+    showToast("Payment marked as rejected");
+    renderOrders();
+
+    if (selectedOrderId === id) window.openOrderDetails(id);
   };
 
   window.deleteOrder = async (id) => {
@@ -2299,7 +2377,6 @@
   };
 
   window.deleteShippingRate = async (id) => {
-    // no confirm popup (internal)
     await deleteDoc(doc(db, "shippingRates", id));
     shippingRates = shippingRates.filter(r => r.id !== id);
 
@@ -2385,6 +2462,8 @@
     const saleRaw = document.getElementById('pSalePrice').value;
     const salePrice = saleRaw === "" ? 0 : Number(saleRaw);
 
+    const imageList = Array.from(document.querySelectorAll('.img-url-input')).map(i => i.value.trim()).filter(v => v);
+
     const data = {
       name,
       description: document.getElementById('pDesc').value,
@@ -2393,7 +2472,8 @@
       stock: document.getElementById('pStock').checked,
       shapes: Array.from(document.querySelectorAll('.var-shape:checked')).map(c => c.value),
       sizes: Array.from(document.querySelectorAll('.var-size:checked')).map(c => c.value),
-      images: Array.from(document.querySelectorAll('.img-url-input')).map(i => i.value.trim()).filter(v => v),
+      images: imageList,
+      image: imageList[0] || "",
       updatedAt: serverTimestamp()
     };
 
@@ -2535,7 +2615,6 @@
       });
     }
     if (sAddTop) {
-      // ✅ no popup: just jump to shipping view and focus input
       sAddTop.addEventListener('click', () => {
         switchView('shipping');
         setTimeout(() => {
