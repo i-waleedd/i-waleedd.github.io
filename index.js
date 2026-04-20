@@ -17,7 +17,7 @@ const db = admin.firestore();
 |
 | 2) FROM_EMAIL:
 |    After buying/verifying your domain in Resend, replace with something like:
-|    "PressPlay Nails <hello@yourdomain.com>"
+|    "VNAILS <hello@yourdomain.com>"
 |
 | 3) APP_URL:
 |    Your live website URL
