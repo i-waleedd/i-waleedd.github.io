@@ -41,7 +41,7 @@ function emailSystemReady() {
     missing.push("RESEND_API_KEY");
   }
 
-  if (!FROM_EMAIL || FROM_EMAIL.includes("onboarding@resend.dev")) {
+  if (!FROM_EMAIL) {
     missing.push("FROM_EMAIL");
   }
 
@@ -645,8 +645,8 @@ exports.sendWeeklyPromoEmail = onSchedule(
       });
     }
   }
-  
 );
+
 /**
  * 6) SEND CUSTOMER EMAIL AFTER PAYMENT CONFIRMATION
  */
@@ -660,8 +660,8 @@ exports.notifyCustomerOnPaymentConfirmed = onDocumentUpdated("orders/{orderId}",
     const oldStatus = String(before?.paymentStatus || "").toLowerCase();
     const newStatus = String(after?.paymentStatus || "").toLowerCase();
 
-    // only trigger when changed TO confirmed
-    if (oldStatus === "confirmed" || newStatus !== "confirmed") return;
+    // only trigger when changed TO paid
+    if (oldStatus === "paid" || newStatus !== "paid") return;
 
     const customerEmail =
       after?.customer?.email ||
@@ -686,8 +686,8 @@ exports.notifyCustomerOnPaymentConfirmed = onDocumentUpdated("orders/{orderId}",
 
         <p>Your payment has been verified successfully.</p>
 
-        <p><strong>Order ID:</strong> ${orderId}</p>
-        <p><strong>Total:</strong> ${total}</p>
+        <p><strong>Order ID:</strong> ${escapeHtml(orderId)}</p>
+        <p><strong>Total:</strong> ${escapeHtml(total)}</p>
 
         <p>We will process your order soon 💅</p>
       `,
@@ -700,8 +700,10 @@ exports.notifyCustomerOnPaymentConfirmed = onDocumentUpdated("orders/{orderId}",
     });
 
     logger.info("Customer email sent", { orderId });
-
   } catch (error) {
-    logger.error("Error sending confirmation email", error);
+    logger.error("Error sending confirmation email", {
+      error: error?.message || error,
+      orderId: event.params.orderId,
+    });
   }
 });
