@@ -64,12 +64,20 @@
       justify-content: space-between;
       align-items: center;
       padding: 0 5%;
-      background: var(--bg);
-      border-bottom: 1px solid rgba(0,0,0,0.05);
-      position: sticky;
+      background: transparent;
+      border-bottom: 1px solid transparent;
+      position: fixed;
       top: 36px;
+      left: 0;
+      width: 100%;
       z-index: 1001;
       height: 70px;
+      box-shadow: none;
+      transition: background 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease, color 0.3s ease;
+    }
+    header.scrolled {
+      background: var(--bg);
+      border-bottom: 1px solid rgba(0,0,0,0.05);
       box-shadow: 0 4px 20px rgba(0,0,0,0.03);
     }
 
@@ -82,7 +90,8 @@
       line-height: 1;
     }
 
-    header h1 a { color: var(--text); cursor: pointer; }
+    header h1 a { color: var(--white); cursor: pointer; }
+    header.scrolled h1 a { color: var(--text); }
 
     /* ================= NAV MENU (DESKTOP) ================= */
     .nav-links {
@@ -99,8 +108,11 @@
       text-transform: uppercase;
       letter-spacing: 0.5px;
       padding: 8px 0;
+      color: var(--white);
     }
     .nav-links a:hover { color: var(--primary); }
+    header.scrolled .nav-links a { color: var(--text); }
+    header.scrolled .nav-links a:hover { color: var(--primary); }
 
     /* MOBILE MENU TOGGLE */
     .menu-toggle {
@@ -111,7 +123,8 @@
       padding: 10px;
       border-radius: 10px;
     }
-    .menu-toggle span { width: 22px; height: 2px; background: #222; border-radius: 2px; transition: 0.3s; }
+    .menu-toggle span { width: 22px; height: 2px; background: var(--white); border-radius: 2px; transition: 0.3s; }
+    header.scrolled .menu-toggle span { background: #222; }
 
     /* Menu Overlay */
     .menu-overlay {
@@ -145,8 +158,9 @@
       display: inline-flex;
       align-items: center;
       justify-content: center;
-      color: var(--text);
+      color: var(--white);
     }
+    header.scrolled .cart-icon { color: var(--text); }
     .cart-icon svg { width: 24px; height: 24px; }
 
     .cart-icon span {
@@ -200,8 +214,9 @@
       width: 26px; height: 26px;
       align-items: center;
       justify-content: center;
-      color: var(--text);
+      color: var(--white);
     }
+    header.scrolled .user-btn { color: var(--text); }
     .user-btn svg { width: 22px; height: 22px; }
 
     /* User dropdown */
@@ -237,6 +252,61 @@
       border-color: rgba(0,0,0,0.08);
     }
     .user-dd-item i { font-size: 18px; }
+
+    /* ================= HERO SECTION ================= */
+    .hero {
+      height: 52vh;
+      min-height: 360px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      padding: 0 20px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .hero-bg{
+      position:absolute;
+      inset:0;
+      background: var(--text) url('banner9.jpeg') center/cover no-repeat;
+      animation: zoom 5s ease-in-out infinite alternate;
+      transform-origin: center;
+      z-index: 0;
+    }
+
+    @keyframes zoom { from { transform: scale(1); } to { transform: scale(1.15); } }
+
+    .hero::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: rgba(0,0,0,0.35);
+      z-index: 1;
+    }
+
+    .hero-content {
+      position: relative;
+      z-index: 2;
+      animation: fadeInUp 1s ease-out;
+    }
+
+    .hero h2 {
+      font-size: 42px;
+      color: var(--white);
+      text-shadow: 0 4px 20px rgba(0,0,0,0.4);
+      font-weight: 700;
+      line-height: 1.1;
+      margin-bottom: 12px;
+    }
+
+    .hero p {
+      font-size: 16px;
+      color: #fff0f1;
+      font-weight: 400;
+      max-width: 620px;
+      margin: 0 auto;
+    }
 
     /* ================= PAGE TITLE ================= */
     .page-header {
@@ -460,13 +530,17 @@
         padding: 16px 6px;
         border-bottom: 1px solid rgba(0,0,0,0.12);
         font-size: 15px;
-        color: #2b1719;
+        color: #2b1719 !important;
         font-weight: 700;
         text-transform: none;
         letter-spacing: 0.2px;
         display: block; /* ✅ helps ensure taps/clicks always register */
       }
       .nav-links a:last-child { border-bottom: none; }
+
+      .hero { min-height: 300px; height: 40vh; }
+      .hero h2 { font-size: 28px; margin-bottom: 10px; }
+      .hero p { font-size: 14px; padding: 0 10px; }
 
       .contact-container { grid-template-columns: 1fr; gap: 14px; }
       .contact-section { padding: 20px 12px 60px; }
@@ -495,11 +569,13 @@
       header { top: 34px; }
       header h1 { font-size: 16px; letter-spacing: 0.5px; }
       .nav-links { top: 54px; }
+      .user-dropdown { top: calc(34px + 60px - 6px); }
     }
 
     @media (max-width: 480px) { .cart-dropdown { width: 100%; } }
 
     @keyframes promo-slide { from { transform: translateX(0); } to { transform: translateX(-50%); } }
+    @keyframes fadeInUp { from { opacity: 0; transform: translateY(30px); } to { opacity: 1; transform: translateY(0); } }
   </style>
 </head>
 
@@ -515,7 +591,7 @@
   </div>
 </div>
 
-<header>
+<header id="siteHeader">
   <div class="menu-toggle" id="menuToggle" aria-label="Open menu">
     <span></span><span></span><span></span>
   </div>
@@ -575,6 +651,14 @@
   <div class="cart-total" id="cartTotal">PKR 0</div>
   <a href="checkout.html"><button class="checkout-btn">Checkout Now</button></a>
 </div>
+
+<section class="hero">
+  <div class="hero-bg" aria-hidden="true"></div>
+  <div class="hero-content">
+    <h2>Contact Us</h2>
+    <p>We'd love to hear from you. Fill out the form below or reach us via email.</p>
+  </div>
+</section>
 
 <div class="page-header">
   <h2>Contact Us</h2>
@@ -892,15 +976,24 @@
   const nav = document.getElementById("navLinks");
   const menuOverlay = document.getElementById("menuOverlay");
   const menuToggle = document.getElementById("menuToggle");
+  const siteHeader = document.getElementById("siteHeader");
+
+  function updateHeaderState() {
+    const menuOpen = nav.classList.contains("active");
+    const shouldSolid = window.scrollY > 40 || menuOpen;
+    siteHeader.classList.toggle("scrolled", shouldSolid);
+  }
 
   function closeMenu() {
     nav.classList.remove("active");
     menuOverlay.classList.remove("active");
+    updateHeaderState();
   }
 
   function toggleMenu() {
     nav.classList.toggle("active");
     menuOverlay.classList.toggle("active");
+    updateHeaderState();
   }
 
   menuToggle.addEventListener("click", toggleMenu);
@@ -913,6 +1006,10 @@
   document.addEventListener("keydown", (e) => {
     if (e.key === "Escape") closeMenu();
   });
+
+  window.addEventListener("scroll", updateHeaderState, { passive: true });
+
+  updateHeaderState();
 </script>
 
 </body>
