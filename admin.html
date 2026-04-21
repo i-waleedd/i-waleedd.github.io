@@ -1197,7 +1197,7 @@
 
           <div class="card-section">
             <h3>Product Images</h3>
-            <label style="font-size:13px; color:rgba(0,0,0,0.65); margin-bottom:8px; display:block; font-weight:700;">Paste Image URLs</label>
+            <label style="font-size:13px; color:rgba(0,0,0,0.65); margin-bottom:8px; display:block; font-weight:700;">Upload Images</label>
 
             <div id="imgContainer" class="dynamic-img-list"></div>
 
@@ -1283,6 +1283,9 @@
   import {
     collection, getDocs, addDoc, doc, updateDoc, deleteDoc, serverTimestamp, setDoc
   } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js";
+  import { getStorage, ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-storage.js";
+
+  const storage = getStorage();
 
   // --- STATE ---
   let products = [];
@@ -2425,12 +2428,30 @@
   function addImageInput(val = '') {
     const div = document.createElement('div');
     div.className = 'img-input-row';
+    div.dataset.existingUrl = val || '';
 
     const input = document.createElement('input');
-    input.type = 'text';
-    input.className = 'form-control img-url-input';
-    input.placeholder = 'Image URL';
-    input.value = val || '';
+    input.type = 'file';
+    input.accept = 'image/*';
+    input.className = 'form-control img-file-input';
+
+    const preview = document.createElement('img');
+    preview.className = 'prod-thumb';
+    preview.style.width = '42px';
+    preview.style.height = '42px';
+    preview.style.flexShrink = '0';
+    preview.src = val || 'https://placehold.co/100x100/f3f4f6/9ca3af?text=No+Img';
+    preview.alt = 'Preview';
+
+    input.addEventListener('change', () => {
+      const file = input.files?.[0];
+      if (file) {
+        preview.src = URL.createObjectURL(file);
+        div.dataset.existingUrl = '';
+      } else {
+        preview.src = div.dataset.existingUrl || 'https://placehold.co/100x100/f3f4f6/9ca3af?text=No+Img';
+      }
+    });
 
     const btn = document.createElement('button');
     btn.type = 'button';
@@ -2439,9 +2460,21 @@
     btn.addEventListener('click', () => div.remove());
 
     div.appendChild(input);
+    div.appendChild(preview);
     div.appendChild(btn);
 
     document.getElementById('imgContainer').appendChild(div);
+  }
+
+  async function uploadImage(file) {
+    if (!file) return "";
+
+    const safeName = String(file.name || "image").replace(/[^a-zA-Z0-9._-]/g, "_");
+    const fileName = `${Date.now()}-${Math.random().toString(36).slice(2, 8)}-${safeName}`;
+    const storageRef = ref(storage, `products/${fileName}`);
+
+    await uploadBytes(storageRef, file);
+    return await getDownloadURL(storageRef);
   }
 
   async function saveProduct() {
@@ -2462,7 +2495,21 @@
     const saleRaw = document.getElementById('pSalePrice').value;
     const salePrice = saleRaw === "" ? 0 : Number(saleRaw);
 
-    const imageList = Array.from(document.querySelectorAll('.img-url-input')).map(i => i.value.trim()).filter(v => v);
+    const imageRows = Array.from(document.querySelectorAll('#imgContainer .img-input-row'));
+    const imageList = [];
+
+    for (const row of imageRows) {
+      const fileInput = row.querySelector('.img-file-input');
+      const existingUrl = (row.dataset.existingUrl || '').trim();
+      const file = fileInput?.files?.[0];
+
+      if (file) {
+        const uploadedUrl = await uploadImage(file);
+        if (uploadedUrl) imageList.push(uploadedUrl);
+      } else if (existingUrl) {
+        imageList.push(existingUrl);
+      }
+    }
 
     const data = {
       name,
