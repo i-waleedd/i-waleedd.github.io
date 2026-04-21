@@ -71,12 +71,21 @@
       justify-content: space-between;
       align-items: center;
       padding: 0 5%;
-      background: var(--bg);
-      border-bottom: 1px solid rgba(0,0,0,0.05);
-      position: sticky;
+      background: transparent;
+      border-bottom: 1px solid transparent;
+      position: fixed;
       top: 36px;
+      left: 0;
+      width: 100%;
       z-index: 1001;
       height: 70px;
+      box-shadow: none;
+      transition: background 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease, color 0.3s ease;
+    }
+
+    header.scrolled {
+      background: var(--bg);
+      border-bottom: 1px solid rgba(0,0,0,0.05);
       box-shadow: 0 4px 20px rgba(0,0,0,0.03);
     }
 
@@ -89,7 +98,8 @@
       line-height: 1;
     }
 
-    header h1 a { color: var(--text); cursor: pointer; }
+    header h1 a { color: var(--white); cursor: pointer; }
+    header.scrolled h1 a { color: var(--text); }
 
     /* ================= NAV MENU (DESKTOP) ================= */
     .nav-links {
@@ -106,8 +116,16 @@
       text-transform: uppercase;
       letter-spacing: 0.5px;
       padding: 8px 0;
+      color: var(--white);
     }
     .nav-links a:hover { color: var(--primary); }
+
+    header.scrolled .nav-links a {
+      color: var(--text);
+    }
+    header.scrolled .nav-links a:hover {
+      color: var(--primary);
+    }
 
     /* MOBILE MENU TOGGLE */
     .menu-toggle {
@@ -118,7 +136,16 @@
       padding: 10px;
       border-radius: 10px;
     }
-    .menu-toggle span { width: 22px; height: 2px; background: #222; border-radius: 2px; transition: 0.3s; }
+    .menu-toggle span {
+      width: 22px;
+      height: 2px;
+      background: var(--white);
+      border-radius: 2px;
+      transition: 0.3s;
+    }
+    header.scrolled .menu-toggle span {
+      background: #222;
+    }
 
     /* MENU OVERLAY */
     .menu-overlay {
@@ -165,8 +192,9 @@
       width: 26px; height: 26px;
       align-items: center;
       justify-content: center;
-      color: var(--text);
+      color: var(--white);
     }
+    header.scrolled .user-btn { color: var(--text); }
     .user-btn svg { width: 22px; height: 22px; }
 
     /* User dropdown */
@@ -212,8 +240,9 @@
       display: inline-flex;
       align-items: center;
       justify-content: center;
-      color: var(--text);
+      color: var(--white);
     }
+    header.scrolled .cart-icon { color: var(--text); }
     .cart-icon svg { width: 24px; height: 24px; }
 
     .cart-icon span {
@@ -844,7 +873,7 @@
         padding: 16px 6px;
         border-bottom: 1px solid rgba(0,0,0,0.12);
         font-size: 15px;
-        color: #2b1719;
+        color: #2b1719 !important;
         font-weight: 700;
         text-transform: none;
         letter-spacing: 0.2px;
@@ -909,6 +938,7 @@
       header { top: 34px; }
       header h1 { font-size: 16px; letter-spacing: 0.5px; }
       .nav-links { top: 54px; }
+      .user-dropdown { top: calc(34px + 60px - 6px); }
     }
 
     @media (max-width: 480px) {
@@ -933,7 +963,7 @@
   </div>
 </div>
 
-<header>
+<header id="siteHeader">
   <div class="menu-toggle" id="menuToggle" aria-label="Open menu">
     <span></span><span></span><span></span>
   </div>
@@ -1662,6 +1692,13 @@
   const nav = document.getElementById("navLinks");
   const menuOverlay = document.getElementById("menuOverlay");
   const menuToggle = document.getElementById("menuToggle");
+  const siteHeader = document.getElementById("siteHeader");
+
+  function updateHeaderState() {
+    const menuOpen = nav.classList.contains("active");
+    const shouldSolid = window.scrollY > 40 || menuOpen;
+    siteHeader.classList.toggle("scrolled", shouldSolid);
+  }
 
   function closeMenu() {
     nav.classList.remove("active");
@@ -1670,6 +1707,8 @@
     // Only unlock scroll if cart is not open
     const cartOpen = document.getElementById("cartDropdown")?.classList.contains("show");
     if (!cartOpen) document.body.classList.remove("no-scroll");
+
+    updateHeaderState();
   }
 
   function toggleMenu() {
@@ -1680,6 +1719,8 @@
     const cartOpen = document.getElementById("cartDropdown")?.classList.contains("show");
     const menuOpen = nav.classList.contains("active");
     document.body.classList.toggle("no-scroll", menuOpen || cartOpen);
+
+    updateHeaderState();
   }
 
   menuToggle.addEventListener("click", toggleMenu);
@@ -1693,9 +1734,12 @@
     if (e.key === "Escape") closeMenu();
   });
 
+  window.addEventListener("scroll", updateHeaderState, { passive: true });
+
   // ========= INIT =========
   updateCartCount();
   renderCart();
+  updateHeaderState();
 </script>
 
 </body>
