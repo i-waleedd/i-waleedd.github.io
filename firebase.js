@@ -6,13 +6,13 @@ import {
   enableMultiTabIndexedDbPersistence
 } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js";
 import { getAnalytics, isSupported } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-analytics.js";
+import { getStorage } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-storage.js";
 
 const firebaseConfig = {
   apiKey: "AIzaSyDsTxlWCnYH-9Q7oHVOFetkMLwFzjF6fGQ",
   authDomain: "waleed-6d2b1.firebaseapp.com",
   projectId: "waleed-6d2b1",
-  // ✅ Fixed (common/default Firebase Storage bucket format)
-  storageBucket: "waleed-6d2b1.appspot.com",
+  storageBucket: "waleed-6d2b1.firebasestorage.app",
   messagingSenderId: "41201313634",
   appId: "1:41201313634:web:574a75545eb9361f5e6e3b",
   measurementId: "G-V6V3MTGPHF"
@@ -23,13 +23,13 @@ const app = initializeApp(firebaseConfig);
 
 // 2. Export Services
 export const auth = getAuth(app);
+export const db = getFirestore(app);
+export const storage = getStorage(app);
 
 // ✅ Firestore init with IndexedDB persistence (v9 API)
 // - multi-tab persistence when possible
 // - fallback to single-tab persistence
 // - final fallback = no persistence (still works)
-export const db = getFirestore(app);
-
 (async () => {
   try {
     await enableMultiTabIndexedDbPersistence(db);
