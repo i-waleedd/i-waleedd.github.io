@@ -323,6 +323,52 @@
       margin: 0 auto;
     }
 
+    .hero-cta{
+      margin-top: 28px;
+      display:flex;
+      flex-direction:column;
+      align-items:center;
+      gap: 12px;
+    }
+    .hero-banner-btn{
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-width: 220px;
+      padding: 14px 26px;
+      background: #fff;
+      color: #111;
+      border: 1px solid rgba(255,255,255,0.95);
+      border-radius: 0;
+      font-size: 13px;
+      font-weight: 700;
+      letter-spacing: 0.5px;
+      text-transform: uppercase;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.12);
+      transition: transform 0.25s ease, box-shadow 0.25s ease, background 0.25s ease;
+    }
+    .hero-banner-btn:hover{
+      background: #fff;
+      color: #111;
+      transform: translateY(-2px);
+      box-shadow: 0 14px 28px rgba(0,0,0,0.18);
+    }
+    .hero-scroll-hint{
+      display:flex;
+      flex-direction:column;
+      align-items:center;
+      gap: 2px;
+      color: #fff;
+      font-size: 12px;
+      font-weight: 500;
+      letter-spacing: 0.2px;
+      text-transform: none;
+    }
+    .hero-scroll-hint .hero-scroll-icon{
+      font-size: 20px;
+      line-height: 1;
+    }
+
     .section-title {
       text-align: center;
       font-size: 28px;
@@ -915,6 +961,18 @@
       .hero { min-height: 350px; height: 40vh; }
       .hero h2 { font-size: 28px; margin-bottom: 10px; }
       .hero p { font-size: 14px; padding: 0 10px; }
+      .hero-cta{ margin-top: 22px; gap: 10px; }
+      .hero-banner-btn{
+        min-width: 190px;
+        padding: 12px 22px;
+        font-size: 12px;
+      }
+      .hero-scroll-hint{
+        font-size: 11px;
+      }
+      .hero-scroll-hint .hero-scroll-icon{
+        font-size: 18px;
+      }
 
       .products {
         grid-template-columns: repeat(2, 1fr);
@@ -1075,16 +1133,19 @@
   <div class="hero-content">
     <h2>Elevate Your Look<br>Salon-Quality Press-Ons</h2>
     <p>Handcrafted, stylish, made to last 💅🏼</p>
+    <div class="hero-cta">
+      <a href="products.html" class="hero-banner-btn">View All Products</a>
+      <div class="hero-scroll-hint">
+        <span>scroll down to discover</span>
+        <span class="hero-scroll-icon">˅</span>
+      </div>
+    </div>
   </div>
 </section>
 
 <h2 class="section-title">Newest Arrivals</h2>
 <div class="products" id="homeProductsContainer">
   <div class="spinner-container"><div class="spinner"></div></div>
-</div>
-
-<div class="view-all-wrap">
-  <a href="products.html"><button class="view-all-btn" type="button">View All Products</button></a>
 </div>
 
 <footer>
