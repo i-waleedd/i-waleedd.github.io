@@ -14,23 +14,22 @@
     :root {
       --primary: #ff7e8d;
       --primary-hover: #ff6b7d;
-      --bg: #ffffff;            /* ✅ match products.html (white theme) */
+      --bg: #ffffff;
       --text: #2b1719;
       --white: #ffffff;
       --footer-bg: #1a1a1a;
       --offwhite: rgba(255,255,255,0.92);
-
-      /* ✅ slight difference between page bg and product box bg */
       --card-bg: #fbfbfc;
 
-      /* ✅ Dior-like neutrals (from index.html) */
       --dior-ink: #111;
       --dior-muted: rgba(17,17,17,0.62);
       --dior-border: rgba(17,17,17,0.12);
       --dior-soft: rgba(17,17,17,0.06);
+      --product-panel: #f3f3f3;
     }
 
     * { box-sizing: border-box; margin: 0; padding: 0; }
+
     body {
       font-family: 'Poppins', sans-serif;
       background: var(--bg);
@@ -68,8 +67,8 @@
 
     /* ================= HEADER ================= */
     header {
-      display: flex;
-      justify-content: space-between;
+      display: grid;
+      grid-template-columns: 1fr auto 1fr;
       align-items: center;
       padding: 0 5%;
       background: transparent;
@@ -95,19 +94,25 @@
       font-weight: 700;
       letter-spacing: 1px;
       text-transform: uppercase;
-      flex-shrink: 0;
       line-height: 1;
+      justify-self: center;
+      grid-column: 2;
+      position: relative;
+      z-index: 2;
+      text-align: center;
     }
     header h1 a { color: var(--white); cursor: pointer; }
-    header.scrolled h1 a { color: var(--text); cursor: pointer; }
+    header.scrolled h1 a { color: var(--text); }
 
     /* ================= NAV MENU (DESKTOP) ================= */
     .nav-links {
       display: flex;
       gap: 35px;
       align-items: center;
-      flex: 1;
-      justify-content: center;
+      justify-content: flex-start;
+      grid-column: 1;
+      justify-self: start;
+      min-width: 0;
     }
     .nav-links a {
       font-weight: 500;
@@ -130,8 +135,17 @@
       cursor: pointer;
       padding: 10px;
       border-radius: 10px;
+      grid-column: 1;
+      justify-self: start;
+      z-index: 2;
     }
-    .menu-toggle span { width: 22px; height: 2px; background: var(--white); border-radius: 2px; transition: 0.3s; }
+    .menu-toggle span {
+      width: 22px;
+      height: 2px;
+      background: var(--white);
+      border-radius: 2px;
+      transition: 0.3s;
+    }
     header.scrolled .menu-toggle span { background: #222; }
 
     /* Menu Overlay */
@@ -140,7 +154,6 @@
       top: 0; left: 0;
       width: 100%; height: 100%;
       background: rgba(0,0,0,0.35);
-      /* ✅ FIX: keep overlay BELOW the mobile menu so links are clickable */
       z-index: 1000;
       opacity: 0;
       visibility: hidden;
@@ -153,11 +166,15 @@
     .header-actions {
       display: flex;
       align-items: center;
-      gap: 14px;
+      justify-content: flex-end;
+      gap: 16px;
+      grid-column: 3;
+      justify-self: end;
       flex-shrink: 0;
+      z-index: 2;
     }
 
-    /* Login button (only shown when logged out) */
+    /* Login button */
     .login-btn {
       padding: 8px 18px;
       background: var(--primary);
@@ -172,7 +189,7 @@
     }
     .login-btn:hover { background: var(--primary-hover); transform: translateY(-2px); }
 
-    /* Person icon (only shown when logged in) */
+    /* Person icon */
     .user-btn {
       display: none;
       cursor: pointer;
@@ -180,6 +197,7 @@
       align-items: center;
       justify-content: center;
       color: var(--white);
+      order: 1;
     }
     header.scrolled .user-btn { color: var(--text); }
     .user-btn svg { width: 22px; height: 22px; }
@@ -218,24 +236,26 @@
     }
     .user-dd-item i { font-size: 18px; }
 
-    /* Shopify cart icon */
+    /* Cart icon */
     .cart-icon {
       position: relative;
       cursor: pointer;
-      width: 26px;
-      height: 26px;
+      width: 28px;
+      height: 28px;
       display: inline-flex;
       align-items: center;
       justify-content: center;
       color: var(--white);
+      order: 2;
+      margin-left: 2px;
     }
     header.scrolled .cart-icon { color: var(--text); }
     .cart-icon svg { width: 24px; height: 24px; }
 
     .cart-icon span {
       position: absolute;
-      top: -6px;
-      right: -8px;
+      top: -7px;
+      right: -9px;
       background: var(--primary);
       color: var(--white);
       font-size: 10px;
@@ -248,7 +268,6 @@
       transform-origin: center;
     }
 
-    /* vibration when cart has items */
     .cart-icon span.vibrate { animation: cartVibe 2s infinite; }
     @keyframes cartVibe {
       0%, 82% { transform: translate(0,0) rotate(0deg); }
@@ -327,62 +346,68 @@
     /* ================= PRODUCTS GRID ================= */
     .products {
       display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
-      gap: 25px;
-      padding: 0 5% 80px;
-      max-width: 1300px;
-      margin: auto;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 0;
+      padding: 0 0 80px;
+      width: 100%;
+      max-width: none;
+      margin: 0;
       flex: 1;
+      align-items: stretch;
     }
 
-    /* ✅ wrapper so button sits OUTSIDE the product box but stays under it */
     .product-wrap{
       display:flex;
       flex-direction:column;
-      gap: 12px; /* match index spacing */
+      gap: 0;
+      min-width: 0;
+      background: var(--product-panel);
     }
 
-    /* ✅ Dior-like product card style (from index.html) */
     .product-card {
-      border-radius: 6px;
+      border-radius: 0;
       overflow: hidden;
-      background: var(--white);
-      border: 1px solid transparent;
+      background: var(--product-panel);
+      border-right: 1px solid rgba(255,255,255,0.18);
       box-shadow: none;
       position: relative;
-      transition: border-color 0.2s ease, transform 0.2s ease;
+      transition: transform 0.25s ease;
       cursor: pointer;
+      height: 100%;
+      display: flex;
+      flex-direction: column;
     }
     .product-card:hover{
-      transform: translateY(-2px);
-      border-color: var(--primary);
+      transform: translateY(0);
     }
 
-    /* media area for wishlist + nav + progress (like index.html) */
     .product-media{
       position: relative;
       width: 100%;
       overflow: hidden;
-      background: #fff;
+      background: var(--product-panel);
       touch-action: pan-y;
+      aspect-ratio: 1 / 1.32;
     }
 
-    /* ✅ Image full (no side whitespace) */
     .product-card img {
       width: 100%;
+      height: 100%;
       margin: 0;
       display: block;
-      aspect-ratio: 4 / 5;
+      aspect-ratio: auto;
       object-fit: cover;
+      object-position: center;
       border-radius: 0;
       transition: transform 0.35s ease;
       user-select: none;
       -webkit-user-drag: none;
       pointer-events: none;
+      padding: 0;
+      background: var(--product-panel);
     }
     .product-card:hover img { transform: scale(1.03); }
 
-    /* ✅ Sale & Best Seller tag: old style (red bg, white text) */
     .badge {
       position: absolute;
       top: 14px;
@@ -404,16 +429,15 @@
       color: #fff;
     }
 
-    /* ✅ Wishlist button (top-right) */
     .wish-btn{
       position: absolute;
-      top: 12px;
-      right: 12px;
-      width: 34px;
-      height: 34px;
-      border-radius: 8px;
-      border: 1px solid rgba(0,0,0,0.18);
-      background: rgba(0,0,0,0.18);
+      top: 14px;
+      right: 14px;
+      width: 36px;
+      height: 36px;
+      border-radius: 999px;
+      border: 1px solid rgba(255,255,255,0.28);
+      background: rgba(0,0,0,0.22);
       color: rgba(255,255,255,0.95);
       display: grid;
       place-items: center;
@@ -423,8 +447,8 @@
     }
     .wish-btn i{ font-size: 18px; line-height: 1; }
     .wish-btn:hover{
-      background: rgba(0,0,0,0.28);
-      border-color: rgba(0,0,0,0.28);
+      background: rgba(0,0,0,0.32);
+      border-color: rgba(255,255,255,0.35);
       transform: translateY(-1px);
     }
     .wish-btn.active{
@@ -433,7 +457,6 @@
       color: #fff;
     }
 
-    /* ✅ Desktop arrows only when multiple images */
     .img-nav{
       position: absolute;
       inset: 0;
@@ -448,92 +471,98 @@
       position: absolute;
       top: 50%;
       transform: translateY(-50%);
-      width: 38px;
-      height: 38px;
+      width: 34px;
+      height: 34px;
       border-radius: 999px;
-      border: 1px solid rgba(0,0,0,0.14);
-      background: rgba(255,255,255,0.55);
-      backdrop-filter: blur(2px);
+      border: none;
+      background: transparent;
       cursor: pointer;
       display: grid;
       place-items: center;
       transition: 0.18s;
       opacity: 0;
     }
-    .img-nav-btn i{ font-size: 22px; color: #2b1719; }
-    .img-nav-btn:hover{ background: rgba(255,255,255,0.75); transform: translateY(-50%) scale(1.03); }
-    .img-nav-btn.prev{ left: 10px; }
-    .img-nav-btn.next{ right: 10px; }
+    .img-nav-btn i{ font-size: 24px; color: #111; }
+    .img-nav-btn:hover{ transform: translateY(-50%) scale(1.03); }
+    .img-nav-btn.prev{ left: 6px; }
+    .img-nav-btn.next{ right: 6px; }
 
     @media (hover:hover){
       .product-card:hover .img-nav-btn{ opacity: 1; }
     }
 
-    /* ✅ Dior-style segmented progress line */
     .img-progress{
       position: absolute;
-      left: 12px;
-      right: 12px;
-      bottom: 8px;
-      height: 3px;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      height: 2px;
       display: none;
       z-index: 4;
       pointer-events: none;
-      gap: 6px;
+      gap: 0;
       align-items: center;
+      background: rgba(0,0,0,0.10);
     }
     .img-progress.show{
       display: flex;
     }
     .img-segment{
       flex: 1;
-      height: 3px;
-      background: rgba(0,0,0,0.15);
-      border-radius: 999px;
+      height: 2px;
+      background: rgba(0,0,0,0.10);
+      border-radius: 0;
       transition: background 0.25s ease;
     }
     .img-segment.active{
-      background: var(--primary);
+      background: #111;
     }
 
-    /* ✅ Dior-like text block */
     .product-info {
-      padding: 16px 18px 22px;
-      text-align: center;
+      padding: 18px 18px 20px;
+      text-align: left;
       display: flex;
       flex-direction: column;
-      gap: 6px;
-      background: var(--white);
-      border-top: 1px solid rgba(0,0,0,0.06);
+      gap: 8px;
+      background: var(--product-panel);
+      color: var(--dior-ink);
+      border-top: 1px solid rgba(17,17,17,0.10);
+      min-height: 82px;
+      justify-content: flex-start;
     }
 
     .product-info h4 {
-      font-size: 13px;
+      font-size: 14px;
       font-weight: 500;
       color: var(--dior-ink);
       overflow: hidden;
       text-overflow: ellipsis;
       white-space: nowrap;
       letter-spacing: 0.01em;
+      line-height: 1.35;
     }
 
     .price {
-      font-size: 12.5px;
+      font-size: 13px;
       font-weight: 500;
-      color: var(--dior-muted);
+      color: var(--dior-ink);
+      display: flex;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 6px;
     }
     .price span {
-      color: rgba(17,17,17,0.35);
-      font-weight: 500;
+      color: rgba(17,17,17,0.45);
+      font-weight: 400;
       text-decoration: line-through;
       font-size: 12px;
-      margin-left: 6px;
+      margin-left: 0;
+      background: transparent;
     }
 
-    /* ✅ review shown on hover (also on mobile via JS class) */
     .product-rating {
       display: flex;
-      justify-content: center;
+      justify-content: flex-start;
       align-items: center;
       gap: 8px;
       font-size: 11.5px;
@@ -630,7 +659,7 @@
     }
     .toast.show { visibility: visible; opacity: 1; bottom: 40px; }
 
-    /* ================= CART (Improved) ================= */
+    /* ================= CART ================= */
     .cart-dropdown {
       position: fixed;
       top: 0;
@@ -779,7 +808,6 @@
     }
     .checkout-btn:hover { background: var(--primary-hover); }
 
-    /* Prevent background scrolling when overlays open */
     body.no-scroll { overflow: hidden; }
 
     /* ================= SPINNER ================= */
@@ -799,20 +827,31 @@
       border-radius: 50%;
       animation: spin 1s linear infinite;
     }
+
     @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
     @keyframes promo-slide { from { transform: translateX(0); } to { transform: translateX(-50%); } }
     @keyframes fadeInUp { from { opacity: 0; transform: translateY(30px); } to { opacity: 1; transform: translateY(0); } }
 
-    /* ================= RESPONSIVE FIXES ================= */
-    @media (max-width: 1024px) {
+    /* ================= RESPONSIVE ================= */
+    @media (max-width: 1200px) {
       .nav-links { gap: 22px; }
       header { padding: 0 4%; }
-      .footer-grid { grid-template-columns: 1fr 1fr; } /* match index.html */
+    }
+
+    @media (max-width: 1024px) {
+      .products {
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+      }
+      .footer-grid { grid-template-columns: 1fr 1fr; }
     }
 
     @media (max-width: 900px) {
       .promo-bar { font-size: 10px; }
-      header { height: 60px; padding: 0 12px; }
+      header {
+        height: 60px;
+        padding: 0 12px;
+        grid-template-columns: auto 1fr auto;
+      }
       header h1 { font-size: 18px; }
 
       .menu-toggle { display: flex; }
@@ -854,26 +893,34 @@
 
       .products {
         grid-template-columns: repeat(2, 1fr);
-        gap: 12px;
-        padding: 0 12px 60px;
+        gap: 0;
+        padding: 0 0 60px;
       }
 
-      /* ✅ keep image full on mobile */
+      .product-media{
+        aspect-ratio: 1 / 1.25;
+      }
+
       .product-card img{
         width: 100%;
+        height: 100%;
         margin: 0;
-        aspect-ratio: 4 / 5;
+        padding: 0;
+        object-fit: cover;
       }
+
       .badge{ top: 10px; left: 10px; padding: 6px 10px; font-size: 10px; }
-      .wish-btn{ top: 10px; right: 10px; width: 32px; height: 32px; border-radius: 8px; }
+      .wish-btn{ top: 10px; right: 10px; width: 32px; height: 32px; }
       .img-nav{ display: none !important; }
       .img-nav-btn{ display:none !important; }
 
-      .product-info { padding: 14px 12px 18px; }
+      .product-info {
+        padding: 14px 12px 18px;
+        min-height: 78px;
+      }
       .product-info h4 { font-size: 12.5px; }
       .price { font-size: 12px; }
 
-      /* ✅ IMPORTANT: don't force rating visible on mobile */
       .product-rating{
         opacity: 0;
         transform: translateY(4px);
@@ -931,8 +978,6 @@
     <span></span><span></span><span></span>
   </div>
 
-  <h1><a href="index.html">VNAILS</a></h1>
-
   <nav class="nav-links" id="navLinks" aria-label="Primary navigation">
     <a href="index.html">Home</a>
     <a href="best-sellers.html" style="color:var(--primary);">Best Sellers</a>
@@ -940,10 +985,11 @@
     <a href="contact.html">Contact</a>
   </nav>
 
+  <h1><a href="index.html">VNAILS</a></h1>
+
   <div class="header-actions">
     <button class="login-btn" id="loginBtn">Login</button>
 
-    <!-- ✅ person icon -->
     <div class="user-btn" id="userBtn" title="Account" aria-label="Account">
       <svg viewBox="0 0 24 24" fill="none">
         <path d="M12 12c2.761 0 5-2.463 5-5.5S14.761 1 12 1 7 3.463 7 6.5 9.239 12 12 12Z" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
@@ -951,7 +997,6 @@
       </svg>
     </div>
 
-    <!-- ✅ Shopify cart icon -->
     <div class="cart-icon" onclick="toggleCart()" aria-label="Cart">
       <svg viewBox="0 0 24 24" fill="none">
         <path d="M3 5h2l1.1 11.2a2 2 0 0 0 2 1.8h9.7a2 2 0 0 0 2-1.7L22 8H6.2" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
@@ -962,13 +1007,11 @@
     </div>
   </div>
 
-  <!-- user dropdown -->
   <div class="user-dropdown" id="userDropdown">
     <div class="user-dd-item" id="ddAdmin" style="display:none;">
       <i class='bx bx-shield-quarter'></i> Admin Dashboard
     </div>
 
-    <!-- ✅ Wishlist button added (match index.html) -->
     <div class="user-dd-item" id="ddWishlist">
       <i class='bx bx-heart'></i> Wishlist
     </div>
@@ -1080,7 +1123,6 @@
       userDropdown.classList.toggle("show");
     });
 
-    /* ✅ FIX: clicking inside dropdown should not auto-close before item handlers finish */
     userDropdown.addEventListener("click", (e) => {
       e.stopPropagation();
     });
@@ -1226,12 +1268,8 @@
       }
 
       const imgs = Array.isArray(p.images) && p.images.length ? p.images : [(p.image || "")].filter(Boolean);
-
-      /* ✅ FIX: avoid empty src="" (causes extra network request / broken image flash) */
-      const imageSrc = (imgs && imgs[0]) ? imgs[0] : "https://placehold.co/300x300/ffffff/2b1719?text=VNAILS";
-
+      const imageSrc = (imgs && imgs[0]) ? imgs[0] : "https://placehold.co/900x1200/ffffff/2b1719?text=VNAILS";
       const imagesJson = escapeHtml(JSON.stringify(imgs || []));
-
       const ratingVal = Number(p.rating || 0);
       const wished = isWished(p.id);
 
@@ -1252,9 +1290,7 @@
                 <button class="img-nav-btn next" type="button" aria-label="Next image" data-next="1"><i class='bx bx-chevron-right'></i></button>
               </div>
 
-              <div class="img-progress" data-progress="1">
-                <div class="img-progress-bar" data-bar="1"></div>
-              </div>
+              <div class="img-progress" data-progress="1"></div>
             </div>
 
             <div class="product-info">
@@ -1270,7 +1306,6 @@
       `;
     });
 
-    // attach events + image slider + wishlist
     container.querySelectorAll(".product-wrap").forEach(wrap => {
       const pid = wrap.getAttribute("data-product-id");
       const card = wrap.querySelector(".product-card");
@@ -1284,7 +1319,6 @@
 
       const wishBtn = wrap.querySelector('[data-wish="1"]');
 
-      // Wishlist button (heart) - separate from card click
       if (wishBtn) {
         wishBtn.addEventListener("click", (e) => {
           e.preventDefault();
@@ -1297,7 +1331,6 @@
         });
       }
 
-      // Images / carousel
       let images = [];
       try {
         const raw = media?.getAttribute("data-images") || "[]";
@@ -1321,14 +1354,12 @@
       function refreshControls() {
         const multi = images.length > 1;
 
-        // progress line shows if multi
         if (progress) {
           progress.classList.toggle("show", multi);
           if (multi) buildProgressSegments(progress, images.length);
           updateProgress(progress, images.length, idx);
         }
 
-        // arrows: PC only + multi
         const showArrows = multi && !isMobileOrTab();
         if (nav) nav.classList.toggle("show", showArrows);
       }
@@ -1351,7 +1382,6 @@
         });
       }
 
-      // Rating visibility behavior (match index.html)
       if (card) {
         card.addEventListener("touchstart", () => {
           if (!isMobileOrTab()) return;
@@ -1369,7 +1399,6 @@
         }, { passive: true });
       }
 
-      // Swipe on mobile/tab
       let startX = 0;
       let startY = 0;
       let dragging = false;
@@ -1420,14 +1449,13 @@
         media.addEventListener("touchcancel", () => { dragging = false; }, { passive: true });
       }
 
-      // Card click -> product page
       card.addEventListener("click", () => {
         window.location.href = `product.html?id=${encodeURIComponent(pid)}`;
       });
 
       if (img) {
         img.addEventListener("error", () => {
-          img.src = 'https://placehold.co/300x300/ffffff/2b1719?text=VNAILS';
+          img.src = 'https://placehold.co/900x1200/ffffff/2b1719?text=VNAILS';
           img.alt = 'Image unavailable';
         });
       }
@@ -1436,7 +1464,6 @@
 
   loadBestSellers();
 
-  // keep UI synced if wishlist updated elsewhere/tab
   window.addEventListener("storage", (e) => {
     if (e.key === "wishlist") {
       container.querySelectorAll('[data-wish="1"]').forEach(btn => {
@@ -1450,7 +1477,6 @@
   });
 </script>
 
-<!-- ✅ Footer Newsletter (Firestore) -->
 <script type="module">
   import { db } from "./firebase.js";
   import { doc, setDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js";
@@ -1486,8 +1512,6 @@
       if (btn) btn.disabled = true;
 
       try {
-        // ✅ No duplicates: use email as document ID
-        // IMPORTANT: rules require docId == request.resource.data.email
         await setDoc(doc(db, "newsletter", email), {
           email,
           page: "best-sellers",
@@ -1514,7 +1538,6 @@
     setTimeout(() => { toast.className = toast.className.replace("show", ""); }, 3000);
   }
 
-  // ========= CART (Fixed + Better UI) =========
   let cart = JSON.parse(localStorage.getItem("cart")) || [];
 
   function safeImg(url) {
@@ -1523,7 +1546,6 @@
       : "https://placehold.co/100x100/f3f4f6/9ca3af?text=No+Img";
   }
 
-  /* ✅ FIX: basic HTML escape for cart display (prevents localStorage/DOM injection) */
   function esc(s){
     return String(s ?? "")
       .replace(/&/g, "&amp;")
@@ -1611,12 +1633,10 @@
     document.body.classList.remove("no-scroll");
   }
 
-  // if open=true passed, force open
   window.toggleCart = function(open) {
     const dropdown = document.getElementById("cartDropdown");
     const overlay = document.getElementById("cartOverlay");
 
-    // ✅ if menu is open, close it first
     closeMenu();
 
     const isOpen = dropdown.classList.contains("show");
@@ -1629,7 +1649,6 @@
     renderCart();
   };
 
-  // Sync cart across tabs/windows
   window.addEventListener("storage", (e) => {
     if (e.key === "cart") {
       cart = JSON.parse(localStorage.getItem("cart")) || [];
@@ -1638,12 +1657,10 @@
     }
   });
 
-  // Close cart with ESC
   document.addEventListener("keydown", (e) => {
     if (e.key === "Escape") closeCart();
   });
 
-  // ✅ menu toggle (consistent with index.html)
   const nav = document.getElementById("navLinks");
   const menuOverlay = document.getElementById("menuOverlay");
   const menuToggle = document.getElementById("menuToggle");
@@ -1659,7 +1676,6 @@
     nav.classList.remove("active");
     menuOverlay.classList.remove("active");
 
-    // Only unlock scroll if cart is not open
     const cartOpen = document.getElementById("cartDropdown")?.classList.contains("show");
     if (!cartOpen) document.body.classList.remove("no-scroll");
 
@@ -1670,7 +1686,6 @@
     nav.classList.toggle("active");
     menuOverlay.classList.toggle("active");
 
-    /* ✅ FIX: prevent background scrolling when menu is open (same behavior as cart) */
     const cartOpen = document.getElementById("cartDropdown")?.classList.contains("show");
     const menuOpen = nav.classList.contains("active");
     document.body.classList.toggle("no-scroll", menuOpen || cartOpen);
@@ -1691,7 +1706,6 @@
 
   window.addEventListener("scroll", updateHeaderState, { passive: true });
 
-  // ========= INIT =========
   updateCartCount();
   renderCart();
   updateHeaderState();
