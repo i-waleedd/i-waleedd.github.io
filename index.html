@@ -857,27 +857,17 @@
 
     @media (max-width: 900px) {
       .promo-bar { font-size: 10px; }
-
       header {
         height: 60px;
         padding: 0 12px;
         grid-template-columns: auto 1fr auto;
       }
-
-      /* ✅ MOVE LOGO TO LEFT */
       header h1 {
         font-size: 18px;
-        grid-column: 1;
-        justify-self: start;
-        text-align: left;
+        grid-column: 2;
       }
 
-      /* ✅ MOVE MENU TO RIGHT */
-      .menu-toggle {
-        display: flex;
-        grid-column: 3;
-        justify-self: end;
-      }
+      .menu-toggle { display: flex; }
 
       .nav-links {
         position: fixed;
@@ -895,7 +885,6 @@
         border-radius: 18px;
         border: 1px solid rgba(0,0,0,0.10);
       }
-
       .nav-links.active { left: 12px; }
 
       .nav-links a {
@@ -909,7 +898,6 @@
         letter-spacing: 0.2px;
         display: block;
       }
-
       .nav-links a:last-child { border-bottom: none; }
 
       .hero { min-height: 350px; height: 40vh; }
