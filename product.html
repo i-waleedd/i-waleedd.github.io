@@ -856,10 +856,27 @@
       header{
         height:60px;
         padding:0 12px;
-        grid-template-columns:auto 1fr auto;
+        grid-template-columns:1fr auto auto;
       }
-      header h1{font-size:18px}
-      .menu-toggle{display:flex}
+      header h1{
+        font-size:18px;
+        grid-column:1;
+        justify-self:start;
+        text-align:left;
+      }
+      .header-actions{
+        grid-column:2;
+        justify-self:end;
+        display:flex;
+        align-items:center;
+        gap:10px;
+      }
+      .menu-toggle{
+        display:flex;
+        grid-column:3;
+        justify-self:end;
+        padding:8px;
+      }
 
       .nav-links{
         position:fixed;
