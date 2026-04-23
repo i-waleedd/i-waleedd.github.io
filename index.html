@@ -198,7 +198,7 @@
       order: 1;
     }
     header.scrolled .user-btn { color: var(--text); }
-    .user-btn svg { width: 22px; height: 22px; }
+    .user-btn svg { width: 30px; height: 30px; }
 
     .user-dropdown {
       position: absolute;
@@ -1123,9 +1123,14 @@
     <button class="login-btn" id="loginBtn">Login</button>
 
     <div class="user-btn" id="userBtn" title="Account" aria-label="Account">
-      <svg viewBox="0 0 24 24" fill="none">
-        <path d="M12 12c2.761 0 5-2.463 5-5.5S14.761 1 12 1 7 3.463 7 6.5 9.239 12 12 12Z" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
-        <path d="M21 23c0-4.418-4.03-8-9-8s-9 3.582-9 8" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+      <svg viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round">
+        
+        <!-- Head -->
+        <circle cx="32" cy="22" r="7"></circle>
+    
+        <!-- Shoulders (with proper gap) -->
+        <path d="M18 48v-4c0-4 5-7 14-7s14 3 14 7v4"></path>
+    
       </svg>
     </div>
 
