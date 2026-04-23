@@ -107,6 +107,9 @@
       display: flex;
       gap: 35px;
       align-items: center;
+      justify-content: flex-start;
+      grid-column: 1;
+      justify-self: start;
       min-width: 0;
     }
     .nav-links a {
@@ -905,8 +908,8 @@
       .nav-links {
         position: fixed;
         top: 58px;
-        right: -100%;
         left: auto;
+        right: -100%;
         width: min(78vw, 330px);
         height: auto;
         background: var(--bg);
@@ -1054,16 +1057,16 @@
 </div>
 
 <header id="siteHeader">
+  <nav class="nav-links" id="navLinks" aria-label="Primary navigation">
+    <a href="index.html">Home</a>
+    <a href="best-sellers.html">Best Sellers</a>
+    <a href="products.html" style="color:var(--primary);">Products</a>
+    <a href="contact.html">Contact</a>
+  </nav>
+
   <h1><a href="index.html">VNAILS</a></h1>
 
   <div class="header-actions">
-    <nav class="nav-links" id="navLinks" aria-label="Primary navigation">
-      <a href="index.html">Home</a>
-      <a href="best-sellers.html">Best Sellers</a>
-      <a href="products.html" style="color:var(--primary);">Products</a>
-      <a href="contact.html">Contact</a>
-    </nav>
-
     <button class="login-btn" id="loginBtn">Login</button>
 
     <div class="user-btn" id="userBtn" title="Account" aria-label="Account">
