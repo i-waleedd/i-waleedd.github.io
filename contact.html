@@ -127,14 +127,18 @@
     .menu-toggle {
       display: none;
       flex-direction: column;
-      gap: 5px;
+      gap: 3px;
       cursor: pointer;
-      padding: 10px;
+      padding: 6px;
       border-radius: 10px;
       z-index: 2;
+      width: 25px;
+      height: 25px;
+      align-items: center;
+      justify-content: center;
     }
     .menu-toggle span {
-      width: 22px;
+      width: 13px;
       height: 2px;
       background: var(--white);
       border-radius: 2px;
@@ -183,14 +187,15 @@
     .user-btn {
       display: none;
       cursor: pointer;
-      width: 26px; height: 26px;
+      width: 13px;
+      height: 13px;
       align-items: center;
       justify-content: center;
       color: var(--white);
       order: 1;
     }
     header.scrolled .user-btn { color: var(--text); }
-    .user-btn svg { width: 30px; height: 30px; }
+    .user-btn svg { width: 13px; height: 13px; }
 
     .user-dropdown {
       position: absolute;
@@ -228,8 +233,8 @@
     .cart-icon {
       position: relative;
       cursor: pointer;
-      width: 30px;
-      height: 30px;
+      width: 13px;
+      height: 13px;
       display: inline-flex;
       align-items: center;
       justify-content: center;
@@ -239,8 +244,8 @@
     }
     header.scrolled .cart-icon { color: var(--text); }
     .cart-icon svg {
-      width: 30px;
-      height: 30px;
+      width: 13px;
+      height: 13px;
       overflow: visible;
     }
 
@@ -537,8 +542,10 @@
 
       .menu-toggle {
         display: flex;
-        padding: 8px;
+        padding: 6px;
         order: 3;
+        width: 25px;
+        height: 25px;
       }
 
       .header-actions {
