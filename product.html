@@ -92,7 +92,9 @@
       z-index:2;
       text-align:center;
     }
-    header h1 a{color:var(--text)}
+
+    header h1 a{ color:#fff; cursor:pointer; }
+    header.scrolled h1 a{ color:var(--text); }
 
     .nav-links{
       display:flex;
@@ -106,12 +108,20 @@
     .nav-links a{
       font-weight:500;
       font-size:13px;
+      position:relative;
       text-transform:uppercase;
       letter-spacing:.5px;
       padding:8px 0;
-      color:var(--text);
+      color:#fff;
     }
     .nav-links a:hover{color:var(--primary)}
+
+    header.scrolled .nav-links a{
+      color:var(--text);
+    }
+    header.scrolled .nav-links a:hover{
+      color:var(--primary);
+    }
 
     .menu-toggle{
       display:none;
@@ -120,11 +130,18 @@
       cursor:pointer;
       padding:10px;
       border-radius:10px;
-      grid-column:1;
-      justify-self:start;
       z-index:2;
     }
-    .menu-toggle span{width:22px;height:2px;background:#222;border-radius:2px}
+    .menu-toggle span{
+      width:22px;
+      height:2px;
+      background:#fff;
+      border-radius:2px;
+      transition:.3s;
+    }
+    header.scrolled .menu-toggle span{
+      background:#222;
+    }
 
     .menu-overlay{
       position:fixed;
@@ -171,9 +188,10 @@
       width:26px;height:26px;
       align-items:center;
       justify-content:center;
-      color:var(--text);
+      color:#fff;
       order:1;
     }
+    header.scrolled .user-btn{ color:var(--text); }
     .user-btn svg{width:22px;height:22px}
 
     .cart-icon{
@@ -183,10 +201,11 @@
       display:inline-flex;
       align-items:center;
       justify-content:center;
-      color:var(--text);
+      color:#fff;
       order:2;
       margin-left:2px;
     }
+    header.scrolled .cart-icon{ color:var(--text); }
     .cart-icon svg{width:24px;height:24px}
     .cart-icon span{
       position:absolute;
@@ -220,7 +239,7 @@
       right:5%;
       top:calc(36px + 70px - 6px);
       background:var(--bg);
-      border:1px solid var(--border);
+      border:1px solid rgba(0,0,0,0.12);
       border-radius:14px;
       box-shadow:0 10px 30px rgba(0,0,0,0.12);
       padding:10px;
@@ -237,14 +256,14 @@
       padding:12px 10px;
       border-radius:12px;
       font-size:13px;
-      font-weight:700;
+      font-weight:600;
       color:var(--text);
       cursor:pointer;
       border:1px solid transparent;
     }
     .user-dd-item:hover{
-      background:rgba(255,126,141,0.10);
-      border-color:rgba(255,126,141,0.25);
+      background:rgba(255,255,255,0.35);
+      border-color:rgba(0,0,0,0.08);
     }
     .user-dd-item i{font-size:18px}
 
@@ -856,7 +875,7 @@
       header{
         height:60px;
         padding:0 12px;
-        grid-template-columns:1fr auto auto;
+        grid-template-columns:1fr auto;
       }
       header h1{
         font-size:18px;
@@ -864,6 +883,13 @@
         justify-self:start;
         text-align:left;
       }
+
+      .menu-toggle{
+        display:flex;
+        padding:8px;
+        order:3;
+      }
+
       .header-actions{
         grid-column:2;
         justify-self:end;
@@ -871,17 +897,11 @@
         align-items:center;
         gap:10px;
       }
-      .menu-toggle{
-        display:flex;
-        grid-column:3;
-        justify-self:end;
-        padding:8px;
-      }
 
       .nav-links{
         position:fixed;
         top:58px;
-        right:-120%; left:auto;
+        right:-100%; left:auto;
         width:min(78vw,330px);
         height:auto;
         background:var(--bg);
@@ -892,7 +912,7 @@
         transition:.28s ease;
         z-index:2000;
         border-radius:18px;
-        border:1px solid rgba(255,126,141,.35);
+        border:1px solid rgba(0,0,0,0.10);
       }
       .nav-links.active{right:12px}
       .nav-links a{
@@ -900,7 +920,7 @@
         padding:16px 6px;
         border-bottom:1px solid rgba(0,0,0,0.12);
         font-size:15px;
-        color:#2b1719;
+        color:#2b1719 !important;
         font-weight:700;
         text-transform:none;
         letter-spacing:.2px;
@@ -977,10 +997,6 @@
   </div>
 
   <header id="siteHeader">
-    <div class="menu-toggle" id="menuToggle" aria-label="Open menu">
-      <span></span><span></span><span></span>
-    </div>
-
     <nav class="nav-links" id="navLinks" aria-label="Primary navigation">
       <a href="index.html">Home</a>
       <a href="best-sellers.html">Best Sellers</a>
@@ -1007,6 +1023,10 @@
           <path d="M17 21a1 1 0 1 0 0-2 1 1 0 0 0 0 2Z" fill="currentColor"/>
         </svg>
         <span id="cart-count">0</span>
+      </div>
+
+      <div class="menu-toggle" id="menuToggle" aria-label="Open menu">
+        <span></span><span></span><span></span>
       </div>
     </div>
 
@@ -1248,15 +1268,19 @@
     function toggleMenu(){
       nav.classList.toggle("active");
       menuOverlay.classList.toggle("active");
-      const menuOpen = nav.classList.contains("active");
+
       const cartOpen = document.getElementById("cartDropdown")?.classList.contains("show");
+      const menuOpen = nav.classList.contains("active");
       document.body.classList.toggle("no-scroll", menuOpen || cartOpen);
+
       updateHeaderState();
     }
 
     menuToggle.addEventListener("click", toggleMenu);
     menuOverlay.addEventListener("click", closeMenu);
-    nav.querySelectorAll("a").forEach(a => a.addEventListener("click", closeMenu));
+    nav.querySelectorAll("a").forEach(a => {
+      a.addEventListener("click", () => closeMenu());
+    });
     document.addEventListener("keydown", (e)=>{ if(e.key==="Escape") closeMenu(); });
     window.addEventListener("scroll", updateHeaderState, { passive: true });
 
@@ -1388,8 +1412,7 @@
       const overlay = document.getElementById("cartOverlay");
       dropdown.classList.remove("show");
       overlay.classList.remove("show");
-      const menuOpen = document.getElementById("navLinks")?.classList.contains("active");
-      document.body.classList.toggle("no-scroll", !!menuOpen);
+      document.body.classList.remove("no-scroll");
     }
 
     window.toggleCart = function(open){
