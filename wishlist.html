@@ -917,6 +917,42 @@
       .cart-controls button { width: 36px; height: 36px; }
     }
   </style>
+
+
+  <!-- ===== Navigation synced with product.html ===== -->
+  <style>
+    header{background:transparent;border-bottom:1px solid transparent;position:fixed;top:36px;box-shadow:none;transition:background .3s ease,border-color .3s ease,box-shadow .3s ease,color .3s ease;}
+    header.scrolled{background:var(--bg);border-bottom:1px solid rgba(0,0,0,0.05);box-shadow:0 4px 20px rgba(0,0,0,0.03);}
+    .menu-toggle span{background:#000;}
+    header.scrolled .menu-toggle span{background:#222;}
+    .user-btn,.cart-icon{color:#000;}
+    header.scrolled .user-btn,header.scrolled .cart-icon{color:var(--text);}
+    .page-header{padding-top:112px;}
+    .cart-dropdown{width:350px;background:#fff;padding:25px;transition:transform .4s ease;display:block;}
+    .cart-header{margin-bottom:20px;padding-bottom:15px;}
+    .cart-header h4{font-size:16px;font-weight:700;}
+    .cart-item{display:grid;grid-template-columns:54px 1fr auto;gap:12px;align-items:center;margin-bottom:14px;font-size:13px;padding:10px;border:1px solid rgba(0,0,0,0.08);border-radius:12px;background:#fff;}
+    .cart-thumb{width:54px;height:54px;border-radius:10px;overflow:hidden;border:1px solid rgba(0,0,0,0.08);background:rgba(0,0,0,0.03);flex-shrink:0;object-fit:cover;}
+    .cart-mid{display:flex;flex-direction:column;gap:6px;min-width:0;}
+    .cart-name-row{display:flex;align-items:center;justify-content:space-between;gap:10px;min-width:0;}
+    .cart-name{font-weight:800;color:#2b1719;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;min-width:0;}
+    .remove-btn{width:28px;height:28px;border-radius:10px;border:1px solid rgba(0,0,0,0.10);background:rgba(0,0,0,0.02);display:inline-flex;align-items:center;justify-content:center;cursor:pointer;transition:0.2s;flex-shrink:0;}
+    .remove-btn:hover{background:rgba(255,126,141,0.12);border-color:rgba(255,126,141,0.35)}
+    .remove-btn i{font-size:18px;color:#2b1719}
+    .cart-controls{display:inline-flex;align-items:center;gap:8px;}
+    .cart-controls button{width:26px;height:26px;border:1px solid #ddd;background:#fff;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;border-radius:8px;font-weight:800;font-size:13px;transition:0.2s;}
+    .cart-controls button:hover{border-color:rgba(255,126,141,0.55);color:var(--primary);background:#fff;}
+    .cart-qty{font-weight:900;min-width:18px;text-align:center;}
+    .cart-right{text-align:right;display:flex;flex-direction:column;gap:6px;align-items:flex-end;white-space:nowrap;}
+    .cart-lineprice{font-weight:900;color:#2b1719;}
+    .cart-unit{font-size:11px;color:#888;font-weight:700;}
+    .cart-total{font-weight:700;margin-top:30px;text-align:right;font-size:18px;border-top:1px solid #eee;padding-top:20px;}
+    .checkout-btn{margin-top:20px;padding:15px;border-radius:8px;font-weight:700;font-size:15px;box-shadow:none;}
+    @media (max-width:900px){.nav-links{top:58px;right:-100%;left:auto;width:min(78vw,330px);height:auto;}.nav-links.active{right:12px;left:auto;}.nav-links a{font-weight:700;}.page-header{padding-top:100px;}}
+    @media (max-width:480px){.cart-dropdown{width:100%;}}
+    @media (max-width:360px){.user-dropdown{top:calc(34px + 60px - 6px)}.page-header{padding-top:92px;}}
+  </style>
+
 </head>
 
 <body>
@@ -988,7 +1024,7 @@
   <div class="cart-overlay" id="cartOverlay" onclick="toggleCart()"></div>
   <div class="cart-dropdown" id="cartDropdown">
     <div class="cart-header">
-      <h4>Your Cart</h4>
+      <h4>Your Bag</h4>
       <span class="close-cart" onclick="toggleCart()"><i class='bx bx-x'></i></span>
     </div>
     <div id="cartItems"></div>
@@ -1513,7 +1549,7 @@
       let total = 0;
 
       if (!cart.length) {
-        itemsDiv.innerHTML = `<div class="cart-empty">Your cart is empty.</div>`;
+        itemsDiv.innerHTML = `<p style="text-align:center; color:#888; margin-top:20px;">Your bag is empty.</p>`;
         totalDiv.innerText = "PKR 0";
         return;
       }
@@ -1526,17 +1562,26 @@
 
         itemsDiv.innerHTML += `
           <div class="cart-item">
-            <img class="cart-thumb" src="${safeImg(item.image)}" alt="Item" onerror="this.src='https://placehold.co/100x100/f3f4f6/9ca3af?text=No+Img'">
-            <div class="cart-meta">
-              <div class="cart-name">${escapeHtml(item.name || "Item")}</div>
-              <div class="cart-sub">Qty: ${qty}</div>
-            </div>
-            <div class="cart-right">
-              <div class="cart-price">PKR ${line.toLocaleString()}</div>
+            <img class="cart-thumb" src="${safeImg(item.image)}" alt="Cart item" onerror="this.src='https://placehold.co/120x120/f3f3f3/2b1719?text=VNAILS'">
+
+            <div class="cart-mid">
+              <div class="cart-name-row">
+                <div class="cart-name">${escapeHtml(item.name || "Item")}</div>
+                <button class="remove-btn" onclick="removeItem(${index})" aria-label="Remove item">
+                  <i class='bx bx-trash'></i>
+                </button>
+              </div>
+
               <div class="cart-controls">
                 <button type="button" aria-label="Decrease quantity" onclick="changeQty(${index}, -1)">−</button>
+                <div class="cart-qty">${qty}</div>
                 <button type="button" aria-label="Increase quantity" onclick="changeQty(${index}, 1)">+</button>
               </div>
+            </div>
+
+            <div class="cart-right">
+              <div class="cart-lineprice">PKR ${line.toLocaleString()}</div>
+              <div class="cart-unit">PKR ${price.toLocaleString()} each</div>
             </div>
           </div>
         `;
@@ -1560,6 +1605,14 @@
       cart[index].qty = Number(cart[index].qty || 0) + Number(change || 0);
       if (cart[index].qty <= 0) cart.splice(index, 1);
 
+      localStorage.setItem("cart", JSON.stringify(cart));
+      updateCartCount();
+      renderCart();
+    };
+
+    window.removeItem = function(index) {
+      if (!cart[index]) return;
+      cart.splice(index, 1);
       localStorage.setItem("cart", JSON.stringify(cart));
       updateCartCount();
       renderCart();
@@ -1611,6 +1664,13 @@
     const nav = document.getElementById("navLinks");
     const menuOverlay = document.getElementById("menuOverlay");
     const menuToggle = document.getElementById("menuToggle");
+    const siteHeader = document.getElementById("siteHeader");
+
+    function updateHeaderState() {
+      const menuOpen = nav.classList.contains("active");
+      const shouldSolid = window.scrollY > 40 || menuOpen;
+      siteHeader.classList.toggle("scrolled", shouldSolid);
+    }
 
     function closeMenu() {
       nav.classList.remove("active");
@@ -1619,6 +1679,7 @@
       /* ✅ FIX #1: lock scroll if cart open; otherwise unlock */
       const cartOpen = document.getElementById("cartDropdown")?.classList.contains("show");
       document.body.classList.toggle("no-scroll", !!cartOpen);
+      updateHeaderState();
     }
 
     function toggleMenu() {
@@ -1629,6 +1690,7 @@
       const menuOpen = nav.classList.contains("active");
       const cartOpen = document.getElementById("cartDropdown")?.classList.contains("show");
       document.body.classList.toggle("no-scroll", menuOpen || cartOpen);
+      updateHeaderState();
     }
 
     menuToggle.addEventListener("click", toggleMenu);
@@ -1642,41 +1704,14 @@
       if (e.key === "Escape") closeMenu();
     });
 
+    window.addEventListener("scroll", updateHeaderState, { passive: true });
+
     // ========= INIT =========
     updateCartCount();
     renderCart();
+    updateHeaderState();
   </script>
 
-  <!-- ✅ FIX #5: Cart UI updated to match newer “grid” cart style used in product.html -->
-  <style>
-    /* Override cart item UI to newer layout without changing structure */
-    .cart-item{
-      display:grid;
-      grid-template-columns:46px 1fr auto;
-      gap:12px;
-      align-items:center;
-      padding:10px;
-      border:1px solid rgba(0,0,0,0.08);
-      border-radius:12px;
-      background:#fff;
-      margin-bottom:12px;
-    }
-    .cart-item:last-child{ margin-bottom:0; }
-    .cart-thumb{
-      width:46px;height:46px;
-      border-radius:10px;
-      border:1px solid rgba(0,0,0,0.10);
-      background:#fafafa;
-    }
-    .cart-meta{
-      min-width:0;
-    }
-    .cart-name{
-      font-weight:900;
-    }
-    .cart-right{
-      gap:6px;
-    }
-  </style>
+
 </body>
 </html>
