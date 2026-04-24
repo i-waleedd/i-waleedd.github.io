@@ -683,6 +683,9 @@
     <div class="user-dd-item" id="ddAdmin" style="display:none;">
       <i class='bx bx-shield-quarter'></i> Admin Dashboard
     </div>
+    <div class="user-dd-item" id="ddWishlist">
+      <i class='bx bx-heart'></i> Wishlist
+    </div>
     <div class="user-dd-item" id="ddOrders">
       <i class='bx bx-receipt'></i> Orders
     </div>
@@ -825,6 +828,7 @@
     const userDropdown = document.getElementById("userDropdown");
 
     const ddAdmin = document.getElementById("ddAdmin");
+    const ddWishlist = document.getElementById("ddWishlist");
     const ddOrders = document.getElementById("ddOrders");
     const ddLogout = document.getElementById("ddLogout");
 
@@ -838,6 +842,7 @@
     document.addEventListener("click", () => closeUserDropdown());
 
     ddAdmin.addEventListener("click", () => { window.location.href = "admin.html"; });
+    ddWishlist.addEventListener("click", () => { window.location.href = "wishlist.html"; });
     ddOrders.addEventListener("click", () => { window.location.href = "orders.html"; });
     ddLogout.addEventListener("click", async () => {
       await signOut(auth);
