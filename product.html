@@ -302,6 +302,9 @@
       border-bottom:1px solid #eee;
       padding-bottom:15px;
     }
+    .cart-header h4{font-size:16px;font-weight:900}
+    .close-cart{cursor:pointer;display:inline-flex;align-items:center;justify-content:center}
+    .close-cart i{font-size:24px}
 
     .cart-item{
       display:grid;
@@ -428,6 +431,7 @@
       cursor:pointer;
       font-size:15px;
     }
+    .checkout-btn:hover{background:var(--primary-hover)}
 
     /* ================= TOAST ================= */
     .toast{
@@ -1356,10 +1360,15 @@
 
       if(cart.length === 0){
         itemsDiv.innerHTML = "<p style='text-align:center; color:#888; margin-top:20px;'>Your bag is empty.</p>";
+        totalDiv.innerText = "PKR 0";
+        return;
       }
 
       cart.forEach((item, index)=>{
-        total += (item.price || 0) * (item.qty || 0);
+        const qty = Number(item.qty || 0);
+        const price = Number(item.price || 0);
+        const line = price * qty;
+        total += line;
 
         const safeImg = item.image && String(item.image).trim().length
           ? item.image
@@ -1373,7 +1382,7 @@
 
             <div class="cart-mid">
               <div class="cart-name-row">
-                <div class="cart-name">${escapeHtml(item.name)}</div>
+                <div class="cart-name">${escapeHtml(item.name || "Item")}</div>
                 <button class="remove-btn" onclick="removeItem(${index})" aria-label="Remove item">
                   <i class='bx bx-trash'></i>
                 </button>
@@ -1381,14 +1390,14 @@
 
               <div class="cart-controls">
                 <button onclick="changeQty(${index}, -1)" aria-label="Decrease quantity">−</button>
-                <div class="cart-qty">${Number(item.qty || 0)}</div>
+                <div class="cart-qty">${qty}</div>
                 <button onclick="changeQty(${index}, 1)" aria-label="Increase quantity">+</button>
               </div>
             </div>
 
             <div class="cart-right">
-              <div class="cart-lineprice">PKR ${(((item.price || 0) * (item.qty || 0)) || 0).toLocaleString()}</div>
-              <div class="cart-unit">PKR ${Number(item.price || 0).toLocaleString()} each</div>
+              <div class="cart-lineprice">PKR ${line.toLocaleString()}</div>
+              <div class="cart-unit">PKR ${price.toLocaleString()} each</div>
             </div>
           </div>
         `;
@@ -1399,7 +1408,7 @@
 
     window.changeQty = function(index, change){
       if(!cart[index]) return;
-      cart[index].qty = (cart[index].qty || 1) + change;
+      cart[index].qty = (cart[index].qty || 0) + change;
       if(cart[index].qty <= 0) cart.splice(index, 1);
       localStorage.setItem("cart", JSON.stringify(cart));
       updateCartCount();
