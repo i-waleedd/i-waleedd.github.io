@@ -125,16 +125,20 @@
     .menu-toggle{
       display:none;
       flex-direction:column;
-      gap:5px;
+      gap:3px;
       cursor:pointer;
-      padding:10px;
+      padding:6px;
       border-radius:10px;
       z-index:2;
+      width:25px;
+      height:25px;
+      align-items:center;
+      justify-content:center;
     }
     .menu-toggle span{
-      width:22px;
+      width:13px;
       height:2px;
-      background:#222;
+      background:var(--white, #fff);
       border-radius:2px;
       transition:.3s;
     }
@@ -184,53 +188,53 @@
     .user-btn{
       display:none;
       cursor:pointer;
-      width:26px;height:26px;
+      width:32px;
+      height:32px;
       align-items:center;
       justify-content:center;
-      color:var(--text);
+      color:var(--white, #fff);
       order:1;
     }
     header.scrolled .user-btn{ color:var(--text); }
-    .user-btn svg{width:30px;height:30px}
+    .user-btn svg{width:32px;height:32px}
 
     .cart-icon{
       position:relative;
       cursor:pointer;
-      width:28px;height:28px;
+      width:32px;
+      height:32px;
       display:inline-flex;
       align-items:center;
       justify-content:center;
-      color:var(--text);
+      color:var(--white, #fff);
       order:2;
       margin-left:2px;
     }
     header.scrolled .cart-icon{ color:var(--text); }
-    .cart-icon svg{width:24px;height:24px}
-    .cart-icon span{
-      position:absolute;
-      top:-7px;
-      right:-9px;
-      background:var(--primary);
-      color:#fff;
-      font-size:10px;
-      font-weight:700;
-      padding:2px 5px;
-      border-radius:999px;
-      min-width:16px;
-      text-align:center;
-      line-height:1.2;
+    .cart-icon svg{
+      width:32px;
+      height:32px;
+      overflow:visible;
+    }
+    .cart-icon .bag-body{
       transform-origin:center;
     }
-    .cart-icon span.vibrate{ animation:cartVibe 2s infinite; }
-    @keyframes cartVibe{
-      0%,82%{ transform:translate(0,0) rotate(0deg); }
-      84%{ transform:translate(-1px,0) rotate(-2deg); }
-      86%{ transform:translate(1px,0) rotate(2deg); }
-      88%{ transform:translate(-1px,0) rotate(-2deg); }
-      90%{ transform:translate(1px,0) rotate(2deg); }
-      92%{ transform:translate(-1px,0) rotate(-2deg); }
-      94%{ transform:translate(1px,0) rotate(2deg); }
-      96%,100%{ transform:translate(0,0) rotate(0deg); }
+    .cart-icon .bag-handle{
+      transform-origin:center;
+    }
+    .cart-icon.has-items .bag-body{
+      animation:bagBounce 1.9s ease-in-out infinite;
+    }
+    .cart-icon.has-items .bag-handle{
+      animation:handleMove 1.9s ease-in-out infinite;
+    }
+    @keyframes bagBounce{
+      0%,100%{ transform:translateY(0); }
+      50%{ transform:translateY(-2px); }
+    }
+    @keyframes handleMove{
+      0%,100%{ transform:translateY(0); }
+      50%{ transform:translateY(-1.6px); }
     }
 
     .user-dropdown{
@@ -885,8 +889,10 @@
 
       .menu-toggle{
         display:flex;
-        padding:8px;
+        padding:6px;
         order:3;
+        width:25px;
+        height:25px;
       }
 
       .header-actions{
@@ -1020,13 +1026,13 @@
         </svg>
       </div>
 
-      <div class="cart-icon" onclick="toggleCart()" aria-label="Cart">
-        <svg viewBox="0 0 24 24" fill="none">
-          <path d="M3 5h2l1.1 11.2a2 2 0 0 0 2 1.8h9.7a2 2 0 0 0 2-1.7L22 8H6.2" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
-          <path d="M9 21a1 1 0 1 0 0-2 1 1 0 0 0 0 2Z" fill="currentColor"/>
-          <path d="M17 21a1 1 0 1 0 0-2 1 1 0 0 0 0 2Z" fill="currentColor"/>
+      <div class="cart-icon" id="cartIcon" onclick="toggleCart()" aria-label="Cart">
+        <svg viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round">
+          <g class="bag-body">
+            <rect x="16" y="24" width="32" height="24" rx="5"></rect>
+          </g>
+          <path class="bag-handle" d="M24 24c0-5 3.5-9 8-9s8 4 8 9"></path>
         </svg>
-        <span id="cart-count">0</span>
       </div>
 
       <div class="menu-toggle" id="menuToggle" aria-label="Open menu">
@@ -1336,10 +1342,9 @@
 
     function updateCartCount(){
       const count = cart.reduce((sum, item)=> sum + (item.qty || 0), 0);
-      const el = document.getElementById("cart-count");
-      if(el){
-        el.textContent = count;
-        el.classList.toggle("vibrate", count > 0);
+      const cartIcon = document.getElementById("cartIcon");
+      if(cartIcon){
+        cartIcon.classList.toggle("has-items", count > 0);
       }
     }
 
