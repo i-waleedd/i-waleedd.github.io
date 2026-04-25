@@ -8,25 +8,14 @@ admin.initializeApp();
 
 const db = admin.firestore();
 
-/*
-|--------------------------------------------------------------------------
-| CONFIG - REPLACE THESE LATER
-|--------------------------------------------------------------------------
-| 1) RESEND_API_KEY:
-|    Put your Resend API key in Firebase Functions env or replace fallback.
-|
-| 2) FROM_EMAIL:
-|    After buying/verifying your domain in Resend, replace with something like:
-|    "VNAILS <hello@yourdomain.com>"
-|
-| 3) APP_URL:
-|    Your live website URL
-|--------------------------------------------------------------------------
-*/
-const RESEND_API_KEY = process.env.RESEND_API_KEY || "PASTE_RESEND_API_KEY_HERE";
-const FROM_EMAIL = process.env.FROM_EMAIL || "PressPlay Nails <onboarding@resend.dev>";
-const ADMIN_EMAIL = process.env.ADMIN_EMAIL || "workwithwaleed1@gmail.com";
-const APP_URL = process.env.APP_URL || "https://your-site-url.com";
+/* ==========================================================================
+   CONFIG
+   ========================================================================== */
+
+const RESEND_API_KEY = "re_bYWZF6gU_BRD1KDFiX3KnntHyPBY14mZH";
+const FROM_EMAIL = "PressPlay Nails <hello@vnail.app>";
+const ADMIN_EMAIL = "vnailstore@gmail.com";
+const APP_URL = "https://vnail.app";
 
 const resend = new Resend(RESEND_API_KEY);
 
@@ -34,18 +23,30 @@ const resend = new Resend(RESEND_API_KEY);
    HELPERS
    ========================================================================== */
 
+function normalizeEmail(email) {
+  return String(email || "").trim().toLowerCase();
+}
+
+function looksLikeEmail(email) {
+  return /^.+@.+\..+$/.test(normalizeEmail(email));
+}
+
 function emailSystemReady() {
   const missing = [];
 
-  if (!RESEND_API_KEY || RESEND_API_KEY === "PASTE_RESEND_API_KEY_HERE") {
+  if (!RESEND_API_KEY || RESEND_API_KEY.includes("PASTE_")) {
     missing.push("RESEND_API_KEY");
   }
 
-  if (!FROM_EMAIL || FROM_EMAIL.includes("onboarding@resend.dev")) {
+  if (!FROM_EMAIL || !FROM_EMAIL.includes("@vnail.app")) {
     missing.push("FROM_EMAIL");
   }
 
-  if (!APP_URL || APP_URL === "https://your-site-url.com") {
+  if (!ADMIN_EMAIL || !looksLikeEmail(ADMIN_EMAIL)) {
+    missing.push("ADMIN_EMAIL");
+  }
+
+  if (!APP_URL || !APP_URL.startsWith("https://")) {
     missing.push("APP_URL");
   }
 
@@ -55,14 +56,6 @@ function emailSystemReady() {
   }
 
   return true;
-}
-
-function normalizeEmail(email) {
-  return String(email || "").trim().toLowerCase();
-}
-
-function looksLikeEmail(email) {
-  return /^.+@.+\..+$/.test(normalizeEmail(email));
 }
 
 function escapeHtml(value) {
@@ -94,7 +87,6 @@ function isProductVisible(product) {
 function isProductOnSale(product) {
   const price = safeNumber(product?.price);
   const salePrice = safeNumber(product?.salePrice);
-
   return salePrice > 0 && price > 0 && salePrice < price;
 }
 
@@ -153,6 +145,12 @@ async function sendEmail({ to, subject, html }) {
       to,
       subject,
       html,
+    });
+
+    logger.info("Email sent through Resend.", {
+      to,
+      subject,
+      result,
     });
 
     return result;
@@ -249,9 +247,7 @@ function buildProductCard(product, badgeText = "") {
       <div style="padding:18px;">
         ${
           badgeText
-            ? `<div style="display:inline-block;background:#ffedf0;color:#d93e57;border:1px solid #ffd3da;padding:6px 10px;border-radius:999px;font-size:11px;font-weight:800;letter-spacing:0.3px;margin-bottom:12px;">${escapeHtml(
-                badgeText
-              )}</div>`
+            ? `<div style="display:inline-block;background:#ffedf0;color:#d93e57;border:1px solid #ffd3da;padding:6px 10px;border-radius:999px;font-size:11px;font-weight:800;letter-spacing:0.3px;margin-bottom:12px;">${escapeHtml(badgeText)}</div>`
             : ""
         }
 
@@ -285,7 +281,6 @@ function buildNewProductEmail(product) {
       <p style="margin:0 0 16px;font-size:15px;line-height:1.7;color:#444444;">
         We just uploaded a brand new product to PressPlay Nails. Be among the first to shop it.
       </p>
-
       ${buildProductCard(product, "NEW PRODUCT")}
     `,
   });
@@ -299,7 +294,6 @@ function buildSaleEmail(product) {
       <p style="margin:0 0 16px;font-size:15px;line-height:1.7;color:#444444;">
         One of our products is now discounted. Grab it before the sale ends.
       </p>
-
       ${buildProductCard(product, "SALE")}
     `,
   });
@@ -333,20 +327,9 @@ function buildWeeklyPromoEmail() {
 }
 
 function buildManualPaymentAlertEmail(orderId, order) {
-  const customerName =
-    order?.customer?.name ||
-    order?.shipping?.name ||
-    "Customer";
-
-  const customerEmail =
-    order?.customer?.email ||
-    order?.shipping?.email ||
-    "No email";
-
-  const customerPhone =
-    order?.customer?.phone ||
-    order?.shipping?.phone ||
-    "No phone";
+  const customerName = order?.customer?.name || order?.shipping?.name || "Customer";
+  const customerEmail = order?.customer?.email || order?.shipping?.email || "No email";
+  const customerPhone = order?.customer?.phone || order?.shipping?.phone || "No phone";
 
   const paymentMethod = String(order?.paymentMethod || "unknown").toUpperCase();
   const paymentStatus = String(order?.paymentStatus || "pending");
@@ -365,8 +348,9 @@ function buildManualPaymentAlertEmail(orderId, order) {
     ? items
         .map((item) => {
           const itemName = escapeHtml(item?.name || "Item");
-          const qty = safeNumber(item?.qty || 0);
+          const qty = safeNumber(item?.qty || item?.quantity || 1);
           const price = formatPKR(item?.price || 0);
+
           return `
             <tr>
               <td style="padding:10px;border-bottom:1px solid #f3f3f3;">${itemName}</td>
@@ -426,23 +410,47 @@ function buildManualPaymentAlertEmail(orderId, order) {
               <th style="padding:10px;text-align:right;background:#fafafa;border-bottom:1px solid #f0f0f0;">Price</th>
             </tr>
           </thead>
-          <tbody>
-            ${itemsHtml}
-          </tbody>
+          <tbody>${itemsHtml}</tbody>
         </table>
       </div>
     `,
   });
 }
 
+function buildCustomerPaymentConfirmedEmail(orderId, order) {
+  const customerName = order?.customer?.name || order?.shipping?.name || "Customer";
+  const total = formatPKR(order?.total || 0);
+
+  return buildEmailShell({
+    title: "Payment Confirmed 💖",
+    preview: "Your order is confirmed.",
+    bodyHtml: `
+      <p style="margin:0 0 14px;font-size:15px;line-height:1.7;color:#444444;">
+        Hi ${escapeHtml(customerName)},
+      </p>
+
+      <p style="margin:0 0 14px;font-size:15px;line-height:1.7;color:#444444;">
+        Your payment has been verified successfully.
+      </p>
+
+      <div style="border:1px solid #f0f0f0;border-radius:16px;padding:18px;background:#fffafa;margin:16px 0;">
+        <div style="font-size:14px;line-height:1.9;color:#333333;">
+          <div><strong>Order ID:</strong> ${escapeHtml(orderId)}</div>
+          <div><strong>Total:</strong> ${escapeHtml(total)}</div>
+        </div>
+      </div>
+
+      <p style="margin:0;font-size:15px;line-height:1.7;color:#444444;">
+        We will process your order soon 💅
+      </p>
+    `,
+  });
+}
+
 /* ==========================================================================
-   FIRESTORE / SCHEDULED FUNCTIONS
+   FUNCTIONS
    ========================================================================== */
 
-/**
- * 1) AUTO-ADD BUYERS TO NEWSLETTER
- * When an order is created, checkout email is automatically added to subscribers.
- */
 exports.autoSubscribeBuyerOnOrder = onDocumentCreated("orders/{orderId}", async (event) => {
   try {
     const order = event.data?.data();
@@ -478,10 +486,6 @@ exports.autoSubscribeBuyerOnOrder = onDocumentCreated("orders/{orderId}", async 
   }
 });
 
-/**
- * 2) SEND ADMIN EMAIL FOR MANUAL PAYMENT ORDERS
- * Fires when a new order is created with Easypaisa / Alfalah
- */
 exports.sendManualPaymentAdminAlert = onDocumentCreated("orders/{orderId}", async (event) => {
   try {
     const order = event.data?.data();
@@ -490,18 +494,12 @@ exports.sendManualPaymentAdminAlert = onDocumentCreated("orders/{orderId}", asyn
     const paymentMethod = String(order?.paymentMethod || "").toLowerCase();
     const paymentStatus = String(order?.paymentStatus || "").toLowerCase();
 
-    const isManualPayment =
-      paymentMethod === "easypaisa" || paymentMethod === "alfalah";
+    const isManualPayment = paymentMethod === "easypaisa" || paymentMethod === "alfalah";
 
-    if (!isManualPayment) {
-      return;
-    }
+    if (!isManualPayment) return;
+    if (paymentStatus !== "awaiting_verification") return;
 
-    if (paymentStatus !== "awaiting_verification") {
-      return;
-    }
-
-    await sendEmail({
+    const result = await sendEmail({
       to: ADMIN_EMAIL,
       subject: `New Manual Payment Order - ${event.params.orderId.slice(0, 6)}`,
       html: buildManualPaymentAlertEmail(event.params.orderId, order),
@@ -511,6 +509,7 @@ exports.sendManualPaymentAdminAlert = onDocumentCreated("orders/{orderId}", asyn
       orderId: event.params.orderId,
       paymentMethod,
       adminEmail: ADMIN_EMAIL,
+      result,
     });
   } catch (error) {
     logger.error("sendManualPaymentAdminAlert failed", {
@@ -520,10 +519,6 @@ exports.sendManualPaymentAdminAlert = onDocumentCreated("orders/{orderId}", asyn
   }
 });
 
-/**
- * 3) SEND NEW PRODUCT EMAIL
- * Fires when a new visible product is created.
- */
 exports.sendNewProductEmail = onDocumentCreated("products/{productId}", async (event) => {
   try {
     const product = event.data?.data();
@@ -536,6 +531,7 @@ exports.sendNewProductEmail = onDocumentCreated("products/{productId}", async (e
     };
 
     const subscribers = await getAllSubscribers();
+
     if (!subscribers.length) {
       logger.info("No subscribers available for new product email.", {
         productId: event.params.productId,
@@ -561,10 +557,6 @@ exports.sendNewProductEmail = onDocumentCreated("products/{productId}", async (e
   }
 });
 
-/**
- * 4) SEND SALE EMAIL
- * Fires only when a product enters sale state.
- */
 exports.sendSaleEmail = onDocumentUpdated("products/{productId}", async (event) => {
   try {
     const before = event.data?.before?.data();
@@ -576,9 +568,7 @@ exports.sendSaleEmail = onDocumentUpdated("products/{productId}", async (event) 
     const wasOnSale = isProductOnSale(before);
     const isNowOnSale = isProductOnSale(after);
 
-    if (!isNowOnSale || wasOnSale) {
-      return;
-    }
+    if (!isNowOnSale || wasOnSale) return;
 
     const productWithId = {
       id: event.params.productId,
@@ -586,6 +576,7 @@ exports.sendSaleEmail = onDocumentUpdated("products/{productId}", async (event) 
     };
 
     const subscribers = await getAllSubscribers();
+
     if (!subscribers.length) {
       logger.info("No subscribers available for sale email.", {
         productId: event.params.productId,
@@ -611,10 +602,6 @@ exports.sendSaleEmail = onDocumentUpdated("products/{productId}", async (event) 
   }
 });
 
-/**
- * 5) WEEKLY PROMOTIONAL EMAIL
- * Sends every Monday at 10:00 AM Pakistan time.
- */
 exports.sendWeeklyPromoEmail = onSchedule(
   {
     schedule: "0 10 * * 1",
@@ -645,11 +632,8 @@ exports.sendWeeklyPromoEmail = onSchedule(
       });
     }
   }
-  
 );
-/**
- * 6) SEND CUSTOMER EMAIL AFTER PAYMENT CONFIRMATION
- */
+
 exports.notifyCustomerOnPaymentConfirmed = onDocumentUpdated("orders/{orderId}", async (event) => {
   try {
     const before = event.data?.before?.data();
@@ -660,48 +644,36 @@ exports.notifyCustomerOnPaymentConfirmed = onDocumentUpdated("orders/{orderId}",
     const oldStatus = String(before?.paymentStatus || "").toLowerCase();
     const newStatus = String(after?.paymentStatus || "").toLowerCase();
 
-    // only trigger when changed TO confirmed
-    if (oldStatus === "confirmed" || newStatus !== "confirmed") return;
+    const wasConfirmed = oldStatus === "paid" || oldStatus === "confirmed";
+    const isNowConfirmed = newStatus === "paid" || newStatus === "confirmed";
 
-    const customerEmail =
-      after?.customer?.email ||
-      after?.shipping?.email ||
-      "";
+    if (wasConfirmed || !isNowConfirmed) return;
 
-    if (!looksLikeEmail(customerEmail)) return;
+    const customerEmail = after?.customer?.email || after?.shipping?.email || "";
 
-    const customerName =
-      after?.customer?.name ||
-      after?.shipping?.name ||
-      "Customer";
+    if (!looksLikeEmail(customerEmail)) {
+      logger.warn("Payment confirmed but customer email is invalid.", {
+        orderId: event.params.orderId,
+        customerEmail,
+      });
+      return;
+    }
 
-    const orderId = event.params.orderId;
-    const total = formatPKR(after?.total || 0);
-
-    const html = buildEmailShell({
-      title: "Payment Confirmed 💖",
-      preview: "Your order is confirmed",
-      bodyHtml: `
-        <p>Hi ${escapeHtml(customerName)},</p>
-
-        <p>Your payment has been verified successfully.</p>
-
-        <p><strong>Order ID:</strong> ${orderId}</p>
-        <p><strong>Total:</strong> ${total}</p>
-
-        <p>We will process your order soon 💅</p>
-      `,
-    });
-
-    await sendEmail({
+    const result = await sendEmail({
       to: customerEmail,
       subject: "Payment Confirmed - PressPlay Nails",
-      html,
+      html: buildCustomerPaymentConfirmedEmail(event.params.orderId, after),
     });
 
-    logger.info("Customer email sent", { orderId });
-
+    logger.info("Customer payment confirmation email sent.", {
+      orderId: event.params.orderId,
+      customerEmail,
+      result,
+    });
   } catch (error) {
-    logger.error("Error sending confirmation email", error);
+    logger.error("notifyCustomerOnPaymentConfirmed failed", {
+      error: error?.message || error,
+      orderId: event.params.orderId,
+    });
   }
 });
