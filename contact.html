@@ -277,24 +277,21 @@
 
     /* ================= HERO SECTION ================= */
     .hero {
-      height: 52vh;
-      min-height: 360px;
+      position: relative;
+      overflow: hidden;
       display: flex;
       align-items: center;
       justify-content: center;
       text-align: center;
-      padding: 0 20px;
-      position: relative;
-      overflow: hidden;
+    
+      height: calc(100dvh - 34px);
     }
 
-    .hero-bg{
-      position:absolute;
-      inset:0;
-      background: var(--text) url('contact.jpeg') center/cover no-repeat;
+    .hero-bg {
+      position: absolute;
+      inset: 0;
+      background: var(--text) url('contact.jpeg') center center / cover no-repeat;
       animation: zoom 5s ease-in-out infinite alternate;
-      transform-origin: center;
-      z-index: 0;
     }
 
     @keyframes zoom { from { transform: scale(1); } to { transform: scale(1.15); } }
