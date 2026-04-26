@@ -289,9 +289,7 @@
       justify-content: center;
       text-align: center;
     
-      height: 100dvh;
-      min-height: 100vh;
-      padding: 106px 20px 0;
+      height: calc(100dvh - 106px);
     }
 
     .hero-bg {
@@ -299,8 +297,6 @@
       inset: 0;
       background: var(--text) url('home.jpeg') center center / cover no-repeat;
       animation: zoom 5s ease-in-out infinite alternate;
-      transform-origin: center;
-      z-index: 0;
     }
 
     @keyframes zoom {
