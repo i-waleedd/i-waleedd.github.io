@@ -1148,6 +1148,12 @@
       0%, 100% { opacity: 1; transform: scale(1); }
       50% { opacity: 0.5; transform: scale(1.04); }
     }
+
+    @media (max-width: 480px) {
+      .loader-text {
+        font-size: 30px;
+        letter-spacing: 0.38em;
+      }
     }
 
   </style>
@@ -1158,51 +1164,6 @@
 <!-- Preloader -->
 <div id="preloader" class="loader-overlay">
   <h1 class="loader-text">VNAILS</h1>
-</div>
-
-        <div class="premium-brush">
-          <div class="brush-cap"></div>
-          <div class="brush-stem"></div>
-          <div class="brush-bristles"></div>
-        </div>
-
-        <div class="paint-ribbon"></div>
-      </div>
-
-      <div class="floating-sparkle sparkle-a">✦</div>
-      <div class="floating-sparkle sparkle-b">✧</div>
-      <div class="floating-sparkle sparkle-c">✦</div>
-      <div class="floating-sparkle sparkle-d">✧</div>
-    </div>
-
-    <div class="vnails-wordmark">
-      <span>V</span><span>N</span><span>A</span><span>I</span><span>L</span><span>S</span>
-    </div>
-
-    <div class="loader-caption">
-      <span>Handcrafted beauty loading</span>
-    </div>
-
-    <div class="luxury-progress">
-      <span></span>
-    </div>
-  </div>
-</div>
-
-    <div class="polish-brush">
-      <div class="brush-handle"></div>
-      <div class="brush-neck"></div>
-      <div class="brush-head"></div>
-    </div>
-
-    <div class="polish-stroke"></div>
-  </div>
-
-  <div class="brand-reveal">
-    <h1>VNAILS</h1>
-    <p>Salon-ready beauty is loading</p>
-  </div>
-</div>
 </div>
 
 <div id="toast" class="toast">Item added to cart</div>
@@ -1984,7 +1945,7 @@
     const preloader = document.getElementById("preloader");
     if (!preloader) return;
 
-    preloader.classList.add("hide");
+    preloader.style.opacity = "0";
 
     setTimeout(() => {
       preloader.style.display = "none";
