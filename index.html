@@ -1122,10 +1122,113 @@
 
     @keyframes promo-slide { from { transform: translateX(0); } to { transform: translateX(-50%); } }
     @keyframes fadeInUp { from { opacity: 0; transform: translateY(30px); } to { opacity: 1; transform: translateY(0); } }
+
+    /* VNAILS Preloader */
+    .vnails-loader {
+      position: fixed;
+      inset: 0;
+      background:
+        radial-gradient(circle at top left, rgba(255,126,141,0.25), transparent 35%),
+        radial-gradient(circle at bottom right, rgba(255,126,141,0.18), transparent 32%),
+        linear-gradient(135deg, #fff7f8, #ffffff);
+      z-index: 99999;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: opacity 0.55s ease, visibility 0.55s ease;
+    }
+
+    .vnails-loader.hide {
+      opacity: 0;
+      visibility: hidden;
+    }
+
+    .loader-card {
+      text-align: center;
+      padding: 34px 38px;
+      border-radius: 28px;
+      background: rgba(255,255,255,0.72);
+      box-shadow: 0 20px 60px rgba(255,126,141,0.22);
+      border: 1px solid rgba(255,126,141,0.18);
+      backdrop-filter: blur(14px);
+      -webkit-backdrop-filter: blur(14px);
+    }
+
+    .loader-card h1 {
+      color: var(--primary);
+      font-size: 34px;
+      letter-spacing: 6px;
+      font-weight: 800;
+      margin-bottom: 8px;
+    }
+
+    .loader-card p {
+      color: var(--text);
+      font-size: 13px;
+      font-weight: 500;
+      opacity: 0.75;
+    }
+
+    .sparkle {
+      color: var(--primary);
+      font-size: 28px;
+      margin-bottom: 10px;
+      animation: sparkleSpin 1.8s linear infinite;
+    }
+
+    .nail-dots {
+      display: flex;
+      justify-content: center;
+      gap: 8px;
+      margin-top: 18px;
+    }
+
+    .nail-dots span {
+      width: 9px;
+      height: 18px;
+      background: var(--primary);
+      border-radius: 999px 999px 8px 8px;
+      animation: nailBounce 0.9s ease-in-out infinite;
+      box-shadow: 0 6px 16px rgba(255,126,141,0.22);
+    }
+
+    .nail-dots span:nth-child(2) { animation-delay: 0.15s; }
+    .nail-dots span:nth-child(3) { animation-delay: 0.3s; }
+
+    @keyframes nailBounce {
+      0%, 100% { transform: translateY(0); opacity: 0.45; }
+      50% { transform: translateY(-8px); opacity: 1; }
+    }
+
+    @keyframes sparkleSpin {
+      from { transform: rotate(0deg) scale(1); }
+      50% { transform: rotate(180deg) scale(1.2); }
+      to { transform: rotate(360deg) scale(1); }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .sparkle,
+      .nail-dots span {
+        animation: none !important;
+      }
+    }
+
   </style>
 </head>
 
 <body>
+
+<!-- VNAILS Preloader -->
+<div id="preloader" class="vnails-loader">
+  <div class="loader-card">
+    <div class="sparkle">✦</div>
+    <h1>VNAILS</h1>
+    <p>Preparing your perfect set</p>
+    <div class="nail-dots" aria-hidden="true">
+      <span></span><span></span><span></span>
+    </div>
+  </div>
+</div>
 
 <div id="toast" class="toast">Item added to cart</div>
 <div class="menu-overlay" id="menuOverlay"></div>
@@ -1898,6 +2001,20 @@
 
   renderCart();
   updateHeaderState();
+</script>
+
+
+<script>
+  window.addEventListener("load", () => {
+    const preloader = document.getElementById("preloader");
+    if (!preloader) return;
+
+    preloader.classList.add("hide");
+
+    setTimeout(() => {
+      preloader.style.display = "none";
+    }, 600);
+  });
 </script>
 
 </body>
