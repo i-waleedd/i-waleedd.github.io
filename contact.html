@@ -764,10 +764,80 @@
 
     @keyframes promo-slide { from { transform: translateX(0); } to { transform: translateX(-50%); } }
     @keyframes fadeInUp { from { opacity: 0; transform: translateY(30px); } to { opacity: 1; transform: translateY(0); } }
+
+
+    /* Luxury Page Transition */
+    .page-transition {
+      position: fixed;
+      inset: 0;
+      z-index: 9998;
+      background: linear-gradient(135deg, #fff0f2, #ffffff);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      pointer-events: none;
+      transform: translateY(100%);
+      transition: transform 0.75s cubic-bezier(0.76, 0, 0.24, 1);
+    }
+
+    .page-transition.is-active {
+      transform: translateY(0);
+      pointer-events: auto;
+    }
+
+    .page-transition.is-leaving {
+      transform: translateY(0);
+      pointer-events: auto;
+    }
+
+    .page-transition.is-entering {
+      transform: translateY(-100%);
+    }
+
+    .transition-logo {
+      color: var(--primary);
+      font-size: 38px;
+      font-weight: 700;
+      letter-spacing: 0.55em;
+      text-transform: uppercase;
+      transform: translateX(0.27em);
+      opacity: 0;
+      animation: transitionLogoPulse 1.2s ease-in-out infinite;
+    }
+
+    .page-transition.is-active .transition-logo,
+    .page-transition.is-leaving .transition-logo {
+      opacity: 1;
+    }
+
+    @keyframes transitionLogoPulse {
+      0%, 100% { opacity: 0.45; transform: translateX(0.27em) scale(1); }
+      50% { opacity: 1; transform: translateX(0.27em) scale(1.03); }
+    }
+
+    @media (max-width: 480px) {
+      .transition-logo {
+        font-size: 28px;
+        letter-spacing: 0.36em;
+        transform: translateX(0.18em);
+      }
+
+      @keyframes transitionLogoPulse {
+        0%, 100% { opacity: 0.45; transform: translateX(0.18em) scale(1); }
+        50% { opacity: 1; transform: translateX(0.18em) scale(1.03); }
+      }
+    }
+
   </style>
 </head>
 
 <body>
+
+
+<!-- Page Transition -->
+<div id="pageTransition" class="page-transition" aria-hidden="true">
+  <div class="transition-logo">VNAILS</div>
+</div>
 
 <div id="toast" class="toast">Item added to cart</div>
 <div class="menu-overlay" id="menuOverlay"></div>
@@ -1279,6 +1349,58 @@
   renderCart();
   updateHeaderState();
 </script>
+
+
+<script>
+  document.addEventListener("DOMContentLoaded", () => {
+    const transition = document.getElementById("pageTransition");
+    if (!transition) return;
+
+    transition.classList.add("is-active");
+
+    requestAnimationFrame(() => {
+      setTimeout(() => {
+        transition.classList.add("is-entering");
+        transition.classList.remove("is-active");
+
+        setTimeout(() => {
+          transition.classList.remove("is-entering");
+        }, 800);
+      }, 120);
+    });
+
+    document.querySelectorAll("a[href]").forEach((link) => {
+      link.addEventListener("click", (e) => {
+        const href = link.getAttribute("href");
+
+        if (
+          !href ||
+          href.startsWith("#") ||
+          href.startsWith("mailto:") ||
+          href.startsWith("tel:") ||
+          link.target === "_blank" ||
+          link.hasAttribute("download")
+        ) {
+          return;
+        }
+
+        const url = new URL(href, window.location.href);
+
+        if (url.origin !== window.location.origin) return;
+        if (url.href === window.location.href) return;
+
+        e.preventDefault();
+
+        transition.classList.add("is-leaving");
+
+        setTimeout(() => {
+          window.location.href = url.href;
+        }, 650);
+      });
+    });
+  });
+</script>
+
 
 </body>
 </html>
