@@ -1206,19 +1206,6 @@
       50% { opacity: 1; transform: translateX(0.27em) scale(1.03); }
     }
 
-    @media (max-width: 480px) {
-      .transition-logo {
-        font-size: 28px;
-        letter-spacing: 0.36em;
-        transform: translateX(0.18em);
-      }
-
-      @keyframes transitionLogoPulse {
-        0%, 100% { opacity: 0.45; transform: translateX(0.18em) scale(1); }
-        50% { opacity: 1; transform: translateX(0.18em) scale(1.03); }
-      }
-    }
-
   </style>
 </head>
 
@@ -1227,11 +1214,6 @@
 <!-- Preloader -->
 <div id="preloader" class="loader-overlay">
   <h1 class="loader-text">VNAILS</h1>
-</div>
-
-<!-- Page Transition -->
-<div id="pageTransition" class="page-transition" aria-hidden="true">
-  <div class="transition-logo">VNAILS</div>
 </div>
 
 <div id="toast" class="toast">Item added to cart</div>
@@ -2018,57 +2000,6 @@
     setTimeout(() => {
       preloader.style.display = "none";
     }, 600);
-  });
-</script>
-
-
-<script>
-  document.addEventListener("DOMContentLoaded", () => {
-    const transition = document.getElementById("pageTransition");
-    if (!transition) return;
-
-    transition.classList.add("is-active");
-
-    requestAnimationFrame(() => {
-      setTimeout(() => {
-        transition.classList.add("is-entering");
-        transition.classList.remove("is-active");
-
-        setTimeout(() => {
-          transition.classList.remove("is-entering");
-        }, 800);
-      }, 120);
-    });
-
-    document.querySelectorAll("a[href]").forEach((link) => {
-      link.addEventListener("click", (e) => {
-        const href = link.getAttribute("href");
-
-        if (
-          !href ||
-          href.startsWith("#") ||
-          href.startsWith("mailto:") ||
-          href.startsWith("tel:") ||
-          link.target === "_blank" ||
-          link.hasAttribute("download")
-        ) {
-          return;
-        }
-
-        const url = new URL(href, window.location.href);
-
-        if (url.origin !== window.location.origin) return;
-        if (url.href === window.location.href) return;
-
-        e.preventDefault();
-
-        transition.classList.add("is-leaving");
-
-        setTimeout(() => {
-          window.location.href = url.href;
-        }, 650);
-      });
-    });
   });
 </script>
 
